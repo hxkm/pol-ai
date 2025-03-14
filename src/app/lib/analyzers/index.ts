@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { GetAnalyzer } from './get';
 import { ReplyAnalyzer } from './reply';
+import { LinkAnalyzer } from './link';
 
 /**
  * Initialize the analysis system
@@ -20,9 +21,10 @@ export async function initializeAnalyzers(): Promise<void> {
       await fs.promises.mkdir(analysisDir, { recursive: true });
     }
 
-    // Register analyzers
+    // Register analyzers in order of execution
     analyzerRegistry.register(new GetAnalyzer());
     analyzerRegistry.register(new ReplyAnalyzer());
+    analyzerRegistry.register(new LinkAnalyzer()); // Add link analyzer last
 
     // Initialize registry and all registered analyzers
     await analyzerRegistry.initialize();

@@ -1,0 +1,26 @@
+# Cursor Rules for pol-ai project
+
+# Path Handling
+- Always use path.resolve() for absolute paths instead of path.join()
+- Never hardcode Unix-style paths (/data) in environment files
+- Always use process.cwd() as the base for project root
+
+# Next.js API Routes
+- Prefer simple, specific routes over dynamic routes when possible
+- Always use NextRequest and NextResponse types for API routes
+- Never use the generic Request type in route handlers
+
+# Type Safety
+- No 'any' types allowed - use 'unknown' with type guards instead
+- Handle all error cases with proper typing
+- Remove unused variables to prevent ESLint errors
+
+# Environment Variables
+- Keep .env.local simple and development-focused
+- Let Railway handle production environment variables
+- Never mix development and production settings in the same env file
+
+# Deployment
+- Test all file system operations with both Windows and Unix paths
+- Ensure all API routes return proper JSON responses
+- Keep route handlers simple and focused 
