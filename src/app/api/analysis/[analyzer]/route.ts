@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/lib/utils/paths';
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { analyzer: string } }
 ) {
   try {
