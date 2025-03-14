@@ -1,6 +1,6 @@
 import { Thread } from '../../types/interfaces';
 import { analyzerRegistry } from './registry';
-import { ensureDirectories, paths } from '../utils/paths';
+import { paths } from '../utils/paths';
 import path from 'path';
 import fs from 'fs';
 import { GetAnalyzer } from './get';

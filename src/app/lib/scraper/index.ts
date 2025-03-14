@@ -19,7 +19,6 @@ const MEDIA_BASE_URL = 'https://i.4cdn.org/pol';
 
 // Configuration
 const MAX_THREADS_PER_CATEGORY = 20;
-const MAX_THREAD_AGE_DAYS = 3;
 
 // User agents to rotate through
 const USER_AGENTS = [

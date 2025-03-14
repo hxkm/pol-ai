@@ -4,7 +4,7 @@ import { Thread, Analyzer, AnalyzerResult } from '../../types/interfaces';
  * Registry for managing all thread analyzers
  */
 class AnalyzerRegistry {
-  private analyzers: Map<string, Analyzer<any>> = new Map();
+  private analyzers: Map<string, Analyzer<AnalyzerResult>> = new Map();
   private initialized = false;
 
   /**
@@ -20,7 +20,7 @@ class AnalyzerRegistry {
       throw new Error(`Analyzer '${analyzer.name}' is missing required methods`);
     }
     
-    this.analyzers.set(analyzer.name, analyzer);
+    this.analyzers.set(analyzer.name, analyzer as Analyzer<AnalyzerResult>);
     console.log(`Registered analyzer: ${analyzer.name} - ${analyzer.description}`);
   }
 
@@ -28,13 +28,13 @@ class AnalyzerRegistry {
    * Get an analyzer by name
    */
   get<T extends AnalyzerResult>(name: string): Analyzer<T> | undefined {
-    return this.analyzers.get(name);
+    return this.analyzers.get(name) as Analyzer<T> | undefined;
   }
 
   /**
    * Get all registered analyzers
    */
-  getAll(): Analyzer<any>[] {
+  getAll(): Analyzer<AnalyzerResult>[] {
     return Array.from(this.analyzers.values());
   }
 

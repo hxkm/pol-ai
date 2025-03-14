@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { ensureDirectories, paths } from '../utils/paths';
+import { paths } from '../utils/paths';
 import { Thread, AnalyzerResult, AnalyzerStorage, Analyzer } from '../../types/interfaces';
 
 // Maximum age of results to keep (in days)
