@@ -11,8 +11,10 @@ class AnalyzerRegistry {
    * Register a new analyzer
    */
   register<T extends AnalyzerResult>(analyzer: Analyzer<T>): void {
+    // If analyzer already exists, just return
     if (this.analyzers.has(analyzer.name)) {
-      throw new Error(`Analyzer '${analyzer.name}' is already registered`);
+      console.log(`Analyzer '${analyzer.name}' is already registered, skipping`);
+      return;
     }
     
     // Validate analyzer implementation
@@ -22,6 +24,15 @@ class AnalyzerRegistry {
     
     this.analyzers.set(analyzer.name, analyzer as Analyzer<AnalyzerResult>);
     console.log(`Registered analyzer: ${analyzer.name} - ${analyzer.description}`);
+  }
+
+  /**
+   * Reset the registry
+   */
+  reset(): void {
+    this.analyzers.clear();
+    this.initialized = false;
+    console.log('Analyzer registry reset');
   }
 
   /**

@@ -15,6 +15,9 @@ export async function initializeAnalyzers(): Promise<void> {
   console.log('Initializing analysis system...');
   
   try {
+    // Reset the registry before initialization
+    analyzerRegistry.reset();
+
     // Ensure analysis directory exists
     const analysisDir = path.join(paths.dataDir, 'analysis');
     if (!fs.existsSync(analysisDir)) {
