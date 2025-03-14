@@ -6,6 +6,7 @@ import fs from 'fs';
 import { GetAnalyzer } from './get';
 import { ReplyAnalyzer } from './reply';
 import { LinkAnalyzer } from './link';
+import { GeoAnalyzer } from './geo';
 
 /**
  * Initialize the analysis system
@@ -24,7 +25,8 @@ export async function initializeAnalyzers(): Promise<void> {
     // Register analyzers in order of execution
     analyzerRegistry.register(new GetAnalyzer());
     analyzerRegistry.register(new ReplyAnalyzer());
-    analyzerRegistry.register(new LinkAnalyzer()); // Add link analyzer last
+    analyzerRegistry.register(new LinkAnalyzer());
+    analyzerRegistry.register(new GeoAnalyzer()); // Add geo analyzer last
 
     // Initialize registry and all registered analyzers
     await analyzerRegistry.initialize();
