@@ -17,7 +17,6 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
    */
   private processCountryStats(threads: Thread[]): {
     countryStats: Map<string, CountryStats>;
-    uniquePosters: Map<string, Set<string>>;
     totalPosts: number;
     postsWithLocation: number;
     firstPostWithLocation?: { threadId: number; postId: number };
@@ -79,7 +78,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
       }
     }
 
-    return { countryStats, uniquePosters, totalPosts, postsWithLocation, firstPostWithLocation };
+    return { countryStats, totalPosts, postsWithLocation, firstPostWithLocation };
   }
 
   /**
@@ -123,7 +122,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
    */
   async analyze(threads: Thread[]): Promise<GeoAnalyzerResult[]> {
     // Process all posts to gather statistics
-    const { countryStats, uniquePosters, totalPosts, postsWithLocation, firstPostWithLocation } = 
+    const { countryStats, totalPosts, postsWithLocation, firstPostWithLocation } = 
       this.processCountryStats(threads);
 
     // Convert stats to array and sort for most common countries
