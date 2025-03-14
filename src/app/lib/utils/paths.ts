@@ -8,9 +8,13 @@
 import path from 'path';
 import fs from 'fs';
 
-// Get the base data directory from environment variables
-// Default to './data' for local development if not specified
-const DATA_DIR = process.env.DATA_DIR || './data';
+// Get the project root directory (where package.json is)
+const PROJECT_ROOT = process.cwd();
+console.log('DEBUG - Project Root:', PROJECT_ROOT);
+
+// Always use data directory relative to project root
+const DATA_DIR = path.resolve(PROJECT_ROOT, 'data');
+console.log('DEBUG - Data Dir:', DATA_DIR);
 
 // Define all application paths
 export const paths = {
@@ -18,17 +22,19 @@ export const paths = {
   dataDir: DATA_DIR,
   
   // Thread data storage
-  threadsDir: path.join(DATA_DIR, 'threads'),
+  threadsDir: path.resolve(DATA_DIR, 'threads'),
   
   // Summary data storage
-  summariesDir: path.join(DATA_DIR, 'summaries'),
+  summariesDir: path.resolve(DATA_DIR, 'summaries'),
   
   // Helper to get thread file path by ID
-  threadFile: (threadId: string) => path.join(DATA_DIR, 'threads', `${threadId}.json`),
+  threadFile: (threadId: string) => path.resolve(DATA_DIR, 'threads', `${threadId}.json`),
   
   // Helper to get summary file path by ID
-  summaryFile: (threadId: string) => path.join(DATA_DIR, 'summaries', `${threadId}.json`),
+  summaryFile: (threadId: string) => path.resolve(DATA_DIR, 'summaries', `${threadId}.json`),
 };
+
+console.log('DEBUG - Threads Dir:', paths.threadsDir);
 
 /**
  * Ensures all required directories exist
