@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { analyzerRegistry } from '@/app/lib/analyzers';
 import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/lib/utils/paths';

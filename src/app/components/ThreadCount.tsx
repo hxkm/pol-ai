@@ -18,7 +18,7 @@ export const ThreadCount = () => {
         }
         
         setCount(data.count);
-      } catch (err) {
+      } catch {
         setError('Failed to fetch thread count');
       }
     };

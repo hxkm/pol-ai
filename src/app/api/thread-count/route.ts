@@ -40,18 +40,23 @@ export async function GET() {
         jsonCount: jsonFiles.length
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('=== Thread Count Error ===');
     console.error('Error:', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      return NextResponse.json(
+        { 
+          error: 'Failed to get thread count', 
+          details: error.message,
+          stack: error.stack
+        },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { 
-        error: 'Failed to get thread count', 
-        details: error?.message || 'Unknown error',
-        stack: error?.stack
-      },
+      { error: 'Failed to get thread count' },
       { status: 500 }
     );
   }

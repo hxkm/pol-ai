@@ -20,7 +20,7 @@ export const ScraperButton = () => {
       } else {
         setStatus(`Error: ${data.error || 'Unknown error'}`);
       }
-    } catch (error) {
+    } catch {
       setStatus('Failed to start scraper');
     } finally {
       setIsLoading(false);
