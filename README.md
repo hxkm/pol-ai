@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# &amp Information Portal
+
+A web application that displays processed information from 4chan's /pol/ board using Next.js.
+
+## Deployment on Railway
+
+1. Create a new project on Railway
+2. Connect your GitHub repository
+3. Add a persistent volume:
+   - Mount point: `/data`
+   - Size: 1GB (or as needed)
+
+4. Set up environment variables:
+```env
+DATA_DIR=/data
+NODE_ENV=production
+PORT=8080
+```
+
+5. Deploy settings:
+- Root Directory: ./
+- Build Command: `npm run build`
+- Start Command: `npm run start`
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Run scraper
+npm run scrape
+```
+
+## Project Structure
+
+```
+/
+├── src/
+│   └── app/
+│       ├── components/     # React components
+│       ├── lib/           # Backend logic
+│       └── types/         # TypeScript types
+├── public/               # Static assets
+├── data/                # Data storage (mounted volume)
+└── nixpacks.toml        # Railway configuration
+```
+
+## Project Overview
+
+This application consists of three main components:
+
+1. **Scraper**: Fetches thread data from 4chan's API following their rate limiting requirements
+2. **Summarizer**: Processes thread content using DeepSeek AI to generate concise summaries
+3. **Cleaner**: Manages data lifecycle by removing old threads and orphaned summaries
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ 
+- npm
+- DeepSeek AI API key
+
+### Environment Setup
+
+Create a `.env.local` file in the project root with the following variables:
+
+```
+DATA_DIR=/data
+DEEPSEEK_API_KEY=your_key_here
+NODE_ENV=development
+PORT=3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Run the development server
+npm run dev
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+### Running the Scraper
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run scrape
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This will fetch thread data from 4chan's /pol/ board and store it in the `/data/threads` directory.
 
-## Deploy on Vercel
+### Running the Summarizer
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run summarize
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This will process thread data and generate summaries using DeepSeek AI, storing them in the `/data/summaries` directory.
+
+### Running the Cleaner
+
+```bash
+npm run clean
+```
+
+This will remove old thread data and orphaned summaries to prevent excessive storage usage.
+
+## Development Guidelines
+
+- Follow TypeScript best practices
+- Use functional programming patterns
+- Implement proper error handling
+- Respect 4chan's API rate limits
+- Use atomic file operations for data integrity
+
+## License
+
+MIT

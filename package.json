@@ -1,25 +1,30 @@
 {
-  "name": "temp",
+  "name": "pol-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "scrape": "tsx src/app/lib/scraper/index.ts",
+    "summarize": "tsx src/app/lib/summarizer/index.ts",
+    "clean": "tsx src/app/lib/cleaner/index.ts"
   },
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.2"
+    "next": "15.2.2",
+    "axios": "^1.6.7"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
-    "@eslint/eslintrc": "^3"
+    "tsx": "^4.19.3",
+    "typescript": "^5"
   }
 }
