@@ -7,6 +7,7 @@ import { GetAnalyzer } from './get';
 import { ReplyAnalyzer } from './reply';
 import { LinkAnalyzer } from './link';
 import { GeoAnalyzer } from './geo';
+import { SlurAnalyzer } from './slur';
 
 /**
  * Initialize the analysis system
@@ -29,7 +30,8 @@ export async function initializeAnalyzers(): Promise<void> {
     analyzerRegistry.register(new GetAnalyzer());
     analyzerRegistry.register(new ReplyAnalyzer());
     analyzerRegistry.register(new LinkAnalyzer());
-    analyzerRegistry.register(new GeoAnalyzer()); // Add geo analyzer last
+    analyzerRegistry.register(new GeoAnalyzer());
+    analyzerRegistry.register(new SlurAnalyzer()); // Add slur analyzer last
 
     // Initialize registry and all registered analyzers
     await analyzerRegistry.initialize();
