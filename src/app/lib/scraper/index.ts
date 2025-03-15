@@ -222,6 +222,39 @@ function saveThread(thread: Thread): void {
 }
 
 /**
+ * Clean up threads older than 24 hours
+ */
+async function cleanOldThreads(): Promise<void> {
+  console.log('Cleaning up old thread files...');
+  
+  try {
+    const threadFiles = fs.readdirSync(paths.threadsDir)
+      .filter(file => file.endsWith('.json'));
+    
+    let removedCount = 0;
+    const now = Date.now();
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    
+    for (const file of threadFiles) {
+      const filePath = path.resolve(paths.threadsDir, file);
+      const stats = fs.statSync(filePath);
+      
+      if (now - stats.mtimeMs > ONE_DAY_MS) {
+        console.log(`Removing old thread file: ${file}`);
+        fs.unlinkSync(filePath);
+        removedCount++;
+      }
+    }
+    
+    if (removedCount > 0) {
+      console.log(`Removed ${removedCount} old thread files`);
+    }
+  } catch (error) {
+    console.error('Error cleaning old thread files:', error);
+  }
+}
+
+/**
  * Main scraper function
  */
 async function scrape(): Promise<void> {
@@ -231,6 +264,9 @@ async function scrape(): Promise<void> {
   ensureDirectories();
   
   try {
+    // Clean up old threads first
+    await cleanOldThreads();
+    
     // Initialize analyzers
     await initializeAnalyzers();
     

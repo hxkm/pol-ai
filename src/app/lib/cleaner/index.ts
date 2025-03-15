@@ -10,7 +10,7 @@ import path from 'path';
 import { ensureDirectories, paths } from '../utils/paths';
 
 // Maximum age of threads to keep (in days)
-const MAX_THREAD_AGE_DAYS = 7;
+const MAX_THREAD_AGE_DAYS = 1;
 
 /**
  * Get the age of a file in days
