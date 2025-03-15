@@ -10,7 +10,7 @@ export class GetAnalyzer extends BaseAnalyzer<GetAnalyzerResult> {
   description = 'Analyzes posts with repeating digits (GETs) and their checking posts';
 
   // Keywords that indicate a post is checking a GET
-  private static CHECK_KEYWORDS = ['checked', 'digits', 'dubs', 'trips', 'quads', 'quints'];
+  private static CHECK_KEYWORDS = ['checked', 'get','digits', 'dubs', 'trips', 'quads', 'quints'];
 
   /**
    * Find repeating digits at the end of a post number

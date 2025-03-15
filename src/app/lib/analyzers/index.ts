@@ -8,6 +8,8 @@ import { ReplyAnalyzer } from './reply';
 import { LinkAnalyzer } from './link';
 import { GeoAnalyzer } from './geo';
 import { SlurAnalyzer } from './slur';
+import { MediaAnalyzer } from './media';
+import { BaseAnalyzer } from './base';
 
 /**
  * Initialize the analysis system
@@ -31,7 +33,8 @@ export async function initializeAnalyzers(): Promise<void> {
     analyzerRegistry.register(new ReplyAnalyzer());
     analyzerRegistry.register(new LinkAnalyzer());
     analyzerRegistry.register(new GeoAnalyzer());
-    analyzerRegistry.register(new SlurAnalyzer()); // Add slur analyzer last
+    analyzerRegistry.register(new SlurAnalyzer());
+    analyzerRegistry.register(new MediaAnalyzer()); // Add media analyzer last
 
     // Initialize registry and all registered analyzers
     await analyzerRegistry.initialize();
@@ -76,5 +79,5 @@ export async function purgeOldResults(): Promise<void> {
 }
 
 // Re-export registry and base analyzer
-export { analyzerRegistry } from './registry';
-export { BaseAnalyzer } from './base'; 
+export { analyzerRegistry };
+export { BaseAnalyzer }; 
