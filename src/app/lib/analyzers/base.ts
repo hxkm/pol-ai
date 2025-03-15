@@ -26,7 +26,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    * Validate a result before saving
    */
   protected validateResult(result: T): boolean {
-    if (!result.timestamp || !result.threadId || !result.postId) {
+    if (!result.timestamp || result.threadId === 0 || result.postId === 0) {
       console.error(`Invalid result in ${this.name}:`, result);
       return false;
     }

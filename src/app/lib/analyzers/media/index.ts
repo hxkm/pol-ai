@@ -282,15 +282,15 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
     // Create single result
     return [{
       timestamp: Date.now(),
-      threadId: threads[0]?.no || 0,
-      postId: threads[0]?.posts?.[0]?.no || 0,
+      threadId: threads[0]?.no || -1,
+      postId: threads[0]?.posts?.[0]?.no || -1,
       categoryStats,
       recentFiles: downloadedFiles.slice(-MediaAnalyzer.MAX_RECENT_FILES),
       metadata: {
         totalFilesProcessed: totalFiles,
         filesDownloaded: downloadedFiles.length,
         duplicatesSkipped,
-        filesDeleted: 0, // We'll handle cleanup separately
+        filesDeleted: 0,
         lastPurge: Date.now()
       }
     }];
