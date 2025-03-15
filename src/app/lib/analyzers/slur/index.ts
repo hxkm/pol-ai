@@ -133,8 +133,8 @@ export class SlurAnalyzer extends BaseAnalyzer<SlurAnalyzerResult> {
     // Create single result
     return [{
       timestamp: Date.now(),
-      threadId: threads[0]?.no || 0,
-      postId: threads[0]?.posts?.[0]?.no || 0,
+      threadId: threads[0]?.no || -1,
+      postId: threads[0]?.posts?.[0]?.no || -1,
       termStats,
       metadata: {
         totalPostsAnalyzed: totalPosts,
