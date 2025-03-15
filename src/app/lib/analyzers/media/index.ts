@@ -47,7 +47,7 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
   /**
    * Determine media category based on filename and extension
    */
-  private categorizeFile(filename: string, ext: string, post?: Post): MediaCategory | null {
+  private categorizeFile(filename: string, ext: string): MediaCategory | null {
     const lowerFilename = filename.toLowerCase();
     const lowerExt = ext.toLowerCase();
 
@@ -232,7 +232,7 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
           w: thread.w,
           h: thread.h
         };
-        const category = this.categorizeFile(thread.filename, thread.ext, opPost);
+        const category = this.categorizeFile(thread.filename, thread.ext);
         
         // Skip if not categorized or random category is full
         if (!category || (category === MediaCategory.RANDOM && randomCount >= MediaAnalyzer.MAX_RANDOM_IMAGES)) {
@@ -254,7 +254,7 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
         if (!post.tim || !post.ext || !post.filename) continue;
         
         totalFiles++;
-        const category = this.categorizeFile(post.filename, post.ext, post);
+        const category = this.categorizeFile(post.filename, post.ext);
         
         // Skip if not categorized or random category is full
         if (!category || (category === MediaCategory.RANDOM && randomCount >= MediaAnalyzer.MAX_RANDOM_IMAGES)) {
