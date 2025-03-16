@@ -13,10 +13,10 @@ function logPathInfo(label: string, value: string) {
   console.log(`[PATHS] ${label}: ${value}`);
 }
 
-// Detect if we're running on Railway
-const isRailway = process.env.NODE_ENV === 'production';
+// Detect if we're running on Railway - use RAILWAY_ENVIRONMENT explicitly
+const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
 
-// Get the project root directory
+// Get the project root directory - always use /app on Railway
 const PROJECT_ROOT = isRailway ? '/app' : process.cwd();
 
 // Log environment information
@@ -60,13 +60,26 @@ export const paths: Paths = {
  * This should be called during application startup
  */
 export function ensureDirectories(): void {
-  // Create directories if they don't exist
-  [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      console.log(`Creating directory: ${dir}`);
-      fs.mkdirSync(dir, { recursive: true });
-    }
-  });
+  try {
+    // Create directories if they don't exist
+    [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
+      if (!fs.existsSync(dir)) {
+        console.log(`Creating directory: ${dir}`);
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+
+    // Verify directories were created
+    [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
+      if (!fs.existsSync(dir)) {
+        throw new Error(`Failed to create directory: ${dir}`);
+      }
+      console.log(`Verified directory exists: ${dir}`);
+    });
+  } catch (error) {
+    console.error('Error ensuring directories exist:', error);
+    // Don't throw - let the application continue and handle errors at higher levels
+  }
 }
 
 /**

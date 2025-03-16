@@ -2,6 +2,12 @@ import './init';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ensureDirectories } from './utils/paths';
+
+// Initialize data directories
+if (typeof window === 'undefined') {
+  ensureDirectories();
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
