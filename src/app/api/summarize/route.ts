@@ -59,7 +59,7 @@ export async function POST() {
     console.log('Initializing summarizer...');
     const summarizer = new Summarizer(apiKey);
     console.log('Starting analysis...');
-    const results = await summarizer.analyze(threadsToAnalyze);
+    const { articles, matrix } = await summarizer.analyze(threadsToAnalyze);
     console.log('Analysis complete');
 
     // Save results
@@ -76,15 +76,21 @@ export async function POST() {
     // Write the results to file
     await fs.writeFile(
       outputPath,
-      JSON.stringify(results, null, 2),
+      JSON.stringify({ articles, matrix }, null, 2),
       'utf-8'
     );
     console.log('Results saved to:', outputPath);
 
     return NextResponse.json({ 
       message: 'Summarizer completed successfully',
-      threadsAnalyzed: results.articles.length,
-      averageAntisemiticPercentage: results.batchStats.averageAntisemiticPercentage
+      threadsAnalyzed: articles.batchStats.totalThreads,
+      averageAntisemiticPercentage: articles.batchStats.averageAntisemiticPercentage,
+      matrixStats: {
+        meanPercentage: matrix.statistics.mean,
+        medianPercentage: matrix.statistics.median,
+        totalAnalyzed: matrix.statistics.totalAnalyzed,
+        themeCount: matrix.themes.length
+      }
     });
   } catch (error) {
     console.error('Failed to run summarizer:', error);
