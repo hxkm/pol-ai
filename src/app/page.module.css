@@ -170,3 +170,8 @@ a.secondary {
     filter: invert();
   }
 }
+
+.pinkCard {
+  background: #fa1b66 !important;
+  color: white !important;
+}

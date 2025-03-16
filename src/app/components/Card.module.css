@@ -5,7 +5,8 @@
   margin: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
-  height: 300px;
+  min-height: 100px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -15,4 +16,9 @@
 .card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.pinkCard {
+  background: #fa1b66;
+  color: white;
 } 

@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Pol-AI",
   description: "AI-powered analysis of online discourse",
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

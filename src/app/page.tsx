@@ -97,8 +97,8 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <CardGrid>
-          {cardLayout.map(card => (
-            <Card key={card.id}>
+          {cardLayout.map((card, index) => (
+            <Card key={card.id} className={index === 0 ? styles.pinkCard : ''}>
               <CardContent card={card} />
             </Card>
           ))}
