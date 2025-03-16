@@ -1,7 +1,7 @@
 import { Scheduler } from '../app/lib/scheduler';
 
 console.log('Starting scheduler...');
-const scheduler = new Scheduler();
+const scheduler = Scheduler.getInstance();
 scheduler.start();
 
 // Handle graceful shutdown
