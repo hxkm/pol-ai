@@ -34,5 +34,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# data directory
-/data
+# Project specific
+/data/threads/
+/data/analysis/
+*.log

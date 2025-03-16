@@ -3,43 +3,42 @@ import { BaseAnalyzer } from '../base';
 import { GetAnalyzerResult, GetType } from './types';
 
 /**
- * Analyzer for finding and tracking checked GETs (posts with repeating digits)
+ * Analyzer for finding posts with repeating digits (GETs) and tracking how many times they are checked
  */
 export class GetAnalyzer extends BaseAnalyzer<GetAnalyzerResult> {
-  name = 'get';
-  description = 'Analyzes posts with repeating digits (GETs) and their checking posts';
+  private static readonly CHECK_KEYWORDS = ['check', 'checked', 'get', 'digits', 'dubs', 'trips', 'quads', 'quints'];
+  private static readonly MAX_RESULTS = 1000;
 
-  // Keywords that indicate a post is checking a GET
-  private static CHECK_KEYWORDS = ['checked', 'get','digits', 'dubs', 'trips', 'quads', 'quints'];
+  public readonly name = 'get';
+  public readonly description = 'Tracks posts with repeating digits (GETs) and how many times they were checked';
 
   /**
-   * Find repeating digits at the end of a post number
+   * Find repeating digits in a post number
    */
-  private findRepeatingDigits(postNo: number): { digits: string; count: number } | null {
+  private findRepeatingDigits(postNo: number): { repeatingDigits: string; digitCount: number } | null {
     const postStr = postNo.toString();
-    
-    // Start with maximum possible length of repeating digits
-    const maxLength = postStr.length;
-    
-    // Check for repeating digits from longest to shortest
-    for (let length = maxLength; length >= 2; length--) {
-      const endDigits = postStr.slice(-length);
-      const firstDigit = endDigits[0];
+    let maxRepeating = '';
+    let maxCount = 0;
+
+    for (let i = 0; i < postStr.length; i++) {
+      let count = 1;
+      const digit = postStr[i];
       
-      // Check if all digits are the same
-      if (endDigits.split('').every(d => d === firstDigit)) {
-        return {
-          digits: endDigits,
-          count: length
-        };
+      while (i + count < postStr.length && postStr[i + count] === digit) {
+        count++;
+      }
+
+      if (count > maxCount) {
+        maxCount = count;
+        maxRepeating = digit.repeat(count);
       }
     }
-    
-    return null;
+
+    return maxCount >= 2 ? { repeatingDigits: maxRepeating, digitCount: maxCount } : null;
   }
 
   /**
-   * Get the GET type based on number of repeating digits
+   * Determine the type of GET based on number of repeating digits
    */
   private getGetType(digitCount: number): GetType {
     switch (digitCount) {
@@ -50,106 +49,68 @@ export class GetAnalyzer extends BaseAnalyzer<GetAnalyzerResult> {
       case 6: return GetType.SEXTS;
       case 7: return GetType.SEPTS;
       case 8: return GetType.OCTS;
-      default: return GetType.SPECIAL; // 9 or more repeating digits
+      default: return GetType.SPECIAL;
     }
   }
 
   /**
    * Check if a post is checking a GET
    */
-  private isCheckingPost(post: Post, getPostNo: number): boolean {
-    // Post must be a reply to the GET
-    if (post.no === getPostNo) return false;
+  private isCheckingPost(post: Post, targetPostNo: number): boolean {
+    if (!post.com) return false;
     
-    const content = post.com?.toLowerCase() || '';
-    return GetAnalyzer.CHECK_KEYWORDS.some(keyword => content.includes(keyword));
+    const comment = post.com.toLowerCase();
+    return GetAnalyzer.CHECK_KEYWORDS.some(keyword => comment.includes(keyword)) &&
+           comment.includes(targetPostNo.toString());
   }
 
   /**
-   * Convert thread to a post object (for OP)
+   * Analyze threads to find GETs and count their checks
    */
-  private threadToPost(thread: Thread): Post {
-    return {
-      no: thread.no,
-      resto: 0, // OP posts have resto = 0
-      time: thread.time,
-      name: thread.name,
-      trip: undefined,
-      id: undefined,
-      com: thread.com,
-      tim: thread.tim,
-      filename: thread.filename,
-      ext: thread.ext,
-      fsize: thread.fsize,
-      md5: thread.md5,
-      w: thread.w,
-      h: thread.h,
-      tn_w: thread.tn_w,
-      tn_h: thread.tn_h,
-      country: undefined,
-      country_name: undefined
-    };
-  }
+  public async analyze(threads: Thread[]): Promise<GetAnalyzerResult[]> {
+    const getResults = new Map<number, GetAnalyzerResult>();
 
-  /**
-   * Find all checked GETs in all threads
-   */
-  async analyze(threads: Thread[]): Promise<GetAnalyzerResult[]> {
-    const results: GetAnalyzerResult[] = [];
-    
+    // First pass: find all GETs
     for (const thread of threads) {
-      // Skip if thread has no posts
       if (!thread.posts) continue;
 
-      // Convert thread to post for OP analysis
-      const opPost = this.threadToPost(thread);
+      for (const post of thread.posts) {
+        const repeatingInfo = this.findRepeatingDigits(post.no);
+        if (!repeatingInfo) continue;
 
-      // Check each post for GETs
-      for (const post of [opPost, ...thread.posts]) {
-        // Look for repeating digits
-        const repeating = this.findRepeatingDigits(post.no);
-        if (!repeating) continue;
-
-        // Find posts that checked this GET across all threads
-        const checkingPosts: Post[] = [];
-        
-        // Check current thread
-        checkingPosts.push(...thread.posts.filter(p => 
-          this.isCheckingPost(p, post.no)
-        ));
-        
-        // Check other threads for cross-thread checks
-        for (const otherThread of threads) {
-          if (otherThread.no === thread.no || !otherThread.posts) continue;
-          
-          checkingPosts.push(...otherThread.posts.filter(p =>
-            this.isCheckingPost(p, post.no)
-          ));
-        }
-
-        // Only record GETs that were checked
-        if (checkingPosts.length === 0) continue;
-
-        // Create result
-        results.push({
+        getResults.set(post.no, {
           timestamp: Date.now(),
           threadId: thread.no,
           postId: post.no,
-          getType: this.getGetType(repeating.count),
-          getPost: post,
-          checkingPosts,
-          repeatingDigits: repeating.digits,
-          digitCount: repeating.count,
+          getType: this.getGetType(repeatingInfo.digitCount),
+          repeatingDigits: repeatingInfo.repeatingDigits,
+          digitCount: repeatingInfo.digitCount,
           metadata: {
-            checkCount: checkingPosts.length,
-            threadSubject: thread.sub || '',
-            isOp: post.no === thread.no,
-            crossThreadChecks: checkingPosts.some(p => p.resto !== thread.no)
+            postNo: post.no,
+            checkCount: 0
           }
         });
       }
     }
 
-    return results;
+    // Second pass: count checks for each GET
+    for (const thread of threads) {
+      if (!thread.posts) continue;
+
+      for (const post of thread.posts) {
+        for (const [getPostNo, result] of getResults) {
+          if (this.isCheckingPost(post, getPostNo)) {
+            result.metadata.checkCount++;
+          }
+        }
+      }
+    }
+
+    // Sort results by check count and limit to MAX_RESULTS
+    const sortedResults = Array.from(getResults.values())
+      .sort((a, b) => b.metadata.checkCount - a.metadata.checkCount)
+      .slice(0, GetAnalyzer.MAX_RESULTS);
+
+    return sortedResults;
   }
 } 

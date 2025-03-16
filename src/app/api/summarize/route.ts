@@ -59,7 +59,7 @@ export async function POST() {
     console.log('Initializing summarizer...');
     const summarizer = new Summarizer(apiKey);
     console.log('Starting analysis...');
-    const { articles, matrix } = await summarizer.analyze(threadsToAnalyze);
+    const { articles, matrix, bigPicture } = await summarizer.analyze(threadsToAnalyze);
     console.log('Analysis complete');
 
     // Save results
@@ -76,7 +76,7 @@ export async function POST() {
     // Write the results to file
     await fs.writeFile(
       outputPath,
-      JSON.stringify({ articles, matrix }, null, 2),
+      JSON.stringify({ articles, matrix, bigPicture }, null, 2),
       'utf-8'
     );
     console.log('Results saved to:', outputPath);
@@ -90,6 +90,11 @@ export async function POST() {
         medianPercentage: matrix.statistics.median,
         totalAnalyzed: matrix.statistics.totalAnalyzed,
         themeCount: matrix.themes.length
+      },
+      bigPictureStats: {
+        themeCount: bigPicture.themes.length,
+        sentimentCount: bigPicture.sentiments.length,
+        overviewLength: bigPicture.overview.article.length
       }
     });
   } catch (error) {

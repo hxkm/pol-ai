@@ -1,4 +1,4 @@
-import { AnalyzerResult, Post } from '../../../types/interfaces';
+import { AnalyzerResult } from '../../../types/interfaces';
 
 /**
  * Types of GETs based on number of repeating digits
@@ -19,8 +19,10 @@ export enum GetType {
  */
 export interface GetAnalyzerResult extends AnalyzerResult {
   getType: GetType;           // Type of GET (dubs/trips/etc)
-  getPost: Post;             // The post that got the GET
-  checkingPosts: Post[];     // Posts that checked the GET
-  repeatingDigits: string;   // The actual repeating digits
-  digitCount: number;        // Number of repeating digits
+  repeatingDigits: string;    // The actual repeating digits
+  digitCount: number;         // Number of repeating digits
+  metadata: {
+    postNo: number;          // The post number that got the GET
+    checkCount: number;      // Number of times this GET was checked
+  };
 } 

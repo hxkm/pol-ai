@@ -1,131 +1,92 @@
-# &amp Information Portal
+# Pol-AI
 
-A web application that displays processed information from 4chan's /pol/ board using Next.js.
+A Next.js application for analyzing online discourse using AI. The system scrapes content, generates summaries, and performs antisemitism analysis using the DeepSeek API.
 
-## Deployment on Railway
+## Features
 
-1. Create a new project on Railway
-2. Connect your GitHub repository
-3. Add a persistent volume:
-   - Mount point: `/data`
-   - Size: 1GB (or as needed)
+- Thread scraping and data collection
+- AI-powered content summarization
+- Antisemitism matrix analysis
+  - Theme identification
+  - Statistical analysis
+  - 48-hour trend tracking
+- Web interface for monitoring and control
 
-4. Set up environment variables:
+## Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/pol-ai.git
+cd pol-ai
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Create a `.env.local` file with your DeepSeek API key:
 ```env
-DATA_DIR=/data
-NODE_ENV=production
-PORT=8080
+DEEPSEEK_API_KEY=your_api_key_here
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_TEMPERATURE=1.0
 ```
 
-5. Deploy settings:
-- Root Directory: ./
-- Build Command: `npm run build`
-- Start Command: `npm run start`
-
-## Development
-
+4. Create required directories:
 ```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
-
-# Run scraper
-npm run scrape
-```
-
-## Project Structure
-
-```
-/
-├── src/
-│   └── app/
-│       ├── components/     # React components
-│       ├── lib/           # Backend logic
-│       └── types/         # TypeScript types
-├── public/               # Static assets
-├── data/                # Data storage (mounted volume)
-└── nixpacks.toml        # Railway configuration
-```
-
-## Project Overview
-
-This application consists of three main components:
-
-1. **Scraper**: Fetches thread data from 4chan's API following their rate limiting requirements
-2. **Summarizer**: Processes thread content using DeepSeek AI to generate concise summaries
-3. **Cleaner**: Manages data lifecycle by removing old threads and orphaned summaries
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm
-- DeepSeek AI API key
-
-### Environment Setup
-
-Create a `.env.local` file in the project root with the following variables:
-
-```
-DATA_DIR=/data
-DEEPSEEK_API_KEY=your_key_here
-NODE_ENV=development
-PORT=3000
-```
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Run the development server
-npm run dev
+mkdir -p data/threads data/analysis
 ```
 
 ## Usage
 
-### Running the Scraper
+### Development
 
+Run the development server:
 ```bash
-npm run scrape
+npm run dev
 ```
 
-This will fetch thread data from 4chan's /pol/ board and store it in the `/data/threads` directory.
+### Scripts
 
-### Running the Summarizer
+- `npm run scrape` - Run the thread scraper
+- `npm run summarize` - Generate summaries and analysis
+- `npm run clean` - Clean up old data
+- `npm run test:matrix` - Test the antisemitism matrix analyzer
 
+### Production
+
+Build and start the production server:
 ```bash
-npm run summarize
+npm run build
+npm start
 ```
 
-This will process thread data and generate summaries using DeepSeek AI, storing them in the `/data/summaries` directory.
+## Project Structure
 
-### Running the Cleaner
+- `/src/app` - Next.js application code
+  - `/api` - API routes
+  - `/components` - React components
+  - `/lib` - Core functionality
+    - `/analyzers` - Analysis modules
+    - `/scraper` - Data collection
+  - `/types` - TypeScript type definitions
+  - `/utils` - Utility functions
 
-```bash
-npm run clean
-```
+## Data Management
 
-This will remove old thread data and orphaned summaries to prevent excessive storage usage.
+- Thread data is stored in `/data/threads`
+- Analysis results are stored in `/data/analysis`
+- Trend data is automatically cleaned after 48 hours
+- File size limits and rotation are implemented for data management
 
-## Development Guidelines
+## Contributing
 
-- Follow TypeScript best practices
-- Use functional programming patterns
-- Implement proper error handling
-- Respect 4chan's API rate limits
-- Use atomic file operations for data integrity
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.

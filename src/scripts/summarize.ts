@@ -114,6 +114,23 @@ async function main() {
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`\n✓ Completed analysis of all ${threadsToAnalyze.length} threads`);
 
+    // Log detailed results
+    console.log('\n📊 Analysis Summary:');
+    console.log('Article Analysis:');
+    console.log(`- Analyzed ${results.articles.batchStats.totalAnalyzedPosts} posts`);
+    console.log(`- Across ${results.articles.batchStats.totalThreads} threads`);
+    console.log(`- Average antisemitic content: ${results.articles.batchStats.averageAntisemiticPercentage.toFixed(2)}%`);
+    
+    console.log('\nAntisemitism Matrix:');
+    console.log(`- Identified ${results.matrix.themes.length} antisemitic themes`);
+    console.log(`- Mean percentage: ${results.matrix.statistics.mean.toFixed(2)}%`);
+    console.log(`- Median percentage: ${results.matrix.statistics.median.toFixed(2)}%`);
+    
+    console.log('\nBig Picture Analysis:');
+    console.log(`- Generated ${results.bigPicture.overview.article.length} character overview`);
+    console.log(`- Identified ${results.bigPicture.themes.length} general themes`);
+    console.log(`- Analyzed ${results.bigPicture.sentiments.length} major sentiments`);
+
     // Save results with consistent filename
     const outputPath = path.resolve(
       process.cwd(),

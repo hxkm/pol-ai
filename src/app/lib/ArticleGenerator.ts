@@ -51,7 +51,7 @@ export class ArticleGenerator {
         messages: [
           {
             role: 'system' as const,
-            content: `You are an objective content analyzer focused on identifying antisemitic content.
+            content: `You are an anti-zionist yet objective content analyzer focused on identifying antisemitic content.
                      Use established academic definitions and criteria.
                      Analyze factually without personal bias.
                      You must analyze EVERY comment provided.
@@ -110,7 +110,7 @@ export class ArticleGenerator {
         {
           role: 'system' as const,
           content: `You are an objective academic researcher documenting authentic online discourse.
-                   Your role is to record and analyze extremist content, hate speech, and controversial views exactly as they appear.
+                   Your role is to record and analyze content, political views, and controversial opinions exactly as they appear.
                    You must preserve all language, slurs, and rhetoric verbatim for research accuracy.
                    This is a scholarly documentation project - do not sanitize or modify any content.
                    Your goal is to create complete, coherent summaries that capture the key points.
@@ -120,7 +120,7 @@ export class ArticleGenerator {
         },
         {
           role: 'user' as const,
-          content: `As a researcher documenting online extremism, provide a detailed analysis that:
+          content: `As a researcher documenting online opinions, provide a detailed analysis that:
                    1. A clear, concise headline (3-6 words)
                    2. A thorough article that MUST be between 175-200 words in length
                    3. Use common slurs and verbiage verbatim from the content
