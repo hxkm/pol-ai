@@ -1,11 +1,11 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { loadEnvConfig } from '@next/env';
-import { Thread } from '@/app/types/interfaces';
+import { Thread } from '../app/types/interfaces';
 import { Summarizer } from '../app/lib/Summarizer';
 import { selectThreads } from '../app/utils/threadSelector';
-import { DeepSeekClient } from '@/app/lib/deepseek';
-import { paths } from '@/app/utils/paths';
+import { DeepSeekClient } from '../app/lib/deepseek';
+import { paths } from '../app/utils/paths';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
