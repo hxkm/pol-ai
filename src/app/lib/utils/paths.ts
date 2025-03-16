@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Enhanced debug logging with timestamps and categories
-function logPathInfo(category: string, message: string, data?: any) {
+function logPathInfo(category: string, message: string, data?: Record<string, unknown>) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] [PATHS:${category}] ${message}`;
   console.log(logMessage);

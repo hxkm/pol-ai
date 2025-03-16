@@ -6,6 +6,13 @@ import path from 'path';
 import { paths } from '../../utils/paths';
 import axios from 'axios';
 import crypto from 'crypto';
+import fsPromises from 'fs/promises';
+
+interface DirectoryStats {
+  files: number;
+  totalSize: number;
+  subdirectories: Record<string, DirectoryStats>;
+}
 
 /**
  * Analyzer for downloading and managing media files
@@ -89,26 +96,28 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
   /**
    * Get the current directory structure for logging
    */
-  private async getDirectoryStructure(dir: string): Promise<any> {
-    const structure: any = {};
-    const items = await fs.promises.readdir(dir);
+  private async getDirectoryStructure(dir: string): Promise<DirectoryStats> {
+    const stats: DirectoryStats = {
+      files: 0,
+      totalSize: 0,
+      subdirectories: {}
+    };
+
+    const items = await fsPromises.readdir(dir);
     
     for (const item of items) {
       const fullPath = path.join(dir, item);
-      const stats = await fs.promises.stat(fullPath);
+      const itemStats = await fsPromises.stat(fullPath);
       
-      if (stats.isDirectory()) {
-        const files = await fs.promises.readdir(fullPath);
-        structure[item] = {
-          type: 'directory',
-          fileCount: files.length,
-          totalSize: (await this.getDirectorySize(fullPath)).toLocaleString(),
-          lastModified: stats.mtime
-        };
+      if (itemStats.isDirectory()) {
+        stats.subdirectories[item] = await this.getDirectoryStructure(fullPath);
+      } else {
+        stats.files++;
+        stats.totalSize += itemStats.size;
       }
     }
     
-    return structure;
+    return stats;
   }
 
   /**
@@ -116,11 +125,11 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
    */
   private async getDirectorySize(dir: string): Promise<number> {
     let size = 0;
-    const items = await fs.promises.readdir(dir);
+    const items = await fsPromises.readdir(dir);
     
     for (const item of items) {
       const fullPath = path.join(dir, item);
-      const stats = await fs.promises.stat(fullPath);
+      const stats = await fsPromises.stat(fullPath);
       size += stats.size;
     }
     
