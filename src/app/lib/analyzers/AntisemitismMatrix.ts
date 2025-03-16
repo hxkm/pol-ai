@@ -40,7 +40,7 @@ export class AntisemitismMatrixAnalyzer {
           const backupPath = this.latestAnalysisPath.replace('.json', `-${timestamp}.json`);
           await fs.rename(this.latestAnalysisPath, backupPath);
         }
-      } catch (_error) {
+      } catch (_) {
         // File doesn't exist yet, ignore
       }
 
