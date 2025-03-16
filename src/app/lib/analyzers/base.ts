@@ -9,9 +9,83 @@ const MAX_CHUNK_SIZE = 50 * 1024 * 1024; // 50MB per chunk
 const MIN_DISK_SPACE = 500 * 1024 * 1024; // 500MB minimum free space
 const MAX_CHUNKS = 5; // Maximum number of chunk files to keep
 
+type LogDataValue = string | number | boolean | Error | fs.Stats | Date | null | undefined;
+type LogDataRecord = Record<string, unknown>;
+
+interface BaseLogData {
+  category: string;
+  message: string;
+  data?: LogDataRecord;
+}
+
+interface DiskSpaceData {
+  type: 'disk';
+  required: number;
+  available: number;
+  sufficient: boolean;
+}
+
+interface ChunkData {
+  type: 'chunk';
+  remainingChunks: number;
+  dataSize?: number;
+  recordCount?: number;
+}
+
+interface StorageData {
+  type: 'storage';
+  lastUpdated: string | Date;
+  resultCount: number;
+  totalResults?: number;
+  newResults?: number;
+}
+
+interface DirectoryData {
+  type: 'directory';
+  stats: fs.Stats;
+  mode: number;
+  uid: number;
+  gid: number;
+  size: number;
+  atime: Date;
+  mtime: Date;
+  ctime: Date;
+}
+
+interface ErrorData {
+  type: 'error';
+  error: Error | string;
+  context?: Record<string, string | number>;
+}
+
+interface ValidationData {
+  type: 'validation';
+  result: unknown;
+  isValid: boolean;
+  threadId?: number;
+  postId?: number;
+}
+
+interface PurgeData {
+  type: 'purge';
+  originalCount: number;
+  remainingCount: number;
+  purgedCount: number;
+}
+
+type LogData = 
+  | DiskSpaceData 
+  | ChunkData 
+  | StorageData 
+  | DirectoryData 
+  | ErrorData 
+  | ValidationData 
+  | PurgeData;
+
 /**
  * Enhanced logging function for analyzers
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function logAnalyzer(analyzer: string, category: string, message: string, data?: any) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] [${analyzer.toUpperCase()}:${category}] ${message}`;
