@@ -11,13 +11,16 @@
     "summarize": "tsx src/scripts/summarize.ts",
     "clean": "tsx src/app/lib/cleaner/index.ts",
     "test:matrix": "tsx src/scripts/test-matrix.ts",
-    "test:bigpicture": "tsx src/scripts/test-bigpicture.ts"
+    "test:bigpicture": "tsx src/scripts/test-bigpicture.ts",
+    "schedule": "tsx src/scripts/schedule.ts"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@types/node-cron": "^3.0.11",
+    "axios": "^1.6.7",
     "next": "15.2.2",
-    "axios": "^1.6.7"
+    "node-cron": "^3.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

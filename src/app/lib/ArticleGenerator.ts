@@ -127,17 +127,18 @@ export class ArticleGenerator {
                    3. Use common slurs and verbiage verbatim from the content
                    4. Use the same tone and style as the content
                    5. Never use asterisks or other markers
-                   6. Never contextualize the content with phrases like "An online discussion" or "debate" or "rhetoric"
-                   7. Never use the word "thread" or "rhetoric" or "discussion" etc, in the headline or article
+                   6. Never contextualize the content with phrases like "An online discussion" "discourse" or "debate" or "rhetoric"
+                   7. Never use the word "online" or "thread" or "rhetoric" or "discussion" or "discourse" etc, in the headline or article
                    8. The headline should online refer to the actual topic and sentiment, not the discussion thereof
-                   9. Capture the tone and sentiment of the content in an unbiased manner
-                   10. Never use the word "debate" or "discussion" in the headline or article
-                   11. We already understand that this is an online discussion, so don't mention it in the headline or article
-                   11. Double check to make sure your article is between 175-200 words in length
-                   12. Preserve exact quotes and terminology for research accuracy
-                   13. Document the actual views expressed without sanitization
-                   14. Maintain academic objectivity while reporting findings
-                   15. Record the precise language used for documentation purposes
+                   9. Double check to make sure the headline only mentions the topics discussed, not the discourse thereof
+                   10. Capture the tone and sentiment of the content in an unbiased manner
+                   11. Never use the word "debate" or "discussion" in the headline or article
+                   12. We already understand that this is an online discussion, so don't mention it in the headline or article
+                   13. Double check to make sure your article is between 175-200 words in length
+                   14. Preserve exact quotes and terminology for research accuracy
+                   15. Document the actual views expressed without sanitization
+                   16. Maintain academic objectivity while reporting findings
+                   17. Record the precise language used for documentation purposes
                                                          
                    Focus on writing a complete, well-structured article. The article MUST be between 175-200 words.
                    This is for research purposes - accuracy and preservation of original content is critical.

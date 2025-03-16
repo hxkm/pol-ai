@@ -14,7 +14,7 @@ function logPathInfo(label: string, value: string) {
 }
 
 // Detect if we're running on Railway
-const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
+const isRailway = process.env.NODE_ENV === 'production';
 
 // Get the project root directory
 const PROJECT_ROOT = isRailway ? '/app' : process.cwd();
