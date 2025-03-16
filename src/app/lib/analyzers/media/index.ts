@@ -6,13 +6,6 @@ import path from 'path';
 import { paths } from '../../utils/paths';
 import axios from 'axios';
 import crypto from 'crypto';
-import fsPromises from 'fs/promises';
-
-interface DirectoryStats {
-  files: number;
-  totalSize: number;
-  subdirectories: Record<string, DirectoryStats>;
-}
 
 /**
  * Analyzer for downloading and managing media files
@@ -42,98 +35,30 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
   private async initDirectories(): Promise<void> {
     try {
       const mediaDir = path.resolve(paths.dataDir, 'media');
-      console.log('\n[MEDIA] Initializing media directories...');
-      console.log(`[MEDIA] Base media directory: ${mediaDir}`);
-      console.log(`[MEDIA] Current working directory: ${process.cwd()}`);
-      console.log(`[MEDIA] Environment: ${process.env.RAILWAY_ENVIRONMENT || 'local'}`);
+      console.log('Creating media directory:', mediaDir);
       
       // Create main media directory first
       if (!fs.existsSync(mediaDir)) {
-        console.log(`[MEDIA] Creating main directory: ${mediaDir}`);
         await fs.promises.mkdir(mediaDir, { recursive: true });
-        console.log('[MEDIA] ✓ Main directory created');
-      } else {
-        console.log('[MEDIA] ✓ Main directory exists');
+        console.log('Created main media directory');
       }
       
       // Create category directories
       for (const category of Object.values(MediaCategory)) {
         const categoryDir = path.resolve(mediaDir, category);
-        console.log(`\n[MEDIA] Processing category: ${category}`);
-        console.log(`[MEDIA] Category path: ${categoryDir}`);
+        console.log('Creating category directory:', categoryDir);
         
         if (!fs.existsSync(categoryDir)) {
-          console.log(`[MEDIA] Creating category directory: ${categoryDir}`);
           await fs.promises.mkdir(categoryDir, { recursive: true });
-          console.log(`[MEDIA] ✓ Created ${category} directory`);
-        } else {
-          console.log(`[MEDIA] ✓ ${category} directory exists`);
-        }
-
-        // Verify write permissions
-        try {
-          const testFile = path.join(categoryDir, '.write-test');
-          await fs.promises.writeFile(testFile, 'test');
-          await fs.promises.unlink(testFile);
-          console.log(`[MEDIA] ✓ Verified write access to ${category} directory`);
-        } catch (error) {
-          console.error(`[MEDIA] ✗ Write permission test failed for ${category}:`, error);
-          throw error;
+          console.log('Created category directory:', category);
         }
       }
       
-      console.log('\n[MEDIA] Directory initialization complete');
-      
-      // Log directory structure
-      const structure = await this.getDirectoryStructure(mediaDir);
-      console.log('\n[MEDIA] Current directory structure:', structure);
+      console.log('Media directories initialized successfully');
     } catch (error) {
-      console.error('[MEDIA] ✗ Error initializing media directories:', error);
+      console.error('Error initializing media directories:', error);
       throw error;
     }
-  }
-
-  /**
-   * Get the current directory structure for logging
-   */
-  private async getDirectoryStructure(dir: string): Promise<DirectoryStats> {
-    const stats: DirectoryStats = {
-      files: 0,
-      totalSize: 0,
-      subdirectories: {}
-    };
-
-    const items = await fsPromises.readdir(dir);
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const itemStats = await fsPromises.stat(fullPath);
-      
-      if (itemStats.isDirectory()) {
-        stats.subdirectories[item] = await this.getDirectoryStructure(fullPath);
-      } else {
-        stats.files++;
-        stats.totalSize += itemStats.size;
-      }
-    }
-    
-    return stats;
-  }
-
-  /**
-   * Calculate directory size
-   */
-  private async getDirectorySize(dir: string): Promise<number> {
-    let size = 0;
-    const items = await fsPromises.readdir(dir);
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stats = await fsPromises.stat(fullPath);
-      size += stats.size;
-    }
-    
-    return size;
   }
 
   /**
@@ -294,8 +219,7 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
    * Process media from all threads
    */
   async analyze(threads: Thread[]): Promise<MediaAnalyzerResult[]> {
-    console.log('\n[MEDIA] Starting media analysis...');
-    console.log(`[MEDIA] Processing ${threads.length} threads`);
+    console.log('Starting media analysis...');
     
     // Initialize directories and tracking
     await this.initDirectories();
@@ -305,23 +229,14 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
     let totalFiles = 0;
     let duplicatesSkipped = 0;
     let randomCount = 0;
-    let processedThreads = 0;
 
     // Process each thread
     for (const thread of threads) {
-      processedThreads++;
-      console.log(`\n[MEDIA] Processing thread ${thread.no} (${processedThreads}/${threads.length})`);
-      
-      if (!thread.posts) {
-        console.log(`[MEDIA] ⚠ No posts found in thread ${thread.no}`);
-        continue;
-      }
+      if (!thread.posts) continue;
 
       // Include OP if it has a file
       if (thread.tim && thread.ext && thread.filename) {
         totalFiles++;
-        console.log(`[MEDIA] Processing OP file: ${thread.filename}${thread.ext}`);
-        
         const opPost = {
           no: thread.no,
           resto: 0,
@@ -346,30 +261,20 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
         if (mediaFile) {
           downloadedFiles.push(mediaFile);
           if (category === MediaCategory.RANDOM) randomCount++;
-          console.log(`[MEDIA] ✓ Downloaded ${category} file: ${mediaFile.filename}`);
         } else {
           duplicatesSkipped++;
-          console.log('[MEDIA] ⚠ Duplicate file skipped');
         }
       }
 
       // Process each post in thread
-      let processedPosts = 0;
       for (const post of thread.posts) {
         if (!post.tim || !post.ext || !post.filename) continue;
         
-        processedPosts++;
         totalFiles++;
-        console.log(`[MEDIA] Processing post ${post.no} file: ${post.filename}${post.ext}`);
-        
         const category = this.categorizeFile(post.filename, post.ext);
-        if (!category) {
-          console.log(`[MEDIA] ⚠ Skipping uncategorized file: ${post.filename}${post.ext}`);
-          continue;
-        }
         
-        if (category === MediaCategory.RANDOM && randomCount >= MediaAnalyzer.MAX_RANDOM_IMAGES) {
-          console.log('[MEDIA] ⚠ Random category full, skipping file');
+        // Skip if not categorized or random category is full
+        if (!category || (category === MediaCategory.RANDOM && randomCount >= MediaAnalyzer.MAX_RANDOM_IMAGES)) {
           continue;
         }
 
@@ -377,33 +282,19 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
         if (mediaFile) {
           downloadedFiles.push(mediaFile);
           if (category === MediaCategory.RANDOM) randomCount++;
-          console.log(`[MEDIA] ✓ Downloaded ${category} file: ${mediaFile.filename}`);
         } else {
           duplicatesSkipped++;
-          console.log('[MEDIA] ⚠ Duplicate file skipped');
+        }
+
+        // Early exit if we have enough random images
+        if (randomCount >= MediaAnalyzer.MAX_RANDOM_IMAGES) {
+          break;
         }
       }
-      
-      console.log(`[MEDIA] Thread ${thread.no} complete - Processed ${processedPosts} posts`);
     }
 
     // Get category statistics
-    console.log('\n[MEDIA] Gathering category statistics...');
     const categoryStats = await this.getCategoryStats();
-    
-    // Log final statistics
-    console.log('\n[MEDIA] Analysis complete:');
-    console.log(`[MEDIA] - Total files processed: ${totalFiles}`);
-    console.log(`[MEDIA] - Files downloaded: ${downloadedFiles.length}`);
-    console.log(`[MEDIA] - Duplicates skipped: ${duplicatesSkipped}`);
-    console.log(`[MEDIA] - Random images: ${randomCount}/${MediaAnalyzer.MAX_RANDOM_IMAGES}`);
-    
-    console.log('\n[MEDIA] Category statistics:');
-    categoryStats.forEach(stat => {
-      console.log(`[MEDIA] ${stat.category}:`);
-      console.log(`[MEDIA] - Files: ${stat.fileCount}`);
-      console.log(`[MEDIA] - Total size: ${stat.totalSize} bytes`);
-    });
 
     // Create single result
     return [{
