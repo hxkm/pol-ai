@@ -2,6 +2,7 @@ import { DeepSeekClient } from './deepseek';
 import { Thread, Post } from '../types/interfaces';
 import { ArticleAnalysis, ArticleGeneratorConfig, ArticleBatch } from '../types/article';
 import { randomSample } from '../utils/array';
+import { paths } from '@/app/utils/paths';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -23,7 +24,7 @@ export class ArticleGenerator {
     this.config = { ...DEFAULT_CONFIG, ...config };
     // Get temperature from environment variable, default to 0.7 if not set
     this.temperature = process.env.DEEPSEEK_TEMPERATURE ? parseFloat(process.env.DEEPSEEK_TEMPERATURE) : 0.7;
-    this.progressFile = path.resolve(process.cwd(), 'data', 'analysis', 'progress.json');
+    this.progressFile = path.resolve(paths.dataDir, 'analysis', 'progress.json');
   }
 
   private getPostsToAnalyze(thread: Thread): Post[] {

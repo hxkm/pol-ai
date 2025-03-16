@@ -1,6 +1,7 @@
 import { DeepSeekClient } from '../deepseek';
 import { ArticleAnalysis } from '@/app/types/article';
 import { AntisemitismMatrix, AntisemitismTheme, AntisemitismTrend } from '@/app/types/antisemitism';
+import { paths } from '@/app/utils/paths';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -20,14 +21,19 @@ interface ThemeData {
 
 export class AntisemitismMatrixAnalyzer {
   private client: DeepSeekClient;
+  private outputPath: string;
+  private categoriesPath: string;
+  private examplesPath: string;
   private historicalDataPath: string;
   private latestAnalysisPath: string;
 
   constructor(apiKey: string) {
     this.client = new DeepSeekClient(apiKey);
-    const analysisDir = path.resolve(process.cwd(), 'data', 'analysis');
-    this.historicalDataPath = path.resolve(analysisDir, 'antisemitism-trends.json');
-    this.latestAnalysisPath = path.resolve(analysisDir, 'latest-analysis.json');
+    this.outputPath = path.resolve(paths.dataDir, 'analysis', 'antisemitism.json');
+    this.categoriesPath = path.resolve(paths.dataDir, 'analysis', 'categories.json');
+    this.examplesPath = path.resolve(paths.dataDir, 'analysis', 'examples.json');
+    this.historicalDataPath = path.resolve(paths.dataDir, 'analysis', 'antisemitism-trends.json');
+    this.latestAnalysisPath = path.resolve(paths.dataDir, 'analysis', 'latest-antisemitism.json');
   }
 
   private async rotateLogs() {

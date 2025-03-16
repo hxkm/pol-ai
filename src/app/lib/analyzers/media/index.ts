@@ -33,14 +33,31 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
    * Initialize media directories
    */
   private async initDirectories(): Promise<void> {
-    const mediaDir = path.resolve(paths.dataDir, 'media');
-    
-    // Create category directories
-    for (const category of Object.values(MediaCategory)) {
-      const categoryDir = path.resolve(mediaDir, category);
-      if (!fs.existsSync(categoryDir)) {
-        await fs.promises.mkdir(categoryDir, { recursive: true });
+    try {
+      const mediaDir = path.resolve(paths.dataDir, 'media');
+      console.log('Creating media directory:', mediaDir);
+      
+      // Create main media directory first
+      if (!fs.existsSync(mediaDir)) {
+        await fs.promises.mkdir(mediaDir, { recursive: true });
+        console.log('Created main media directory');
       }
+      
+      // Create category directories
+      for (const category of Object.values(MediaCategory)) {
+        const categoryDir = path.resolve(mediaDir, category);
+        console.log('Creating category directory:', categoryDir);
+        
+        if (!fs.existsSync(categoryDir)) {
+          await fs.promises.mkdir(categoryDir, { recursive: true });
+          console.log('Created category directory:', category);
+        }
+      }
+      
+      console.log('Media directories initialized successfully');
+    } catch (error) {
+      console.error('Error initializing media directories:', error);
+      throw error;
     }
   }
 

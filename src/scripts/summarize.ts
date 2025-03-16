@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { loadEnvConfig } from '@next/env';
-import { Thread } from '../app/types/interfaces';
+import { Thread } from '@/app/types/interfaces';
 import { Summarizer } from '../app/lib/Summarizer';
 import { selectThreads } from '../app/utils/threadSelector';
+import { DeepSeekClient } from '@/app/lib/deepseek';
+import { paths } from '@/app/utils/paths';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
@@ -63,6 +65,26 @@ async function saveResults(results: unknown, outputPath: string): Promise<void> 
   } catch (error) {
     console.error('❌ Error saving results:', error);
   }
+}
+
+async function loadThreads(): Promise<Thread[]> {
+  const threadsDir = paths.threadsDir;
+  const files = await fs.readdir(threadsDir);
+  const threads: Thread[] = [];
+
+  for (const file of files) {
+    if (!file.endsWith('.json')) continue;
+    const filePath = path.resolve(threadsDir, file);
+    const content = await fs.readFile(filePath, 'utf-8');
+    threads.push(JSON.parse(content));
+  }
+
+  return threads;
+}
+
+async function saveSummary(threadId: string, summary: string): Promise<void> {
+  const summaryPath = paths.summaryFile(threadId);
+  await fs.writeFile(summaryPath, JSON.stringify({ summary }, null, 2));
 }
 
 async function main() {

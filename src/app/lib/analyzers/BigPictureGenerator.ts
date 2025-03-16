@@ -2,6 +2,7 @@ import { DeepSeekClient } from '../deepseek';
 import { Thread } from '@/app/types/interfaces';
 import { ArticleAnalysis } from '@/app/types/article';
 import { BigPictureAnalysis, Theme, Sentiment } from '@/app/types/bigpicture';
+import { paths } from '@/app/utils/paths';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -11,7 +12,7 @@ export class BigPictureGenerator {
 
   constructor(apiKey: string) {
     this.client = new DeepSeekClient(apiKey);
-    this.outputPath = path.resolve(process.cwd(), 'data', 'analysis', 'big-picture.json');
+    this.outputPath = path.resolve(paths.dataDir, 'analysis', 'big-picture.json');
   }
 
   private async generateOverview(threads: Thread[]): Promise<string> {

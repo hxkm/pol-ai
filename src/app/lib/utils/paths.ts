@@ -8,13 +8,26 @@
 import path from 'path';
 import fs from 'fs';
 
-// Get the project root directory (where package.json is)
-const PROJECT_ROOT = process.cwd();
-console.log('DEBUG - Project Root:', PROJECT_ROOT);
+// Debug logging function
+function logPathInfo(label: string, value: string) {
+  console.log(`[PATHS] ${label}: ${value}`);
+}
+
+// Detect if we're running on Railway
+const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
+
+// Get the project root directory
+const PROJECT_ROOT = isRailway ? '/app' : process.cwd();
+
+// Log environment information
+logPathInfo('Environment', isRailway ? 'Railway' : 'Local');
+logPathInfo('Project Root', PROJECT_ROOT);
+logPathInfo('Process CWD', process.cwd());
+logPathInfo('__dirname', __dirname);
 
 // Always use data directory relative to project root
 const DATA_DIR = path.resolve(PROJECT_ROOT, 'data');
-console.log('DEBUG - Data Dir:', DATA_DIR);
+logPathInfo('Data Directory', DATA_DIR);
 
 // Define all application paths
 export const paths = {
