@@ -9,7 +9,8 @@
     "lint": "next lint",
     "scrape": "tsx src/app/lib/scraper/index.ts",
     "summarize": "tsx src/scripts/summarize.ts",
-    "clean": "tsx src/app/lib/cleaner/index.ts"
+    "clean": "tsx src/app/lib/cleaner/index.ts",
+    "test:matrix": "tsx src/scripts/test-matrix.ts"
   },
   "dependencies": {
     "react": "^19.0.0",
