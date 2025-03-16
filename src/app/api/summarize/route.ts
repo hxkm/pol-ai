@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { loadEnvConfig } from '@next/env';
 import { Summarizer } from '@/app/lib/Summarizer';
 import { loadAllThreads } from '@/app/utils/fileLoader';
@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 // Load environment variables
 loadEnvConfig(process.cwd());
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     console.log('Starting summarizer process...');
     
