@@ -3,8 +3,6 @@ import { ArticleGenerator } from './ArticleGenerator';
 import { ArticleBatch } from '../types/article';
 import { AntisemitismMatrix } from '../types/antisemitism';
 import { AntisemitismMatrixAnalyzer } from './analyzers/AntisemitismMatrix';
-import path from 'path';
-import fs from 'fs/promises';
 
 export class Summarizer {
   private articleGenerator: ArticleGenerator;

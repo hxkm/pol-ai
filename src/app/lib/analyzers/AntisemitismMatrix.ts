@@ -1,7 +1,6 @@
 import { DeepSeekClient } from '../deepseek';
 import { ArticleAnalysis } from '@/app/types/article';
 import { AntisemitismMatrix, AntisemitismTheme, AntisemitismTrend } from '@/app/types/antisemitism';
-import { DeepSeekMessage } from '@/app/types/deepseek';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -41,7 +40,7 @@ export class AntisemitismMatrixAnalyzer {
           const backupPath = this.latestAnalysisPath.replace('.json', `-${timestamp}.json`);
           await fs.rename(this.latestAnalysisPath, backupPath);
         }
-      } catch (e) {
+      } catch (_error) {
         // File doesn't exist yet, ignore
       }
 
@@ -62,7 +61,7 @@ export class AntisemitismMatrixAnalyzer {
     }
   }
 
-  private async saveAnalysis(data: any) {
+  private async saveAnalysis(data: unknown) {
     await this.rotateLogs();
     await fs.mkdir(path.dirname(this.latestAnalysisPath), { recursive: true });
     await fs.writeFile(
