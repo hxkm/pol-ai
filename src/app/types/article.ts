@@ -1,5 +1,3 @@
-import { Thread } from './interfaces';
-
 export interface ArticleAnalysis {
   threadId: number;
   headline: string;

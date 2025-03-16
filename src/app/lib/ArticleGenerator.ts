@@ -2,7 +2,6 @@ import { DeepSeekClient } from './deepseek';
 import { Thread, Post } from '../types/interfaces';
 import { ArticleAnalysis, ArticleGeneratorConfig, ArticleBatch } from '../types/article';
 import { randomSample } from '../utils/array';
-import { DeepSeekMessage } from '../types/deepseek';
 import fs from 'fs/promises';
 import path from 'path';
 

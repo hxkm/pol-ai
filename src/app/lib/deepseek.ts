@@ -46,7 +46,7 @@ export class DeepSeekClient {
       // Handle network errors and socket timeouts
       if (retries > 0) {
         const isNetworkError = error instanceof TypeError || 
-          (error as any)?.code === 'UND_ERR_SOCKET';
+          (typeof error === 'object' && error !== null && 'code' in error && error.code === 'UND_ERR_SOCKET');
         
         if (isNetworkError) {
           console.log(`Network error occurred, retrying in ${delay}ms...`);

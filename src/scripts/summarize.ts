@@ -111,7 +111,6 @@ async function main() {
     console.log('🏃 Starting analysis...\n');
     console.log('This may take a while. Processing threads:');
     
-    let completedThreads = 0;
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`\n✓ Completed analysis of all ${threadsToAnalyze.length} threads`);
 
