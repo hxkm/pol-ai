@@ -10,6 +10,18 @@ const MIN_DISK_SPACE = 500 * 1024 * 1024; // 500MB minimum free space
 const MAX_CHUNKS = 5; // Maximum number of chunk files to keep
 
 /**
+ * Enhanced logging function for analyzers
+ */
+function logAnalyzer(analyzer: string, category: string, message: string, data?: any) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] [${analyzer.toUpperCase()}:${category}] ${message}`;
+  console.log(logMessage);
+  if (data) {
+    console.log(`[${timestamp}] [${analyzer.toUpperCase()}:${category}:DATA]`, data);
+  }
+}
+
+/**
  * Base class for all analyzers
  */
 export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer<T> {
@@ -30,11 +42,20 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   private async checkDiskSpace(): Promise<boolean> {
     try {
+      logAnalyzer(this.name, 'DISK', `Checking disk space for ${this.storagePath}`);
       const stats = await fs.promises.statfs(this.storagePath);
       const freeSpace = stats.bfree * stats.bsize;
+      const freeSpaceMB = Math.floor(freeSpace / (1024 * 1024));
+      
+      logAnalyzer(this.name, 'DISK', `Available space: ${freeSpaceMB}MB`, {
+        required: Math.floor(MIN_DISK_SPACE / (1024 * 1024)),
+        available: freeSpaceMB,
+        sufficient: freeSpace >= MIN_DISK_SPACE
+      });
+      
       return freeSpace >= MIN_DISK_SPACE;
     } catch (error) {
-      console.warn(`Could not check disk space: ${error}`);
+      logAnalyzer(this.name, 'ERROR', 'Could not check disk space:', error);
       return true; // Assume space is available if check fails
     }
   }
@@ -51,20 +72,28 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   private async rotateChunks(): Promise<void> {
     try {
+      logAnalyzer(this.name, 'CHUNKS', 'Starting chunk rotation');
       const files = await fs.promises.readdir(this.storagePath);
       const chunkFiles = files
         .filter(f => f.startsWith('chunk_') && f.endsWith('.json'))
         .sort();
 
+      logAnalyzer(this.name, 'CHUNKS', `Found ${chunkFiles.length} chunk files`);
+
       // Remove oldest chunks if we have too many
       while (chunkFiles.length >= MAX_CHUNKS) {
         const oldestChunk = chunkFiles.shift();
         if (oldestChunk) {
+          logAnalyzer(this.name, 'CHUNKS', `Removing old chunk: ${oldestChunk}`);
           await fs.promises.unlink(path.join(this.storagePath, oldestChunk));
         }
       }
+      
+      logAnalyzer(this.name, 'CHUNKS', 'Chunk rotation complete', {
+        remainingChunks: chunkFiles.length
+      });
     } catch (error) {
-      console.error(`Error rotating chunks for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error rotating chunks:`, error);
     }
   }
 
@@ -79,6 +108,11 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
     const nextChunkIndex = chunkFiles.length;
     const chunkPath = this.getChunkPath(nextChunkIndex);
 
+    logAnalyzer(this.name, 'WRITE', `Creating new chunk file: ${chunkPath}`, {
+      dataSize: JSON.stringify(data).length,
+      recordCount: data.length
+    });
+
     const tempFile = `${chunkPath}.tmp`;
     try {
       const chunk = {
@@ -88,7 +122,9 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
 
       await fs.promises.writeFile(tempFile, JSON.stringify(chunk, null, 2));
       await fs.promises.rename(tempFile, chunkPath);
+      logAnalyzer(this.name, 'WRITE', `✓ Successfully wrote chunk file: ${chunkPath}`);
     } catch (error) {
+      logAnalyzer(this.name, 'ERROR', `Failed to write chunk file: ${chunkPath}`, error);
       if (fs.existsSync(tempFile)) {
         await fs.promises.unlink(tempFile).catch(() => {});
       }
@@ -101,7 +137,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   protected validateResult(result: T): boolean {
     if (!result.timestamp || result.threadId === 0 || result.postId === 0) {
-      console.error(`Invalid result in ${this.name}:`, result);
+      logAnalyzer(this.name, 'VALIDATE', `Invalid result detected:`, result);
       return false;
     }
     return true;
@@ -112,21 +148,27 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   protected async initStorage(): Promise<void> {
     try {
+      logAnalyzer(this.name, 'INIT', `Initializing storage at ${this.storagePath}`);
+      
       // Ensure the analyzer's directory exists
       if (!fs.existsSync(this.storagePath)) {
+        logAnalyzer(this.name, 'INIT', `Creating analyzer directory: ${this.storagePath}`);
         await fs.promises.mkdir(this.storagePath, { recursive: true });
       }
 
       // Create empty storage if it doesn't exist
       if (!fs.existsSync(this.storageFile)) {
+        logAnalyzer(this.name, 'INIT', `Creating empty storage file: ${this.storageFile}`);
         const emptyStorage: AnalyzerStorage<T> = {
           lastUpdated: Date.now(),
           results: []
         };
         await this.writeStorage(emptyStorage);
       }
+      
+      logAnalyzer(this.name, 'INIT', '✓ Storage initialization complete');
     } catch (error) {
-      console.error(`Error initializing storage for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Storage initialization failed:`, error);
       throw new Error(`Storage initialization failed for ${this.name}`);
     }
   }
@@ -138,6 +180,8 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
     try {
       await this.initStorage();
       
+      logAnalyzer(this.name, 'READ', `Reading storage file: ${this.storageFile}`);
+      
       // Read main storage file
       const data = await fs.promises.readFile(this.storageFile, 'utf-8');
       const storage = JSON.parse(data) as AnalyzerStorage<T>;
@@ -147,9 +191,14 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
         throw new Error('Invalid storage format');
       }
       
+      logAnalyzer(this.name, 'READ', `✓ Successfully read storage`, {
+        lastUpdated: new Date(storage.lastUpdated).toISOString(),
+        resultCount: storage.results.length
+      });
+      
       return storage;
     } catch (error) {
-      console.error(`Error reading storage for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error reading storage:`, error);
       return { lastUpdated: Date.now(), results: [] };
     }
   }
@@ -158,6 +207,8 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    * Write storage state to disk with chunking
    */
   protected async writeStorage(storage: AnalyzerStorage<T>): Promise<void> {
+    logAnalyzer(this.name, 'WRITE', 'Writing storage state');
+    
     // Check disk space
     if (!await this.checkDiskSpace()) {
       throw new Error('Insufficient disk space');
@@ -168,6 +219,11 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       // If data is too large, chunk it
       const dataString = JSON.stringify(storage, null, 2);
       if (dataString.length > MAX_CHUNK_SIZE) {
+        logAnalyzer(this.name, 'WRITE', 'Data exceeds chunk size limit, splitting into chunks', {
+          size: dataString.length,
+          limit: MAX_CHUNK_SIZE
+        });
+        
         // Split results into chunks
         const chunkSize = Math.ceil(storage.results.length / MAX_CHUNKS);
         const chunks = [];
@@ -187,13 +243,15 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
           chunked: true
         };
         await fs.promises.writeFile(tempFile, JSON.stringify(metadataOnly, null, 2));
+        logAnalyzer(this.name, 'WRITE', '✓ Successfully wrote chunked storage');
       } else {
         // Write normally if data is small enough
         await fs.promises.writeFile(tempFile, dataString);
+        logAnalyzer(this.name, 'WRITE', '✓ Successfully wrote storage file');
       }
       await fs.promises.rename(tempFile, this.storageFile);
     } catch (error) {
-      console.error(`Error writing storage for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error writing storage:`, error);
       if (fs.existsSync(tempFile)) {
         await fs.promises.unlink(tempFile).catch(() => {});
       }
@@ -206,11 +264,13 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   async saveResults(results: T[]): Promise<void> {
     try {
+      logAnalyzer(this.name, 'SAVE', `Saving ${results.length} new results`);
+      
       // Validate results before saving
       const validResults = results.filter(result => this.validateResult(result));
       
       if (validResults.length !== results.length) {
-        console.warn(`${this.name}: ${results.length - validResults.length} invalid results were filtered out`);
+        logAnalyzer(this.name, 'WARN', `${results.length - validResults.length} invalid results were filtered out`);
       }
 
       // Check disk space
@@ -220,6 +280,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
 
       // If results are too large, write directly to a new chunk
       if (JSON.stringify(validResults).length > MAX_CHUNK_SIZE) {
+        logAnalyzer(this.name, 'SAVE', 'Results exceed chunk size, writing to new chunk');
         await this.writeChunk(validResults);
         return;
       }
@@ -230,8 +291,12 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       storage.lastUpdated = Date.now();
       
       await this.writeStorage(storage);
+      logAnalyzer(this.name, 'SAVE', '✓ Successfully saved results', {
+        newResults: validResults.length,
+        totalResults: storage.results.length
+      });
     } catch (error) {
-      console.error(`Error saving results for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error saving results:`, error);
       throw error;
     }
   }
@@ -241,6 +306,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   async loadResults(): Promise<T[]> {
     try {
+      logAnalyzer(this.name, 'LOAD', 'Loading all results');
       const storage = await this.readStorage();
       let results = [...storage.results];
 
@@ -249,6 +315,10 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       const chunkFiles = files
         .filter(f => f.startsWith('chunk_') && f.endsWith('.json'))
         .sort();
+
+      if (chunkFiles.length > 0) {
+        logAnalyzer(this.name, 'LOAD', `Loading ${chunkFiles.length} chunk files`);
+      }
 
       for (const chunkFile of chunkFiles) {
         try {
@@ -259,15 +329,21 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
           const chunk = JSON.parse(chunkData);
           if (Array.isArray(chunk.data)) {
             results = results.concat(chunk.data);
+            logAnalyzer(this.name, 'LOAD', `✓ Loaded chunk: ${chunkFile}`, {
+              recordCount: chunk.data.length
+            });
           }
         } catch (error) {
-          console.error(`Error loading chunk ${chunkFile}:`, error);
+          logAnalyzer(this.name, 'ERROR', `Error loading chunk ${chunkFile}:`, error);
         }
       }
 
+      logAnalyzer(this.name, 'LOAD', '✓ Successfully loaded all results', {
+        totalResults: results.length
+      });
       return results;
     } catch (error) {
-      console.error(`Error loading results for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error loading results:`, error);
       return [];
     }
   }
@@ -277,6 +353,8 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   async purgeOldResults(): Promise<void> {
     try {
+      logAnalyzer(this.name, 'PURGE', 'Starting result purge');
+      
       // Check disk space
       if (!await this.checkDiskSpace()) {
         throw new Error('Insufficient disk space');
@@ -291,7 +369,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       
       const purgedCount = originalCount - storage.results.length;
       if (purgedCount > 0) {
-        console.log(`${this.name}: Purged ${purgedCount} old results`);
+        logAnalyzer(this.name, 'PURGE', `Purged ${purgedCount} old results`);
       }
       
       // Also purge old chunks
@@ -308,16 +386,21 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
           
           if (chunk.timestamp < cutoff) {
             await fs.promises.unlink(chunkPath);
-            console.log(`${this.name}: Purged old chunk ${chunkFile}`);
+            logAnalyzer(this.name, 'PURGE', `✓ Purged old chunk: ${chunkFile}`);
           }
         } catch (error) {
-          console.error(`Error purging chunk ${chunkFile}:`, error);
+          logAnalyzer(this.name, 'ERROR', `Error purging chunk ${chunkFile}:`, error);
         }
       }
 
       await this.writeStorage(storage);
+      logAnalyzer(this.name, 'PURGE', '✓ Purge complete', {
+        originalCount,
+        remainingCount: storage.results.length,
+        purgedCount
+      });
     } catch (error) {
-      console.error(`Error purging results for ${this.name}:`, error);
+      logAnalyzer(this.name, 'ERROR', `Error purging results:`, error);
       throw error;
     }
   }

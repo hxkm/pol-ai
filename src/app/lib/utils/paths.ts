@@ -8,9 +8,14 @@
 import path from 'path';
 import fs from 'fs';
 
-// Debug logging function
-function logPathInfo(label: string, value: string) {
-  console.log(`[PATHS] ${label}: ${value}`);
+// Enhanced debug logging with timestamps and categories
+function logPathInfo(category: string, message: string, data?: any) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] [PATHS:${category}] ${message}`;
+  console.log(logMessage);
+  if (data) {
+    console.log(`[${timestamp}] [PATHS:${category}:DATA]`, data);
+  }
 }
 
 // Detect if we're running on Railway
@@ -19,18 +24,30 @@ const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
 // Get the project root directory
 const PROJECT_ROOT = isRailway ? '/app' : process.cwd();
 
-// Log environment information
-logPathInfo('Environment', isRailway ? 'Railway' : 'Local');
-logPathInfo('Project Root', PROJECT_ROOT);
-logPathInfo('Process CWD', process.cwd());
-logPathInfo('__dirname', __dirname);
+// Log detailed environment information
+logPathInfo('ENV', `Running in ${isRailway ? 'Railway' : 'Local'} environment`);
+logPathInfo('PATHS', 'System paths:', {
+  projectRoot: PROJECT_ROOT,
+  processCwd: process.cwd(),
+  dirname: __dirname,
+  platform: process.platform,
+  nodeVersion: process.version
+});
 
 // Always use data directory relative to project root
 const DATA_DIR = path.resolve(PROJECT_ROOT, 'data');
-logPathInfo('Data Directory', DATA_DIR);
+logPathInfo('DATA', `Data directory resolved to: ${DATA_DIR}`);
 
 // Define all application paths
-export const paths = {
+export interface Paths {
+  dataDir: string;
+  threadsDir: string;
+  summariesDir: string;
+  threadFile: (threadId: string) => string;
+  summaryFile: (threadId: string) => string;
+}
+
+export const paths: Paths = {
   // Base data directory
   dataDir: DATA_DIR,
   
@@ -41,50 +58,96 @@ export const paths = {
   summariesDir: path.resolve(DATA_DIR, 'summaries'),
   
   // Helper to get thread file path by ID
-  threadFile: (threadId: string) => path.resolve(DATA_DIR, 'threads', `${threadId}.json`),
+  threadFile: (threadId: string) => {
+    const filePath = path.resolve(DATA_DIR, 'threads', `${threadId}.json`);
+    logPathInfo('FILE', `Resolved thread file path: ${filePath}`, { threadId });
+    return filePath;
+  },
   
   // Helper to get summary file path by ID
-  summaryFile: (threadId: string) => path.resolve(DATA_DIR, 'summaries', `${threadId}.json`),
+  summaryFile: (threadId: string) => {
+    const filePath = path.resolve(DATA_DIR, 'summaries', `${threadId}.json`);
+    logPathInfo('FILE', `Resolved summary file path: ${filePath}`, { threadId });
+    return filePath;
+  },
 };
 
-console.log('DEBUG - Threads Dir:', paths.threadsDir);
+// Log all resolved paths
+logPathInfo('PATHS', 'Resolved application paths:', {
+  dataDir: paths.dataDir,
+  threadsDir: paths.threadsDir,
+  summariesDir: paths.summariesDir
+});
 
 /**
  * Ensures all required directories exist
  * This should be called during application startup
  */
-export function ensureDirectories(): void {
-  // Create directories if they don't exist
-  [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      console.log(`Creating directory: ${dir}`);
-      fs.mkdirSync(dir, { recursive: true });
+export async function ensureDirectories(): Promise<void> {
+  logPathInfo('INIT', 'Starting directory initialization');
+  
+  for (const dir of [paths.dataDir, paths.threadsDir, paths.summariesDir]) {
+    try {
+      if (!fs.existsSync(dir)) {
+        logPathInfo('CREATE', `Creating directory: ${dir}`);
+        await fs.promises.mkdir(dir, { recursive: true });
+        logPathInfo('SUCCESS', `Created directory: ${dir}`);
+      } else {
+        logPathInfo('EXISTS', `Directory already exists: ${dir}`);
+      }
+      
+      // Verify directory is writable
+      const testFile = path.join(dir, '.write-test');
+      await fs.promises.writeFile(testFile, 'test');
+      await fs.promises.unlink(testFile);
+      logPathInfo('WRITE', `Verified write access to: ${dir}`);
+    } catch (error) {
+      logPathInfo('ERROR', `Failed to initialize directory: ${dir}`, { error });
+      throw error;
     }
-  });
+  }
+  
+  logPathInfo('INIT', 'Directory initialization complete');
 }
 
 /**
  * Validates write permissions for all data directories
  * Returns true if all directories are writable
  */
-export function validateDirectories(): boolean {
+export async function validateDirectories(): Promise<boolean> {
+  logPathInfo('VALIDATE', 'Starting directory validation');
+  
   try {
-    // Check if directories exist and are writable
-    [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
-      // Ensure directory exists
+    for (const dir of [paths.dataDir, paths.threadsDir, paths.summariesDir]) {
+      // Check if directory exists
       if (!fs.existsSync(dir)) {
         throw new Error(`Directory does not exist: ${dir}`);
       }
+      logPathInfo('CHECK', `Directory exists: ${dir}`);
       
-      // Test write permission by creating and removing a temp file
+      // Get directory stats
+      const stats = await fs.promises.stat(dir);
+      logPathInfo('STATS', `Directory stats for ${dir}:`, {
+        mode: stats.mode,
+        uid: stats.uid,
+        gid: stats.gid,
+        size: stats.size,
+        atime: stats.atime,
+        mtime: stats.mtime,
+        ctime: stats.ctime
+      });
+      
+      // Test write permission
       const testFile = path.join(dir, '.write-test');
-      fs.writeFileSync(testFile, 'test');
-      fs.unlinkSync(testFile);
-    });
+      await fs.promises.writeFile(testFile, 'test');
+      await fs.promises.unlink(testFile);
+      logPathInfo('WRITE', `Verified write access to: ${dir}`);
+    }
     
+    logPathInfo('VALIDATE', 'Directory validation successful');
     return true;
   } catch (error) {
-    console.error('Directory validation failed:', error);
+    logPathInfo('ERROR', 'Directory validation failed', { error });
     return false;
   }
 } 
