@@ -60,7 +60,7 @@ export class Scheduler {
     return Scheduler.instance;
   }
 
-  start() {
+  async start() {
     if (this.isRunning) {
       console.log(`[${new Date().toISOString()}] Scheduler is already running`);
       return;
@@ -68,6 +68,20 @@ export class Scheduler {
 
     console.log(`[${new Date().toISOString()}] Starting scheduler...`);
     console.log('Current UTC time:', new Date().toUTCString());
+
+    // Run both jobs immediately on startup
+    console.log(`[${new Date().toISOString()}] Running initial jobs on startup...`);
+    try {
+      console.log(`[${new Date().toISOString()}] Running initial scraper job...`);
+      await runScraper();
+      console.log(`[${new Date().toISOString()}] Initial scraper job completed`);
+      
+      console.log(`[${new Date().toISOString()}] Running initial summarizer job...`);
+      await runSummarizer();
+      console.log(`[${new Date().toISOString()}] Initial summarizer job completed`);
+    } catch (error) {
+      console.error(`[${new Date().toISOString()}] Error running initial jobs:`, error);
+    }
 
     // Scraper: At minute 0 of hours 0, 3, 6, 9, 12, 15, 18, and 21 (UTC)
     this.scraperJob = cron.schedule('0 0,3,6,9,12,15,18,21 * * *', async () => {

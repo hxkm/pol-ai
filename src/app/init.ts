@@ -2,7 +2,9 @@ import { Scheduler } from './lib/scheduler';
 
 // Start the scheduler when this module is imported
 const scheduler = Scheduler.getInstance();
-scheduler.start();
+scheduler.start().catch(error => {
+  console.error('Failed to start scheduler:', error);
+});
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
