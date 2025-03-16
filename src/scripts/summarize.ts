@@ -4,7 +4,6 @@ import { loadEnvConfig } from '@next/env';
 import { Thread } from '../app/types/interfaces';
 import { Summarizer } from '../app/lib/Summarizer';
 import { selectThreads } from '../app/utils/threadSelector';
-import { DeepSeekClient } from '../app/lib/deepseek';
 import { paths } from '../app/utils/paths';
 
 // Load environment variables
@@ -67,26 +66,6 @@ async function saveResults(results: unknown, outputPath: string): Promise<void> 
   }
 }
 
-async function loadThreads(): Promise<Thread[]> {
-  const threadsDir = paths.threadsDir;
-  const files = await fs.readdir(threadsDir);
-  const threads: Thread[] = [];
-
-  for (const file of files) {
-    if (!file.endsWith('.json')) continue;
-    const filePath = path.resolve(threadsDir, file);
-    const content = await fs.readFile(filePath, 'utf-8');
-    threads.push(JSON.parse(content));
-  }
-
-  return threads;
-}
-
-async function saveSummary(threadId: string, summary: string): Promise<void> {
-  const summaryPath = paths.summaryFile(threadId);
-  await fs.writeFile(summaryPath, JSON.stringify({ summary }, null, 2));
-}
-
 async function main() {
   console.log('\n🚀 Starting Summarizer...\n');
   
@@ -99,8 +78,7 @@ async function main() {
     console.log('✓ DeepSeek API key found');
 
     // Load all threads from the threads directory
-    const threadsDir = path.resolve(process.cwd(), 'data', 'threads');
-    const allThreads = await loadAllThreads(threadsDir);
+    const allThreads = await loadAllThreads(paths.threadsDir);
     
     if (allThreads.length === 0) {
       throw new Error('No threads found to analyze');
@@ -154,13 +132,7 @@ async function main() {
     console.log(`- Analyzed ${results.bigPicture.sentiments.length} major sentiments`);
 
     // Save results with consistent filename
-    const outputPath = path.resolve(
-      process.cwd(),
-      'data',
-      'analysis',
-      'latest-summary.json'
-    );
-
+    const outputPath = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
     await saveResults(results, outputPath);
 
     console.log('\n✨ Analysis complete!\n');
