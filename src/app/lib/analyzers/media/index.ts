@@ -28,6 +28,48 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
 
   // Map to track downloaded files by MD5
   private fileHashes = new Map<string, string>();
+  private hashStoragePath: string;
+
+  constructor() {
+    super();
+    this.hashStoragePath = path.resolve(paths.dataDir, 'media', 'hashes.json');
+    this.loadHashes(); // Load existing hashes on instantiation
+  }
+
+  /**
+   * Load existing file hashes from storage
+   */
+  private async loadHashes(): Promise<void> {
+    try {
+      if (fs.existsSync(this.hashStoragePath)) {
+        const data = await fs.promises.readFile(this.hashStoragePath, 'utf-8');
+        const hashes = JSON.parse(data);
+        this.fileHashes = new Map(Object.entries(hashes));
+        console.log(`Loaded ${this.fileHashes.size} existing file hashes`);
+      }
+    } catch (error) {
+      console.error('Error loading file hashes:', error);
+      // Continue with empty hash map if load fails
+    }
+  }
+
+  /**
+   * Save file hashes to persistent storage
+   */
+  private async saveHashes(): Promise<void> {
+    try {
+      const hashData = Object.fromEntries(this.fileHashes);
+      await fs.promises.mkdir(path.dirname(this.hashStoragePath), { recursive: true });
+      await fs.promises.writeFile(
+        this.hashStoragePath,
+        JSON.stringify(hashData, null, 2),
+        'utf-8'
+      );
+      console.log(`Saved ${this.fileHashes.size} file hashes`);
+    } catch (error) {
+      console.error('Error saving file hashes:', error);
+    }
+  }
 
   /**
    * Initialize media directories
@@ -221,9 +263,9 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
   async analyze(threads: Thread[]): Promise<MediaAnalyzerResult[]> {
     console.log('Starting media analysis...');
     
-    // Initialize directories and tracking
+    // Initialize directories and load existing hashes
     await this.initDirectories();
-    this.fileHashes.clear();
+    await this.loadHashes();
     
     const downloadedFiles: MediaFile[] = [];
     let totalFiles = 0;
@@ -296,7 +338,9 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
     // Get category statistics
     const categoryStats = await this.getCategoryStats();
 
-    // Create single result
+    // Save updated hashes before returning
+    await this.saveHashes();
+
     return [{
       timestamp: Date.now(),
       threadId: threads[0]?.no || -1,
