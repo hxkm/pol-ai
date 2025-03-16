@@ -33,15 +33,18 @@ export class AntisemitismMatrixAnalyzer {
   private async rotateLogs() {
     try {
       // Check if latest analysis exists and is too large (>10MB)
+      let needsRotation = false;
       try {
         const stats = await fs.stat(this.latestAnalysisPath);
-        if (stats.size > 10 * 1024 * 1024) { // 10MB
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-          const backupPath = this.latestAnalysisPath.replace('.json', `-${timestamp}.json`);
-          await fs.rename(this.latestAnalysisPath, backupPath);
-        }
-      } catch (_) {
-        // File doesn't exist yet, ignore
+        needsRotation = stats.size > 10 * 1024 * 1024; // 10MB
+      } catch {
+        // File doesn't exist yet, no rotation needed
+      }
+
+      if (needsRotation) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = this.latestAnalysisPath.replace('.json', `-${timestamp}.json`);
+        await fs.rename(this.latestAnalysisPath, backupPath);
       }
 
       // Clean up old backups (keep last 5)
