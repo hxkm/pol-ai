@@ -13,16 +13,20 @@ async function runScraper() {
 }
 
 async function runSummarizer() {
+  console.log(`[${new Date().toISOString()}] Checking summarizer prerequisites...`);
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
+    console.error('DEEPSEEK_API_KEY environment variable is not set');
     throw new Error('DEEPSEEK_API_KEY environment variable is not set');
   }
+  console.log('API key verified');
   
   const summarizer = new Summarizer(apiKey);
   const { loadAllThreads } = await import('../utils/fileLoader');
   const { selectThreads } = await import('../utils/threadSelector');
   
   // Load and select threads
+  console.log('Loading threads from:', paths.threadsDir);
   const allThreads = await loadAllThreads(paths.threadsDir);
   const selection = selectThreads(allThreads);
   const threadsToAnalyze = [
@@ -32,6 +36,7 @@ async function runSummarizer() {
     ...selection.lowPosts
   ];
   
+  console.log(`Selected ${threadsToAnalyze.length} threads for analysis`);
   return summarizer.analyze(threadsToAnalyze);
 }
 
@@ -42,21 +47,27 @@ export class Scheduler {
   private isRunning: boolean = false;
 
   private constructor() {
-    // Private constructor to enforce singleton
+    console.log(`[${new Date().toISOString()}] Scheduler instance created`);
   }
 
   static getInstance(): Scheduler {
     if (!Scheduler.instance) {
+      console.log(`[${new Date().toISOString()}] Creating new Scheduler instance`);
       Scheduler.instance = new Scheduler();
+    } else {
+      console.log(`[${new Date().toISOString()}] Reusing existing Scheduler instance`);
     }
     return Scheduler.instance;
   }
 
   start() {
     if (this.isRunning) {
-      console.log('Scheduler is already running');
+      console.log(`[${new Date().toISOString()}] Scheduler is already running`);
       return;
     }
+
+    console.log(`[${new Date().toISOString()}] Starting scheduler...`);
+    console.log('Current UTC time:', new Date().toUTCString());
 
     // Scraper: At minute 0 of hours 0, 3, 6, 9, 12, 15, 18, and 21 (UTC)
     this.scraperJob = cron.schedule('0 0,3,6,9,12,15,18,21 * * *', async () => {
@@ -85,20 +96,27 @@ export class Scheduler {
     });
 
     this.isRunning = true;
-    console.log('Scheduler started');
+    console.log(`[${new Date().toISOString()}] Scheduler started successfully`);
     console.log('Scraper schedule: Every 3 hours starting at 00:00 UTC');
     console.log('Summarizer schedule: Daily at 23:30 UTC');
+    
+    // Log current time for reference
+    const now = new Date();
+    console.log('Current time (UTC):', now.toUTCString());
+    console.log('Current hour (UTC):', now.getUTCHours());
+    console.log('Current minute (UTC):', now.getUTCMinutes());
   }
 
   stop() {
     if (!this.isRunning) {
-      console.log('Scheduler is not running');
+      console.log(`[${new Date().toISOString()}] Scheduler is not running`);
       return;
     }
 
+    console.log(`[${new Date().toISOString()}] Stopping scheduler...`);
     this.scraperJob?.stop();
     this.summarizerJob?.stop();
     this.isRunning = false;
-    console.log('Scheduler stopped');
+    console.log(`[${new Date().toISOString()}] Scheduler stopped`);
   }
 } 
