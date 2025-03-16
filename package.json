@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "scrape": "tsx src/app/lib/scraper/index.ts",
-    "summarize": "tsx src/app/lib/summarizer/index.ts",
+    "summarize": "tsx src/scripts/summarize.ts",
     "clean": "tsx src/app/lib/cleaner/index.ts"
   },
   "dependencies": {

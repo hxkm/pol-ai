@@ -11,8 +11,8 @@ export class SlurAnalyzer extends BaseAnalyzer<SlurAnalyzerResult> {
 
   // Terms to track (case-insensitive)
   private static TRACKED_TERMS = [
-    'nigger', 'kike', 'fag', 'chink', 'jeet', 'spic', 'incel',
-    'boomer', 'burger', 'zoomer', 'roach', 'mudslime', 'brownoid',
+    'nigger', 'kike', 'fag', 'chink', 'jeet', 'chud', 'spic', 'incel',
+    'boomer', 'burger', 'zoomer', 'roach', 'groyper', 'mudslime', 'brownoid',
     'shitskin', 'roastie'
   ];
 
