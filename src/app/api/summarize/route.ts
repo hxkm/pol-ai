@@ -1,43 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DeepSeekClient } from '@/app/lib/deepseek';
-import { DeepSeekAPIError } from '@/app/types/deepseek';
+import { loadEnvConfig } from '@next/env';
+import { Summarizer } from '@/app/lib/Summarizer';
+import { loadAllThreads } from '@/app/utils/fileLoader';
+import { selectThreads } from '@/app/utils/threadSelector';
+import path from 'path';
+import fs from 'fs/promises';
+
+// Load environment variables
+loadEnvConfig(process.cwd());
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Starting summarizer process...');
+    
+    // Check API key
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'DeepSeek API key not configured' },
-        { status: 500 }
-      );
+      throw new Error('DEEPSEEK_API_KEY environment variable is not set');
+    }
+    console.log('API key verified');
+
+    // Load all threads from the threads directory
+    const threadsDir = path.resolve(process.cwd(), 'data', 'threads');
+    console.log('Looking for threads in:', threadsDir);
+    
+    // Check if directory exists
+    try {
+      await fs.access(threadsDir);
+      console.log('Threads directory exists');
+    } catch (e) {
+      console.error('Threads directory not found:', e);
+      throw new Error(`Threads directory not found at ${threadsDir}`);
     }
 
-    const body = await request.json();
-    const { text, maxTokens } = body;
-
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json(
-        { error: 'Text to summarize is required' },
-        { status: 400 }
-      );
+    const allThreads = await loadAllThreads(threadsDir);
+    console.log(`Loaded ${allThreads.length} threads`);
+    
+    if (allThreads.length === 0) {
+      throw new Error('No threads found to analyze');
     }
 
-    const client = new DeepSeekClient(apiKey);
-    const summary = await client.summarize(text, maxTokens);
+    // Select threads based on criteria
+    console.log('Selecting threads for analysis...');
+    const selection = selectThreads(allThreads);
+    const threadsToAnalyze = [
+      ...selection.topByPosts,
+      ...selection.mediumHighPosts,
+      ...selection.mediumPosts,
+      ...selection.lowPosts
+    ];
 
-    return NextResponse.json({ summary });
+    if (threadsToAnalyze.length !== 12) {
+      throw new Error(`Expected 12 threads for analysis, but got ${threadsToAnalyze.length}`);
+    }
+    console.log(`Selected ${threadsToAnalyze.length} threads for analysis`);
+
+    // Initialize and run summarizer
+    console.log('Initializing summarizer...');
+    const summarizer = new Summarizer(apiKey);
+    console.log('Starting analysis...');
+    const results = await summarizer.analyze(threadsToAnalyze);
+    console.log('Analysis complete');
+
+    // Save results
+    const outputPath = path.resolve(
+      process.cwd(),
+      'data',
+      'analysis',
+      'latest-summary.json'
+    );
+
+    return NextResponse.json({ 
+      message: 'Summarizer completed successfully',
+      threadsAnalyzed: results.articles.length,
+      averageAntisemiticPercentage: results.batchStats.averageAntisemiticPercentage
+    });
   } catch (error) {
-    console.error('Summarization error:', error);
-
-    if (error instanceof DeepSeekAPIError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.code }
-      );
+    console.error('Failed to run summarizer:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
     }
-
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Failed to run summarizer' },
       { status: 500 }
     );
   }

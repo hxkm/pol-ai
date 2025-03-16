@@ -1,0 +1,124 @@
+
+> pol-ai@0.1.0 scrape
+> tsx src/app/lib/scraper/index.ts
+
+DEBUG - Project Root: C:\Dev\pol-ai
+DEBUG - Data Dir: C:\Dev\pol-ai\data
+DEBUG - Threads Dir: C:\Dev\pol-ai\data\threads
+Starting 4chan /pol/ scraper...
+Cleaning up old thread files...
+Initializing analysis system...
+Analyzer registry reset
+Registered analyzer: get - Analyzes posts with repeating digits (GETs) and their checking posts
+Registered analyzer: reply - Tracks posts with the most replies across all threads
+Registered analyzer: link - Tracks most common domains and most replied-to posts containing links
+Registered analyzer: geo - Tracks country statistics and participation across threads
+Registered analyzer: slur - Tracks occurrences of specific discriminatory terms for research purposes
+Registered analyzer: media - Downloads and manages media files from threads
+Initializing analyzers...
+Initialized analyzer: reply
+Initialized analyzer: link
+Initialized analyzer: slur
+Initialized analyzer: geo
+Initialized analyzer: media
+Initialized analyzer: get
+Initialized 6 analyzers
+Analysis system initialized successfully
+Fetching: /catalog.json
+Found 40 threads to process
+Processing thread 500580362...
+Fetching: /thread/500580362.json
+Thread 500580362 saved to C:\Dev\pol-ai\data\threads\500580362.json
+Processing thread 500580345...
+Fetching: /thread/500580345.json
+Thread 500580345 saved to C:\Dev\pol-ai\data\threads\500580345.json
+Processing thread 500580313...
+Fetching: /thread/500580313.json
+Thread 500580313 saved to C:\Dev\pol-ai\data\threads\500580313.json
+Processing thread 500580279...
+Fetching: /thread/500580279.json
+Thread 500580279 saved to C:\Dev\pol-ai\data\threads\500580279.json
+Processing thread 500580265...
+Fetching: /thread/500580265.json
+Thread 500580265 saved to C:\Dev\pol-ai\data\threads\500580265.json
+Processing thread 500580264...
+Fetching: /thread/500580264.json
+Thread 500580264 saved to C:\Dev\pol-ai\data\threads\500580264.json
+Processing thread 500580244...
+Fetching: /thread/500580244.json
+Thread 500580244 saved to C:\Dev\pol-ai\data\threads\500580244.json
+Processing thread 500580197...
+Fetching: /thread/500580197.json
+Thread 500580197 saved to C:\Dev\pol-ai\data\threads\500580197.json
+Processing thread 500580145...
+Fetching: /thread/500580145.json
+Thread 500580145 saved to C:\Dev\pol-ai\data\threads\500580145.json
+Processing thread 500579985...
+Fetching: /thread/500579985.json
+Thread 500579985 saved to C:\Dev\pol-ai\data\threads\500579985.json
+Processing thread 500579934...
+Fetching: /thread/500579934.json
+Thread 500579934 saved to C:\Dev\pol-ai\data\threads\500579934.json
+Processing thread 500579886...
+Fetching: /thread/500579886.json
+Thread 500579886 saved to C:\Dev\pol-ai\data\threads\500579886.json
+Processing thread 500579800...
+Fetching: /thread/500579800.json
+Thread 500579800 saved to C:\Dev\pol-ai\data\threads\500579800.json
+Processing thread 500579739...
+Fetching: /thread/500579739.json
+Thread 500579739 saved to C:\Dev\pol-ai\data\threads\500579739.json
+Processing thread 500579725...
+Fetching: /thread/500579725.json
+Thread 500579725 saved to C:\Dev\pol-ai\data\threads\500579725.json
+Processing thread 500579713...
+Fetching: /thread/500579713.json
+Thread 500579713 saved to C:\Dev\pol-ai\data\threads\500579713.json
+Processing thread 500579708...
+Fetching: /thread/500579708.json
+Thread 500579708 saved to C:\Dev\pol-ai\data\threads\500579708.json
+Processing thread 500579663...
+Fetching: /thread/500579663.json
+Thread 500579663 saved to C:\Dev\pol-ai\data\threads\500579663.json
+Processing thread 500579562...
+Fetching: /thread/500579562.json
+Thread 500579562 saved to C:\Dev\pol-ai\data\threads\500579562.json
+Processing thread 500579554...
+Fetching: /thread/500579554.json
+Thread 500579554 saved to C:\Dev\pol-ai\data\threads\500579554.json
+Processing thread 500576843...
+Fetching: /thread/500576843.json
+Thread 500576843 saved to C:\Dev\pol-ai\data\threads\500576843.json
+Processing thread 500575768...
+Fetching: /thread/500575768.json
+Thread 500575768 saved to C:\Dev\pol-ai\data\threads\500575768.json
+Processing thread 500574451...
+Fetching: /thread/500574451.json
+Thread 500574451 saved to C:\Dev\pol-ai\data\threads\500574451.json
+Processing thread 500571847...
+Fetching: /thread/500571847.json
+Thread 500571847 saved to C:\Dev\pol-ai\data\threads\500571847.json
+Processing thread 500570788...
+Fetching: /thread/500570788.json
+Thread 500570788 saved to C:\Dev\pol-ai\data\threads\500570788.json
+Processing thread 500570162...
+Fetching: /thread/500570162.json
+Thread 500570162 saved to C:\Dev\pol-ai\data\threads\500570162.json
+Processing thread 500568411...
+Fetching: /thread/500568411.json
+Thread 500568411 saved to C:\Dev\pol-ai\data\threads\500568411.json
+Processing thread 500566804...
+Fetching: /thread/500566804.json
+Thread 500566804 saved to C:\Dev\pol-ai\data\threads\500566804.json
+Processing thread 500565465...
+Fetching: /thread/500565465.json
+Thread 500565465 saved to C:\Dev\pol-ai\data\threads\500565465.json
+Processing thread 500565101...
+Fetching: /thread/500565101.json
+Thread 500565101 saved to C:\Dev\pol-ai\data\threads\500565101.json
+Processing thread 500564474...
+Fetching: /thread/500564474.json
+Thread 500564474 saved to C:\Dev\pol-ai\data\threads\500564474.json
+Processing thread 500560128...
+Fetching: /thread/500560128.json
+Thread 500560128 saved to C:\Dev\pol-ai\data\threads\500560128.json

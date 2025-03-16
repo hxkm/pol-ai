@@ -25,8 +25,8 @@ export const ThreadCount = () => {
 
     fetchCount();
     
-    // Refresh count every minute
-    const interval = setInterval(fetchCount, 60000);
+    // Refresh count every 10 minutes
+    const interval = setInterval(fetchCount, 600000);
     return () => clearInterval(interval);
   }, []);
 
