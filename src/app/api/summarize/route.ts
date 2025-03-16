@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 // Load environment variables
 loadEnvConfig(process.cwd());
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     console.log('Starting summarizer process...');
     
@@ -69,6 +69,17 @@ export async function POST(request: NextRequest) {
       'analysis',
       'latest-summary.json'
     );
+    
+    // Ensure the directory exists
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    
+    // Write the results to file
+    await fs.writeFile(
+      outputPath,
+      JSON.stringify(results, null, 2),
+      'utf-8'
+    );
+    console.log('Results saved to:', outputPath);
 
     return NextResponse.json({ 
       message: 'Summarizer completed successfully',
