@@ -36,7 +36,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
         no: thread.no,
         resto: 0,
         time: thread.time,
-        name: thread.name,
+        name: thread.name || 'Anonymous',
         com: thread.com,
         country: thread.posts[0]?.country,
         country_name: thread.posts[0]?.country_name,
