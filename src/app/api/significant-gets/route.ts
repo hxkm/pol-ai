@@ -13,17 +13,15 @@ interface GetAnalyzerResult {
   timestamp: number;
   threadId: number;
   postId: number;
+  getType: string;
+  repeatingDigits: string;
+  digitCount: number;
   metadata: {
     postNo: number;
     checkCount: number;
     comment: string;
   };
 }
-
-const DEFAULT_DATA = {
-  lastUpdated: Date.now(),
-  results: []
-};
 
 function countRepeatingTrailingDigits(postNumber: string): number {
   const digits = postNumber.split('');
@@ -43,8 +41,23 @@ function countRepeatingTrailingDigits(postNumber: string): number {
   return maxCount;
 }
 
-function isGet(postNumber: string): boolean {
-  return countRepeatingTrailingDigits(postNumber) >= 2;
+function isValidGetResult(value: unknown): value is GetAnalyzerResult {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'timestamp' in value &&
+    'threadId' in value &&
+    'postId' in value &&
+    'getType' in value &&
+    'repeatingDigits' in value &&
+    'digitCount' in value &&
+    'metadata' in value &&
+    typeof (value as GetAnalyzerResult).metadata === 'object' &&
+    (value as GetAnalyzerResult).metadata !== null &&
+    'postNo' in (value as GetAnalyzerResult).metadata &&
+    'checkCount' in (value as GetAnalyzerResult).metadata &&
+    'comment' in (value as GetAnalyzerResult).metadata
+  );
 }
 
 export async function GET() {
@@ -68,93 +81,58 @@ export async function GET() {
     console.log('- Analysis dir exists:', fs.existsSync(path.dirname(analysisPath)));
     console.log('- Analysis file exists:', fs.existsSync(analysisPath));
 
-    // Check if file exists
-    if (!fs.existsSync(analysisPath)) {
-      console.log('Analysis file does not exist, creating with default data');
-      // Log directory creation attempt
+    // Initialize with empty results
+    let results: GetAnalyzerResult[] = [];
+
+    // Try to read and parse data if file exists
+    if (fs.existsSync(analysisPath)) {
       try {
-        const dir = path.dirname(analysisPath);
-        if (!fs.existsSync(dir)) {
-          console.log('Creating directory:', dir);
-          fs.mkdirSync(dir, { recursive: true });
-          if (process.env.RAILWAY_ENVIRONMENT === 'production') {
-            console.log('Setting directory permissions to 777');
-            fs.chmodSync(dir, '777');
-          }
+        const content = fs.readFileSync(analysisPath, 'utf-8');
+        const data = JSON.parse(content);
+        
+        if (data.results && Array.isArray(data.results)) {
+          results = data.results.filter(isValidGetResult);
+          console.log(`Successfully loaded ${results.length} valid GET results`);
         }
-        fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
-        if (process.env.RAILWAY_ENVIRONMENT === 'production') {
-          console.log('Setting file permissions to 666');
-          fs.chmodSync(analysisPath, '666');
-        }
-        console.log('Successfully created default data file');
       } catch (err) {
-        console.error('Error creating default data:', err);
-        throw err;
+        console.error('Error reading analysis file:', err);
       }
     }
 
-    // Read and parse data
-    console.log('Reading analysis file...');
-    const content = fs.readFileSync(analysisPath, 'utf-8');
-    const data = JSON.parse(content);
-    console.log('Successfully read and parsed analysis file');
-
-    if (!data.results || !Array.isArray(data.results)) {
-      console.log('Invalid data format, using default data');
-      fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
-      return NextResponse.json({
-        getOne: null,
-        getTwo: null
-      });
-    }
-
-    const results: GetAnalyzerResult[] = data.results;
-    console.log(`Found ${results.length} total results`);
-
     // If no results, return empty data
     if (results.length === 0) {
-      console.log('No results found, returning null values');
+      console.log('No valid results found, returning null values');
       return NextResponse.json({
         getOne: null,
         getTwo: null
       });
     }
 
-    // Convert analyzer results to Get format and filter for actual GETs
-    const gets: Get[] = results
-      .map(result => ({
-        postNumber: result.metadata.postNo.toString(),
-        comment: result.metadata.comment,
-        checkCount: result.metadata.checkCount
-      }))
-      .filter(get => isGet(get.postNumber));
+    // Sort results by check count and digit count
+    const sortedResults = results.sort((a, b) => {
+      // First prioritize check count
+      const checkDiff = b.metadata.checkCount - a.metadata.checkCount;
+      if (checkDiff !== 0) return checkDiff;
+      // Then prioritize digit count
+      return b.digitCount - a.digitCount;
+    });
 
-    console.log(`Found ${gets.length} valid GETs`);
-
-    // If no GETs found, return null
-    if (gets.length === 0) {
-      console.log('No valid GETs found, returning null values');
-      return NextResponse.json({
-        getOne: null,
-        getTwo: null
-      });
-    }
-
-    // Find GETone (most checked GET)
-    const getOne = gets.reduce((max, current) => 
-      current.checkCount > max.checkCount ? current : max
-    , gets[0]);
+    // Convert top result to getOne
+    const getOne: Get = {
+      postNumber: sortedResults[0].metadata.postNo.toString(),
+      comment: sortedResults[0].metadata.comment,
+      checkCount: sortedResults[0].metadata.checkCount
+    };
 
     console.log('Found GETone:', getOne);
 
-    // Find GETtwo (most repeating trailing digits among remaining GETs)
-    const remainingGets = gets.filter(get => get.postNumber !== getOne.postNumber);
-    const getTwo = remainingGets.length > 0 ? remainingGets.reduce((max, current) => {
-      const maxRepeating = countRepeatingTrailingDigits(max.postNumber);
-      const currentRepeating = countRepeatingTrailingDigits(current.postNumber);
-      return currentRepeating > maxRepeating ? current : max;
-    }, remainingGets[0]) : null;
+    // Find getTwo from remaining results
+    const remainingResults = sortedResults.slice(1);
+    const getTwo = remainingResults.length > 0 ? {
+      postNumber: remainingResults[0].metadata.postNo.toString(),
+      comment: remainingResults[0].metadata.comment,
+      checkCount: remainingResults[0].metadata.checkCount
+    } : null;
 
     console.log('Found GETtwo:', getTwo);
 
@@ -164,7 +142,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching significant GETs:', error);
-    // Log the full error stack trace
     if (error instanceof Error) {
       console.error('Stack trace:', error.stack);
     }
