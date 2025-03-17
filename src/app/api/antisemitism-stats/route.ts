@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-import { paths } from '@/app/utils/paths';
+import { paths, ensureDirectories } from '@/app/utils/paths';
 
 interface AntisemitismStats {
   mean: number;
@@ -33,10 +33,6 @@ interface AnalysisData {
     };
     themes: Theme[];
   };
-}
-
-interface FileSystemError extends Error {
-  code?: string;
 }
 
 const DEFAULT_ANALYSIS_DATA: AnalysisData = {
@@ -82,60 +78,77 @@ function isAnalysisData(value: unknown): value is AnalysisData {
   );
 }
 
-function isFileSystemError(error: unknown): error is FileSystemError {
-  return error instanceof Error && 'code' in error;
-}
-
 export async function GET() {
+  console.log('=== Antisemitism Stats API Debug Info ===');
+  console.log('Environment:', process.env.RAILWAY_ENVIRONMENT || 'local');
+  console.log('CWD:', process.cwd());
+  console.log('Data Dir:', paths.dataDir);
+  
   try {
+    // Ensure all directories exist first
+    console.log('Ensuring directories exist...');
+    ensureDirectories();
+    console.log('Directories ensured');
+
     // Read the latest analysis file
     const analysisPath = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
     const trendsPath = path.resolve(paths.dataDir, 'analysis', 'antisemitism-trends.json');
 
-    // Ensure analysis directory exists
-    const dirPath = path.dirname(analysisPath);
-    try {
-      await fs.mkdir(dirPath, { recursive: true });
-    } catch {
-      // Ignore directory already exists error
-    }
+    console.log('Reading analysis files from:');
+    console.log('Analysis path:', analysisPath);
+    console.log('Trends path:', trendsPath);
 
-    // Try to read both files, use defaults if they don't exist
-    let analysis: unknown;
-    let trends: unknown;
+    // Log directory structure
+    console.log('Directory exists check:');
+    console.log('- Data dir exists:', fs.existsSync(paths.dataDir));
+    console.log('- Analysis dir exists:', fs.existsSync(path.dirname(analysisPath)));
+    console.log('- Analysis file exists:', fs.existsSync(analysisPath));
+    console.log('- Trends file exists:', fs.existsSync(trendsPath));
 
-    try {
-      const analysisContent = await fs.readFile(analysisPath, 'utf-8');
-      analysis = JSON.parse(analysisContent);
-    } catch (err: unknown) {
-      if (isFileSystemError(err) && err.code === 'ENOENT') {
+    // Initialize data with defaults
+    let analysis: unknown = DEFAULT_ANALYSIS_DATA;
+    let trends: unknown = DEFAULT_TRENDS;
+
+    // Try to read analysis file
+    if (fs.existsSync(analysisPath)) {
+      try {
+        const analysisContent = fs.readFileSync(analysisPath, 'utf-8');
+        analysis = JSON.parse(analysisContent);
+        console.log('Successfully read analysis file');
+      } catch (err) {
+        console.error('Error reading analysis file:', err);
         analysis = DEFAULT_ANALYSIS_DATA;
-        await fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8');
-      } else {
-        throw err;
       }
+    } else {
+      console.log('Analysis file does not exist, using default data');
+      fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_ANALYSIS_DATA, null, 2), 'utf-8');
     }
 
-    try {
-      const trendsContent = await fs.readFile(trendsPath, 'utf-8');
-      trends = JSON.parse(trendsContent);
-    } catch (err: unknown) {
-      if (isFileSystemError(err) && err.code === 'ENOENT') {
+    // Try to read trends file
+    if (fs.existsSync(trendsPath)) {
+      try {
+        const trendsContent = fs.readFileSync(trendsPath, 'utf-8');
+        trends = JSON.parse(trendsContent);
+        console.log('Successfully read trends file');
+      } catch (err) {
+        console.error('Error reading trends file:', err);
         trends = DEFAULT_TRENDS;
-        await fs.writeFile(trendsPath, JSON.stringify(trends, null, 2), 'utf-8');
-      } else {
-        throw err;
       }
+    } else {
+      console.log('Trends file does not exist, using default data');
+      fs.writeFileSync(trendsPath, JSON.stringify(DEFAULT_TRENDS, null, 2), 'utf-8');
     }
 
     if (!isAnalysisData(analysis) || !Array.isArray(trends) || !trends.every(isTrendPoint)) {
       // If data is invalid, reset to defaults
       analysis = DEFAULT_ANALYSIS_DATA;
       trends = DEFAULT_TRENDS;
-      await Promise.all([
-        fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8'),
-        fs.writeFile(trendsPath, JSON.stringify(trends, null, 2), 'utf-8')
-      ]);
+      
+      // Write default data to files
+      fs.writeFileSync(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8');
+      fs.writeFileSync(trendsPath, JSON.stringify(trends, null, 2), 'utf-8');
+      
+      console.log('Invalid data format, reset to defaults');
     }
 
     // Calculate trend
@@ -165,9 +178,13 @@ export async function GET() {
         }))
     };
 
+    console.log('Returning stats:', stats);
     return NextResponse.json(stats);
   } catch (error) {
     console.error('Error fetching antisemitism stats:', error);
+    if (error instanceof Error) {
+      console.error('Stack trace:', error.stack);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch antisemitism statistics' },
       { status: 500 }

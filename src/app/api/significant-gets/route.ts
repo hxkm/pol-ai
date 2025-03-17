@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-import { paths } from '@/app/utils/paths';
+import { paths, ensureDirectories } from '@/app/utils/paths';
 
 interface Get {
   postNumber: string;
@@ -56,53 +56,61 @@ function isGet(postNumber: string): boolean {
 }
 
 export async function GET() {
-  console.log('GET request received for significant-gets');
+  console.log('=== Significant GETs API Debug Info ===');
+  console.log('Environment:', process.env.RAILWAY_ENVIRONMENT || 'local');
+  console.log('CWD:', process.cwd());
+  console.log('Data Dir:', paths.dataDir);
   
   try {
+    // Ensure all directories exist first
+    console.log('Ensuring directories exist...');
+    ensureDirectories();
+    console.log('Directories ensured');
+    
     const analysisPath = path.resolve(paths.dataDir, 'analysis', 'get', 'results.json');
     console.log('Analysis path:', analysisPath);
     
-    // Ensure directory exists
-    const dirPath = path.dirname(analysisPath);
-    console.log('Creating directory if needed:', dirPath);
-    
-    try {
-      await fs.mkdir(dirPath, { recursive: true });
-      console.log('Directory created/verified');
-      
-      // In Railway, ensure proper permissions
-      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
-        await fs.chmod(dirPath, 0o777);
-        console.log('Set directory permissions to 777 in Railway');
-      }
-    } catch (err) {
-      console.error('Error creating directory:', err);
-      // Continue since directory might already exist
-    }
+    // Log directory structure
+    console.log('Directory exists check:');
+    console.log('- Data dir exists:', fs.existsSync(paths.dataDir));
+    console.log('- Analysis dir exists:', fs.existsSync(path.dirname(analysisPath)));
+    console.log('- Analysis file exists:', fs.existsSync(analysisPath));
 
-    // Try to read file, use default if it doesn't exist
-    let data;
-    try {
-      console.log('Reading analysis file...');
-      const content = await fs.readFile(analysisPath, 'utf-8');
-      data = JSON.parse(content);
-      console.log('Successfully read and parsed analysis file');
-    } catch (err: unknown) {
-      if (isFileSystemError(err) && err.code === 'ENOENT') {
-        console.log('Analysis file does not exist, using default data');
-        data = DEFAULT_DATA;
-        await fs.writeFile(analysisPath, JSON.stringify(data, null, 2), 'utf-8');
-        console.log('Created default analysis file');
-      } else {
-        console.error('Error reading analysis file:', err);
+    // Check if file exists
+    if (!fs.existsSync(analysisPath)) {
+      console.log('Analysis file does not exist, creating with default data');
+      // Log directory creation attempt
+      try {
+        const dir = path.dirname(analysisPath);
+        if (!fs.existsSync(dir)) {
+          console.log('Creating directory:', dir);
+          fs.mkdirSync(dir, { recursive: true });
+          if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+            console.log('Setting directory permissions to 777');
+            fs.chmodSync(dir, '777');
+          }
+        }
+        fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
+        console.log('Successfully created default data file');
+      } catch (err) {
+        console.error('Error creating default data:', err);
         throw err;
       }
     }
-    
+
+    // Read and parse data
+    console.log('Reading analysis file...');
+    const content = fs.readFileSync(analysisPath, 'utf-8');
+    const data = JSON.parse(content);
+    console.log('Successfully read and parsed analysis file');
+
     if (!data.results || !Array.isArray(data.results)) {
       console.log('Invalid data format, using default data');
-      data = DEFAULT_DATA;
-      await fs.writeFile(analysisPath, JSON.stringify(data, null, 2), 'utf-8');
+      fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
+      return NextResponse.json({
+        getOne: null,
+        getTwo: null
+      });
     }
 
     const results: GetAnalyzerResult[] = data.results;
