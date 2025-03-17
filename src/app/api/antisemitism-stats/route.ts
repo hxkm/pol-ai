@@ -19,32 +19,8 @@ interface AntisemitismStats {
 interface TrendPoint {
   timestamp: number;
   percentage: number;
+  threadCount: number;
 }
-
-interface Theme {
-  name: string;
-  frequency: number;
-}
-
-interface AnalysisData {
-  matrix: {
-    statistics: {
-      mean: number;
-    };
-    themes: Theme[];
-  };
-}
-
-const DEFAULT_ANALYSIS_DATA: AnalysisData = {
-  matrix: {
-    statistics: {
-      mean: 0
-    },
-    themes: []
-  }
-};
-
-const DEFAULT_TRENDS: TrendPoint[] = [];
 
 function determineLevel(percentage: number): AntisemitismStats['level'] {
   if (percentage < 3) return 'Low';
@@ -59,22 +35,10 @@ function isTrendPoint(value: unknown): value is TrendPoint {
     value !== null &&
     'timestamp' in value &&
     'percentage' in value &&
+    'threadCount' in value &&
     typeof (value as TrendPoint).timestamp === 'number' &&
-    typeof (value as TrendPoint).percentage === 'number'
-  );
-}
-
-function isAnalysisData(value: unknown): value is AnalysisData {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'matrix' in value &&
-    typeof (value as AnalysisData).matrix === 'object' &&
-    (value as AnalysisData).matrix !== null &&
-    'statistics' in (value as AnalysisData).matrix &&
-    'themes' in (value as AnalysisData).matrix &&
-    typeof (value as AnalysisData).matrix.statistics.mean === 'number' &&
-    Array.isArray((value as AnalysisData).matrix.themes)
+    typeof (value as TrendPoint).percentage === 'number' &&
+    typeof (value as TrendPoint).threadCount === 'number'
   );
 }
 
@@ -90,70 +54,56 @@ export async function GET() {
     ensureDirectories();
     console.log('Directories ensured');
 
-    // Read the latest analysis file
-    const analysisPath = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
+    // Read the trends file
     const trendsPath = path.resolve(paths.dataDir, 'analysis', 'antisemitism-trends.json');
+    const bigPicturePath = path.resolve(paths.dataDir, 'analysis', 'big-picture.json');
 
     console.log('Reading analysis files from:');
-    console.log('Analysis path:', analysisPath);
     console.log('Trends path:', trendsPath);
+    console.log('Big Picture path:', bigPicturePath);
 
     // Log directory structure
     console.log('Directory exists check:');
     console.log('- Data dir exists:', fs.existsSync(paths.dataDir));
-    console.log('- Analysis dir exists:', fs.existsSync(path.dirname(analysisPath)));
-    console.log('- Analysis file exists:', fs.existsSync(analysisPath));
+    console.log('- Analysis dir exists:', fs.existsSync(path.dirname(trendsPath)));
     console.log('- Trends file exists:', fs.existsSync(trendsPath));
+    console.log('- Big Picture file exists:', fs.existsSync(bigPicturePath));
 
     // Initialize data with defaults
-    let analysis: unknown = DEFAULT_ANALYSIS_DATA;
-    let trends: unknown = DEFAULT_TRENDS;
-
-    // Try to read analysis file
-    if (fs.existsSync(analysisPath)) {
-      try {
-        const analysisContent = fs.readFileSync(analysisPath, 'utf-8');
-        analysis = JSON.parse(analysisContent);
-        console.log('Successfully read analysis file');
-      } catch (err) {
-        console.error('Error reading analysis file:', err);
-        analysis = DEFAULT_ANALYSIS_DATA;
-      }
-    } else {
-      console.log('Analysis file does not exist, using default data');
-      fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_ANALYSIS_DATA, null, 2), 'utf-8');
-    }
+    let trends: TrendPoint[] = [];
+    let themes: Array<{name: string; frequency: number}> = [];
 
     // Try to read trends file
     if (fs.existsSync(trendsPath)) {
       try {
         const trendsContent = fs.readFileSync(trendsPath, 'utf-8');
-        trends = JSON.parse(trendsContent);
-        console.log('Successfully read trends file');
+        const parsedTrends = JSON.parse(trendsContent);
+        if (Array.isArray(parsedTrends) && parsedTrends.every(isTrendPoint)) {
+          trends = parsedTrends;
+          console.log('Successfully read trends file');
+        }
       } catch (err) {
         console.error('Error reading trends file:', err);
-        trends = DEFAULT_TRENDS;
       }
-    } else {
-      console.log('Trends file does not exist, using default data');
-      fs.writeFileSync(trendsPath, JSON.stringify(DEFAULT_TRENDS, null, 2), 'utf-8');
     }
 
-    if (!isAnalysisData(analysis) || !Array.isArray(trends) || !trends.every(isTrendPoint)) {
-      // If data is invalid, reset to defaults
-      analysis = DEFAULT_ANALYSIS_DATA;
-      trends = DEFAULT_TRENDS;
-      
-      // Write default data to files
-      fs.writeFileSync(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8');
-      fs.writeFileSync(trendsPath, JSON.stringify(trends, null, 2), 'utf-8');
-      
-      console.log('Invalid data format, reset to defaults');
+    // Try to read big picture file for themes
+    if (fs.existsSync(bigPicturePath)) {
+      try {
+        const bigPictureContent = fs.readFileSync(bigPicturePath, 'utf-8');
+        const bigPicture = JSON.parse(bigPictureContent);
+        if (bigPicture?.themes && Array.isArray(bigPicture.themes)) {
+          themes = bigPicture.themes;
+          console.log('Successfully read themes from big picture');
+        }
+      } catch (err) {
+        console.error('Error reading big picture file:', err);
+      }
     }
 
-    // Calculate trend
-    const sortedTrends = (trends as TrendPoint[]).sort((a: TrendPoint, b: TrendPoint) => b.timestamp - a.timestamp);
-    const currentPercentage = sortedTrends[0]?.percentage ?? (analysis as AnalysisData).matrix.statistics.mean;
+    // Calculate current mean from latest trend point
+    const sortedTrends = [...trends].sort((a, b) => b.timestamp - a.timestamp);
+    const currentPercentage = sortedTrends[0]?.percentage ?? 0;
     const previousPercentage = sortedTrends[1]?.percentage ?? currentPercentage;
     
     const trendChange = currentPercentage - previousPercentage;
@@ -163,16 +113,16 @@ export async function GET() {
 
     // Prepare response
     const stats: AntisemitismStats = {
-      mean: Number((analysis as AnalysisData).matrix.statistics.mean.toFixed(1)),
-      level: determineLevel((analysis as AnalysisData).matrix.statistics.mean),
+      mean: Number(currentPercentage.toFixed(1)),
+      level: determineLevel(currentPercentage),
       trend: {
         direction: trendDirection as AntisemitismStats['trend']['direction'],
         change: Number(Math.abs(trendChange).toFixed(1))
       },
-      themes: (analysis as AnalysisData).matrix.themes
-        .sort((a: Theme, b: Theme) => b.frequency - a.frequency)
+      themes: themes
+        .sort((a, b) => b.frequency - a.frequency)
         .slice(0, 5)
-        .map((theme: Theme) => ({
+        .map(theme => ({
           name: theme.name,
           frequency: theme.frequency
         }))
