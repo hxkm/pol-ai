@@ -239,8 +239,25 @@ function parseThreadDate(dateStr: string): number {
     if (!match) return Date.now(); // Return current time if format doesn't match
 
     const [, month, day, year, hours, minutes, seconds] = match;
-    // Convert to full year (assuming 20xx)
-    const fullYear = 2000 + parseInt(year);
+    
+    // Convert to full year (assuming current century)
+    const currentYear = new Date().getFullYear();
+    const currentCentury = Math.floor(currentYear / 100) * 100;
+    let fullYear = currentCentury + parseInt(year);
+    
+    // If the resulting date would be in the future, use previous century
+    const proposedDate = new Date(
+      fullYear,
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+      parseInt(seconds)
+    );
+    
+    if (proposedDate.getTime() > Date.now()) {
+      fullYear -= 100;
+    }
     
     return new Date(
       fullYear,

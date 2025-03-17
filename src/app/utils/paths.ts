@@ -17,10 +17,14 @@ function logPathInfo(label: string, value: string) {
 const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
 
 // Get the data directory from environment variable or default
-const DATA_DIR = process.env.DATA_DIR || path.resolve(process.cwd(), 'data');
+const DATA_DIR = process.env.DATA_DIR || 
+  (isRailway ? '/data' : path.resolve(process.cwd(), 'data'));
 
 // Log environment information
 logPathInfo('Environment', isRailway ? 'Railway' : 'Local');
+logPathInfo('Project Root', process.cwd());
+logPathInfo('Process CWD', process.cwd());
+logPathInfo('__dirname', __dirname);
 logPathInfo('Data Directory', DATA_DIR);
 
 // Define all application paths
@@ -33,6 +37,9 @@ export const paths = {
   
   // Summary data storage
   summariesDir: path.resolve(DATA_DIR, 'summaries'),
+  
+  // Analysis data storage
+  analysisDir: path.resolve(DATA_DIR, 'analysis'),
   
   // Helper to get thread file path by ID
   threadFile: (threadId: string) => path.resolve(DATA_DIR, 'threads', `${threadId}.json`),
@@ -52,14 +59,27 @@ export function ensureDirectories(): void {
       paths.dataDir,
       paths.threadsDir,
       paths.summariesDir,
-      path.resolve(paths.dataDir, 'analysis'),
-      path.resolve(paths.dataDir, 'analysis', 'get'),
+      paths.analysisDir,
+      path.resolve(paths.analysisDir, 'get'),
+      path.resolve(paths.analysisDir, 'reply'),
+      path.resolve(paths.analysisDir, 'link'),
+      path.resolve(paths.analysisDir, 'geo'),
+      path.resolve(paths.analysisDir, 'slur'),
+      path.resolve(paths.analysisDir, 'media'),
     ].forEach(dir => {
       if (!fs.existsSync(dir)) {
         console.log(`Creating directory: ${dir}`);
         fs.mkdirSync(dir, { recursive: true });
+        // Set permissions to 777 in Railway
+        if (isRailway) {
+          fs.chmodSync(dir, '777');
+        }
       }
       console.log(`Verified directory exists: ${dir}`);
+      
+      // Log directory permissions
+      const stats = fs.statSync(dir);
+      console.log(`Directory permissions for ${dir}: ${stats.mode.toString(8)}`);
     });
   } catch (error) {
     console.error('Error ensuring directories exist:', error);
@@ -74,7 +94,7 @@ export function ensureDirectories(): void {
 export function validateDirectories(): boolean {
   try {
     // Check if directories exist and are writable
-    [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
+    [paths.dataDir, paths.threadsDir, paths.summariesDir, paths.analysisDir].forEach(dir => {
       // Ensure directory exists
       if (!fs.existsSync(dir)) {
         throw new Error(`Directory does not exist: ${dir}`);
@@ -84,6 +104,9 @@ export function validateDirectories(): boolean {
       const testFile = path.join(dir, '.write-test');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
+      
+      // Log success
+      console.log(`Validated write permissions for: ${dir}`);
     });
     
     return true;
