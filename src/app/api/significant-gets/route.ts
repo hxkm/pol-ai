@@ -19,6 +19,11 @@ interface GetAnalyzerResult {
   };
 }
 
+const DEFAULT_DATA = {
+  lastUpdated: Date.now(),
+  results: []
+};
+
 function countRepeatingTrailingDigits(postNumber: string): number {
   const digits = postNumber.split('');
   let maxCount = 1;
@@ -40,14 +45,44 @@ function countRepeatingTrailingDigits(postNumber: string): number {
 export async function GET() {
   try {
     const analysisPath = path.resolve(paths.dataDir, 'analysis', 'get', 'results.json');
-    const content = await fs.readFile(analysisPath, 'utf-8');
-    const data = JSON.parse(content);
+    
+    // Ensure directory exists
+    const dirPath = path.dirname(analysisPath);
+    try {
+      await fs.mkdir(dirPath, { recursive: true });
+    } catch {
+      // Ignore directory already exists error
+    }
+
+    // Try to read file, use default if it doesn't exist
+    let data;
+    try {
+      const content = await fs.readFile(analysisPath, 'utf-8');
+      data = JSON.parse(content);
+    } catch (err: any) {
+      if (err?.code === 'ENOENT') {
+        // File doesn't exist, create it with default data
+        data = DEFAULT_DATA;
+        await fs.writeFile(analysisPath, JSON.stringify(data, null, 2), 'utf-8');
+      } else {
+        throw err;
+      }
+    }
     
     if (!data.results || !Array.isArray(data.results)) {
-      throw new Error('Invalid data format');
+      data = DEFAULT_DATA;
+      await fs.writeFile(analysisPath, JSON.stringify(data, null, 2), 'utf-8');
     }
 
     const results: GetAnalyzerResult[] = data.results;
+
+    // If no results, return empty data
+    if (results.length === 0) {
+      return NextResponse.json({
+        getOne: null,
+        getTwo: null
+      });
+    }
 
     // Convert analyzer results to Get format
     const gets: Get[] = results.map(result => ({

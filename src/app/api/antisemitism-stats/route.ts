@@ -35,6 +35,17 @@ interface AnalysisData {
   };
 }
 
+const DEFAULT_ANALYSIS_DATA: AnalysisData = {
+  matrix: {
+    statistics: {
+      mean: 0
+    },
+    themes: []
+  }
+};
+
+const DEFAULT_TRENDS: TrendPoint[] = [];
+
 function determineLevel(percentage: number): AntisemitismStats['level'] {
   if (percentage < 3) return 'Low';
   if (percentage < 10) return 'Medium';
@@ -73,22 +84,55 @@ export async function GET() {
     const analysisPath = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
     const trendsPath = path.resolve(paths.dataDir, 'analysis', 'antisemitism-trends.json');
 
-    // Read both files
-    const [analysisContent, trendsContent] = await Promise.all([
-      fs.readFile(analysisPath, 'utf-8'),
-      fs.readFile(trendsPath, 'utf-8')
-    ]);
+    // Ensure analysis directory exists
+    const dirPath = path.dirname(analysisPath);
+    try {
+      await fs.mkdir(dirPath, { recursive: true });
+    } catch {
+      // Ignore directory already exists error
+    }
 
-    const analysis: unknown = JSON.parse(analysisContent);
-    const trends: unknown = JSON.parse(trendsContent);
+    // Try to read both files, use defaults if they don't exist
+    let analysis: unknown;
+    let trends: unknown;
+
+    try {
+      const analysisContent = await fs.readFile(analysisPath, 'utf-8');
+      analysis = JSON.parse(analysisContent);
+    } catch (err: any) {
+      if (err?.code === 'ENOENT') {
+        analysis = DEFAULT_ANALYSIS_DATA;
+        await fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8');
+      } else {
+        throw err;
+      }
+    }
+
+    try {
+      const trendsContent = await fs.readFile(trendsPath, 'utf-8');
+      trends = JSON.parse(trendsContent);
+    } catch (err: any) {
+      if (err?.code === 'ENOENT') {
+        trends = DEFAULT_TRENDS;
+        await fs.writeFile(trendsPath, JSON.stringify(trends, null, 2), 'utf-8');
+      } else {
+        throw err;
+      }
+    }
 
     if (!isAnalysisData(analysis) || !Array.isArray(trends) || !trends.every(isTrendPoint)) {
-      throw new Error('Invalid data format');
+      // If data is invalid, reset to defaults
+      analysis = DEFAULT_ANALYSIS_DATA;
+      trends = DEFAULT_TRENDS;
+      await Promise.all([
+        fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8'),
+        fs.writeFile(trendsPath, JSON.stringify(trends, null, 2), 'utf-8')
+      ]);
     }
 
     // Calculate trend
-    const sortedTrends = trends.sort((a, b) => b.timestamp - a.timestamp);
-    const currentPercentage = sortedTrends[0]?.percentage ?? analysis.matrix.statistics.mean;
+    const sortedTrends = (trends as TrendPoint[]).sort((a: TrendPoint, b: TrendPoint) => b.timestamp - a.timestamp);
+    const currentPercentage = sortedTrends[0]?.percentage ?? (analysis as AnalysisData).matrix.statistics.mean;
     const previousPercentage = sortedTrends[1]?.percentage ?? currentPercentage;
     
     const trendChange = currentPercentage - previousPercentage;
@@ -98,16 +142,16 @@ export async function GET() {
 
     // Prepare response
     const stats: AntisemitismStats = {
-      mean: Number(analysis.matrix.statistics.mean.toFixed(1)),
-      level: determineLevel(analysis.matrix.statistics.mean),
+      mean: Number((analysis as AnalysisData).matrix.statistics.mean.toFixed(1)),
+      level: determineLevel((analysis as AnalysisData).matrix.statistics.mean),
       trend: {
         direction: trendDirection as AntisemitismStats['trend']['direction'],
         change: Number(Math.abs(trendChange).toFixed(1))
       },
-      themes: analysis.matrix.themes
-        .sort((a, b) => b.frequency - a.frequency)
+      themes: (analysis as AnalysisData).matrix.themes
+        .sort((a: Theme, b: Theme) => b.frequency - a.frequency)
         .slice(0, 5)
-        .map(theme => ({
+        .map((theme: Theme) => ({
           name: theme.name,
           frequency: theme.frequency
         }))
