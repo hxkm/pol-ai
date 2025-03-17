@@ -1,0 +1,43 @@
+.stagePost {
+  background-color: #fff;
+  padding: 8px 12px;
+  margin: 8px 0;
+  width: 400px;
+  font-family: arial, helvetica, sans-serif;
+  font-size: 13px;
+  border-radius: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.name {
+  color: #117743;
+  font-weight: bold;
+}
+
+.postNumber {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.postNumber:hover {
+  text-decoration: underline;
+}
+
+.comment {
+  color: #000;
+  margin: 4px 0;
+  word-wrap: break-word;
+}
+
+.checkCount {
+  color: #666;
+  font-size: 11px;
+  margin-top: 4px;
+} 

@@ -5,6 +5,7 @@ import { ThreadCount } from './components/ThreadCount';
 import { ScraperButton } from './components/ScraperButton';
 import { SummarizerButton } from './components/SummarizerButton';
 import { AntisemitismStats } from './components/AntisemitismStats';
+import StagePost from './components/StagePost';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -38,6 +39,17 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       if (card.id === 'content-0') {
         return <AntisemitismStats />;
       }
+      if (card.id === 'content-1') {
+        return (
+          <>
+            <h2>{card.title}</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <StagePost position="top" />
+              <StagePost position="bottom" />
+            </div>
+          </>
+        );
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -69,8 +81,12 @@ export default function Home() {
   const contentCards: ContentCard[] = Array.from({ length: 13 }, (_, i) => ({
     id: `content-${i}`,
     type: 'content',
-    title: i === 0 ? 'Antisemitism Per Post' : `Card ${i + 1}`,
-    content: i === 0 ? '9.4% Medium' : 'Sample content for this card. Will be replaced with real data.'
+    title: i === 0 ? 'Antisemitism Per Post' : 
+           i === 1 ? 'Most Significant GETs' :
+           `Card ${i + 1}`,
+    content: i === 0 ? '9.4% Medium' : 
+             i === 1 ? '' :
+             'Sample content for this card. Will be replaced with real data.'
   }));
 
   // Thread count card (14th card)
@@ -102,7 +118,11 @@ export default function Home() {
       <main className={styles.main}>
         <CardGrid>
           {cardLayout.map((card, index) => (
-            <Card key={card.id} className={index === 0 ? styles.pinkCard : ''}>
+            <Card key={card.id} className={
+              index === 0 ? styles.pinkCard :
+              index === 1 ? styles.neonCard :
+              ''
+            }>
               <CardContent card={card} />
             </Card>
           ))}

@@ -191,6 +191,16 @@ a.secondary {
   gap: 0.5rem;
 }
 
+.neonCard {
+  background: #c5fa05 !important;
+  color: black !important;
+}
+
+.neonCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
 .level {
   font-size: 1rem;
   font-weight: normal;
