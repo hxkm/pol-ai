@@ -1,5 +1,4 @@
 import { promises as fs } from 'fs';
-import * as path from 'path';
 import * as cron from 'node-cron';
 import { scrape } from './scraper';
 import { Summarizer } from './Summarizer';
