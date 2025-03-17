@@ -19,10 +19,18 @@ interface GetAnalyzerResult {
   };
 }
 
+interface FileSystemError extends Error {
+  code?: string;
+}
+
 const DEFAULT_DATA = {
   lastUpdated: Date.now(),
   results: []
 };
+
+function isFileSystemError(error: unknown): error is FileSystemError {
+  return error instanceof Error && 'code' in error;
+}
 
 function countRepeatingTrailingDigits(postNumber: string): number {
   const digits = postNumber.split('');
@@ -59,8 +67,8 @@ export async function GET() {
     try {
       const content = await fs.readFile(analysisPath, 'utf-8');
       data = JSON.parse(content);
-    } catch (err: any) {
-      if (err?.code === 'ENOENT') {
+    } catch (err: unknown) {
+      if (isFileSystemError(err) && err.code === 'ENOENT') {
         // File doesn't exist, create it with default data
         data = DEFAULT_DATA;
         await fs.writeFile(analysisPath, JSON.stringify(data, null, 2), 'utf-8');

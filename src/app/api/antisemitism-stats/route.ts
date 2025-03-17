@@ -35,6 +35,10 @@ interface AnalysisData {
   };
 }
 
+interface FileSystemError extends Error {
+  code?: string;
+}
+
 const DEFAULT_ANALYSIS_DATA: AnalysisData = {
   matrix: {
     statistics: {
@@ -78,6 +82,10 @@ function isAnalysisData(value: unknown): value is AnalysisData {
   );
 }
 
+function isFileSystemError(error: unknown): error is FileSystemError {
+  return error instanceof Error && 'code' in error;
+}
+
 export async function GET() {
   try {
     // Read the latest analysis file
@@ -99,8 +107,8 @@ export async function GET() {
     try {
       const analysisContent = await fs.readFile(analysisPath, 'utf-8');
       analysis = JSON.parse(analysisContent);
-    } catch (err: any) {
-      if (err?.code === 'ENOENT') {
+    } catch (err: unknown) {
+      if (isFileSystemError(err) && err.code === 'ENOENT') {
         analysis = DEFAULT_ANALYSIS_DATA;
         await fs.writeFile(analysisPath, JSON.stringify(analysis, null, 2), 'utf-8');
       } else {
@@ -111,8 +119,8 @@ export async function GET() {
     try {
       const trendsContent = await fs.readFile(trendsPath, 'utf-8');
       trends = JSON.parse(trendsContent);
-    } catch (err: any) {
-      if (err?.code === 'ENOENT') {
+    } catch (err: unknown) {
+      if (isFileSystemError(err) && err.code === 'ENOENT') {
         trends = DEFAULT_TRENDS;
         await fs.writeFile(trendsPath, JSON.stringify(trends, null, 2), 'utf-8');
       } else {
