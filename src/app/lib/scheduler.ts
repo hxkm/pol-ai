@@ -1,27 +1,38 @@
-import cron from 'node-cron';
-import { loadEnvConfig } from '@next/env';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import * as cron from 'node-cron';
+import { scrape } from './scraper';
 import { Summarizer } from './Summarizer';
 import { paths } from '@/app/utils/paths';
-import fs from 'fs';
+import { loadEnvConfig } from '@next/env';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
 
 // Helper functions
 async function runScraper() {
-  const { scrape } = await import('./scraper');
   return scrape();
 }
 
 async function checkThreadAvailability(): Promise<number> {
   try {
-    if (!fs.existsSync(paths.threadsDir)) {
+    if (!paths.threadsDir) {
+      console.log('Threads directory path is not defined');
+      return 0;
+    }
+
+    // Check if directory exists
+    try {
+      await fs.access(paths.threadsDir);
+    } catch {
       console.log('Threads directory does not exist');
       return 0;
     }
-    const files = fs.readdirSync(paths.threadsDir).filter(f => f.endsWith('.json'));
-    console.log(`Found ${files.length} thread files`);
-    return files.length;
+
+    // Read directory contents
+    const files = await fs.readdir(paths.threadsDir);
+    const jsonFiles = files.filter(file => file.endsWith('.json'));
+    return jsonFiles.length;
   } catch (error) {
     console.error('Error checking thread availability:', error);
     return 0;
@@ -128,17 +139,36 @@ export class Scheduler {
       await runScraper();
       console.log(`[${new Date().toISOString()}] Initial scraper job completed`);
       
-      // Wait 2 minutes before running summarizer to ensure threads are available
-      console.log('Waiting 2 minutes for threads to be properly saved...');
-      await new Promise(resolve => setTimeout(resolve, 120000));
-      
-      console.log(`[${new Date().toISOString()}] Running initial summarizer job...`);
-      await runSummarizer();
-      console.log(`[${new Date().toISOString()}] Initial summarizer job completed`);
+      // Wait for threads to be available
+      console.log('Checking for thread availability...');
+      const hasThreads = await waitForThreads();
+      if (hasThreads) {
+        console.log(`[${new Date().toISOString()}] Running initial summarizer job...`);
+        await runSummarizer();
+        console.log(`[${new Date().toISOString()}] Initial summarizer job completed`);
+      } else {
+        console.log('Skipping initial summarizer job due to insufficient threads');
+      }
     } catch (error) {
       console.error(`[${new Date().toISOString()}] Error running initial jobs:`, error);
     }
 
+    // Set up scheduled jobs
+    this.setupScheduledJobs();
+    
+    this.isRunning = true;
+    console.log(`[${new Date().toISOString()}] Scheduler started successfully`);
+    console.log('Scraper schedule: Every 3 hours starting at 00:00 UTC');
+    console.log('Summarizer schedule: Daily at 23:30 UTC');
+    
+    // Log current time for reference
+    const now = new Date();
+    console.log('Current time (UTC):', now.toUTCString());
+    console.log('Current hour (UTC):', now.getUTCHours());
+    console.log('Current minute (UTC):', now.getUTCMinutes());
+  }
+
+  private setupScheduledJobs() {
     // Scraper: At minute 0 of hours 0, 3, 6, 9, 12, 15, 18, and 21 (UTC)
     this.scraperJob = cron.schedule('0 0,3,6,9,12,15,18,21 * * *', async () => {
       console.log(`[${new Date().toISOString()}] Starting scheduled scraper job`);
@@ -156,25 +186,20 @@ export class Scheduler {
     this.summarizerJob = cron.schedule('30 23 * * *', async () => {
       console.log(`[${new Date().toISOString()}] Starting scheduled summarizer job`);
       try {
-        await runSummarizer();
-        console.log(`[${new Date().toISOString()}] Completed scheduled summarizer job`);
+        // Check for threads before running summarizer
+        const hasThreads = await waitForThreads();
+        if (hasThreads) {
+          await runSummarizer();
+          console.log(`[${new Date().toISOString()}] Completed scheduled summarizer job`);
+        } else {
+          console.log('Skipping scheduled summarizer job due to insufficient threads');
+        }
       } catch (error) {
         console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
       }
     }, {
       timezone: 'UTC'
     });
-
-    this.isRunning = true;
-    console.log(`[${new Date().toISOString()}] Scheduler started successfully`);
-    console.log('Scraper schedule: Every 3 hours starting at 00:00 UTC');
-    console.log('Summarizer schedule: Daily at 23:30 UTC');
-    
-    // Log current time for reference
-    const now = new Date();
-    console.log('Current time (UTC):', now.toUTCString());
-    console.log('Current hour (UTC):', now.getUTCHours());
-    console.log('Current minute (UTC):', now.getUTCMinutes());
   }
 
   stop() {
