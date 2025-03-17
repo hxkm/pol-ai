@@ -3,7 +3,7 @@ import { BaseAnalyzer } from '../base';
 import { MediaAnalyzerResult, MediaFile, MediaCategory, CategoryStats } from './types';
 import fs from 'fs';
 import path from 'path';
-import { paths } from '../../utils/paths';
+import { paths } from '@/app/utils/paths';
 import axios from 'axios';
 import crypto from 'crypto';
 

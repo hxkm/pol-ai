@@ -5,11 +5,16 @@ import { AntisemitismMatrix } from '../types/antisemitism';
 import { AntisemitismMatrixAnalyzer } from './analyzers/AntisemitismMatrix';
 import { BigPictureGenerator } from './analyzers/BigPictureGenerator';
 import { BigPictureAnalysis } from '../types/bigpicture';
+import fs from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
+import { paths } from '@/app/utils/paths';
 
 export class Summarizer {
   private articleGenerator: ArticleGenerator;
   private matrixAnalyzer: AntisemitismMatrixAnalyzer;
   private bigPictureGenerator: BigPictureGenerator;
+  private outputFile: string;
 
   constructor(apiKey: string) {
     if (!apiKey) {
@@ -18,6 +23,26 @@ export class Summarizer {
     this.articleGenerator = new ArticleGenerator(apiKey);
     this.matrixAnalyzer = new AntisemitismMatrixAnalyzer(apiKey);
     this.bigPictureGenerator = new BigPictureGenerator(apiKey);
+    this.outputFile = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
+  }
+
+  private async saveSummary(summary: any): Promise<void> {
+    const tempFile = `${this.outputFile}.tmp`;
+    try {
+      await fs.mkdir(path.dirname(this.outputFile), { recursive: true });
+      await fs.writeFile(tempFile, JSON.stringify({
+        ...summary,
+        timestamp: Date.now()
+      }, null, 2));
+      await fs.rename(tempFile, this.outputFile);
+      console.log(`Summary saved to: ${this.outputFile}`);
+    } catch (error) {
+      console.error('Failed to save summary:', error);
+      if (existsSync(tempFile)) {
+        await fs.unlink(tempFile).catch(() => {});
+      }
+      throw error;
+    }
   }
 
   async analyze(threads: Thread[]): Promise<{
@@ -38,6 +63,10 @@ export class Summarizer {
       this.bigPictureGenerator.analyze(threads, articles.articles)
     ]);
     
+    // Combine all results and save
+    const summary = { articles, matrix, bigPicture };
+    await this.saveSummary(summary);
+    
     console.log('\nAnalysis complete:');
     console.log(`- Analyzed ${articles.batchStats.totalAnalyzedPosts} posts across ${articles.batchStats.totalThreads} threads`);
     console.log(`- Average antisemitic content: ${articles.batchStats.averageAntisemiticPercentage.toFixed(2)}%`);
@@ -47,6 +76,6 @@ export class Summarizer {
     console.log(`- Generated big picture overview with ${bigPicture.themes.length} general themes`);
     console.log(`- Identified ${bigPicture.sentiments.length} major sentiments`);
     
-    return { articles, matrix, bigPicture };
+    return summary;
   }
 } 

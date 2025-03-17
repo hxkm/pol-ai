@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { paths } from '../utils/paths';
+import { paths } from '@/app/utils/paths';
 import { Thread, AnalyzerResult, AnalyzerStorage, Analyzer } from '../../types/interfaces';
 
 // Configuration constants

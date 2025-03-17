@@ -1,7 +1,8 @@
 import cron from 'node-cron';
 import { loadEnvConfig } from '@next/env';
 import { Summarizer } from './Summarizer';
-import { paths } from './utils/paths';
+import { Thread } from '../types/interfaces';
+import { paths } from '@/app/utils/paths';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
@@ -61,11 +62,18 @@ export class Scheduler {
   }
 
   async start() {
+    // Only run scheduler in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[${new Date().toISOString()}] Scheduler disabled in non-production environment`);
+      return;
+    }
+
     if (this.isRunning) {
       console.log(`[${new Date().toISOString()}] Scheduler is already running`);
       return;
     }
 
+    console.log(`[${new Date().toISOString()}] Starting scheduler in production mode...`);
     console.log(`[${new Date().toISOString()}] Starting scheduler...`);
     console.log('Current UTC time:', new Date().toUTCString());
 
@@ -132,5 +140,19 @@ export class Scheduler {
     this.summarizerJob?.stop();
     this.isRunning = false;
     console.log(`[${new Date().toISOString()}] Scheduler stopped`);
+  }
+
+  /**
+   * Manually run the summarizer - useful for development
+   */
+  async runSummarizerManually() {
+    console.log(`[${new Date().toISOString()}] Manually running summarizer...`);
+    try {
+      await runSummarizer();
+      console.log(`[${new Date().toISOString()}] Manual summarizer run completed`);
+    } catch (error) {
+      console.error(`[${new Date().toISOString()}] Manual summarizer run failed:`, error);
+      throw error;
+    }
   }
 } 

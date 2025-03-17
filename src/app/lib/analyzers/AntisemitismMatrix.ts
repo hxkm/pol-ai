@@ -1,7 +1,7 @@
 import { DeepSeekClient } from '../deepseek';
 import { ArticleAnalysis } from '../../types/article';
 import { AntisemitismMatrix, AntisemitismTheme, AntisemitismTrend } from '../../types/antisemitism';
-import { paths } from '../../utils/paths';
+import { paths } from '@/app/utils/paths';
 import path from 'path';
 import fs from 'fs/promises';
 

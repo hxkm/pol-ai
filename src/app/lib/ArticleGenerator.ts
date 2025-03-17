@@ -2,8 +2,9 @@ import { DeepSeekClient } from './deepseek';
 import { Thread, Post } from '../types/interfaces';
 import { ArticleAnalysis, ArticleGeneratorConfig, ArticleBatch } from '../types/article';
 import { randomSample } from '../utils/array';
-import { paths } from '../utils/paths';
+import { paths } from '@/app/utils/paths';
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
 
 const DEFAULT_CONFIG: ArticleGeneratorConfig = {
@@ -18,6 +19,7 @@ export class ArticleGenerator {
   private config: ArticleGeneratorConfig;
   private temperature: number;
   private progressFile: string;
+  private outputFile: string;
 
   constructor(apiKey: string, config: Partial<ArticleGeneratorConfig> = {}) {
     this.client = new DeepSeekClient(apiKey);
@@ -25,6 +27,7 @@ export class ArticleGenerator {
     // Get temperature from environment variable, default to 0.7 if not set
     this.temperature = process.env.DEEPSEEK_TEMPERATURE ? parseFloat(process.env.DEEPSEEK_TEMPERATURE) : 0.7;
     this.progressFile = path.resolve(paths.dataDir, 'analysis', 'progress.json');
+    this.outputFile = path.resolve(paths.dataDir, 'analysis', 'articles.json');
   }
 
   private getPostsToAnalyze(thread: Thread): Post[] {
@@ -239,6 +242,34 @@ export class ArticleGenerator {
     }
   }
 
+  private async saveOutput(batch: ArticleBatch): Promise<void> {
+    const tempFile = `${this.outputFile}.tmp`;
+    try {
+      await fs.mkdir(path.dirname(this.outputFile), { recursive: true });
+      
+      // Write to temp file first
+      await fs.writeFile(
+        tempFile,
+        JSON.stringify({
+          ...batch,
+          timestamp: Date.now()
+        }, null, 2),
+        'utf-8'
+      );
+
+      // Atomic rename
+      await fs.rename(tempFile, this.outputFile);
+
+      console.log(`Articles saved to: ${this.outputFile}`);
+    } catch (error) {
+      console.error('Failed to save articles:', error);
+      if (existsSync(tempFile)) {
+        await fs.unlink(tempFile).catch(() => {});
+      }
+      throw error;
+    }
+  }
+
   async generateArticles(
     threads: Thread[],
     onProgress?: (threadId: string) => void
@@ -294,7 +325,7 @@ export class ArticleGenerator {
       // Ignore cleanup errors
     }
 
-    return {
+    const batch = {
       articles,
       batchStats: {
         totalThreads: articles.length,
@@ -303,5 +334,9 @@ export class ArticleGenerator {
         generatedAt: Date.now()
       }
     };
+
+    await this.saveOutput(batch);
+
+    return batch;
   }
 } 
