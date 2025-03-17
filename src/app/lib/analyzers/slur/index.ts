@@ -90,7 +90,7 @@ export class SlurAnalyzer extends BaseAnalyzer<SlurAnalyzerResult> {
             no: thread.no,
             resto: 0,
             time: thread.time,
-            name: thread.name,
+            name: thread.name || 'Anonymous',
             com: thread.com
           },
           termTotals,

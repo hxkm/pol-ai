@@ -283,7 +283,7 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
           no: thread.no,
           resto: 0,
           time: thread.time,
-          name: thread.name,
+          name: thread.name || 'Anonymous',
           tim: thread.tim,
           ext: thread.ext,
           filename: thread.filename,

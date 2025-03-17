@@ -55,7 +55,7 @@ export class ReplyAnalyzer extends BaseAnalyzer<ReplyAnalyzerResult> {
         no: thread.no,
         resto: 0,
         time: thread.time,
-        name: thread.name,
+        name: thread.name || 'Anonymous',
         com: thread.com,
         // Include other fields from thread as needed
       };
