@@ -83,6 +83,10 @@ export async function GET() {
           }
         }
         fs.writeFileSync(analysisPath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf-8');
+        if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+          console.log('Setting file permissions to 666');
+          fs.chmodSync(analysisPath, '666');
+        }
         console.log('Successfully created default data file');
       } catch (err) {
         console.error('Error creating default data:', err);

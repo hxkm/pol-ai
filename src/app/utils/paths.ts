@@ -70,11 +70,31 @@ export function ensureDirectories(): void {
       if (!fs.existsSync(dir)) {
         console.log(`Creating directory: ${dir}`);
         fs.mkdirSync(dir, { recursive: true });
-        // Set permissions to 777 in Railway
-        if (isRailway) {
+      }
+      
+      // Set permissions in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        try {
+          // Set directory permissions to 777
           fs.chmodSync(dir, '777');
+          console.log(`Set directory permissions for ${dir} to 777`);
+          
+          // Set permissions for any existing files in the directory
+          if (fs.existsSync(dir)) {
+            const files = fs.readdirSync(dir);
+            files.forEach(file => {
+              const filePath = path.join(dir, file);
+              if (fs.statSync(filePath).isFile()) {
+                fs.chmodSync(filePath, '666');
+                console.log(`Set file permissions for ${filePath} to 666`);
+              }
+            });
+          }
+        } catch (permError) {
+          console.error(`Error setting permissions for ${dir}:`, permError);
         }
       }
+      
       console.log(`Verified directory exists: ${dir}`);
       
       // Log directory permissions
