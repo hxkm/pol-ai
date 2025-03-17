@@ -87,7 +87,18 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       };
 
       await fs.promises.writeFile(tempFile, JSON.stringify(chunk, null, 2));
+
+      // Set proper permissions on temp file in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        await fs.promises.chmod(tempFile, '666');
+      }
+
       await fs.promises.rename(tempFile, chunkPath);
+
+      // Set proper permissions on final file in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        await fs.promises.chmod(chunkPath, '666');
+      }
     } catch (error) {
       if (fs.existsSync(tempFile)) {
         await fs.promises.unlink(tempFile).catch(() => {});
@@ -115,6 +126,10 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       // Ensure the analyzer's directory exists
       if (!fs.existsSync(this.storagePath)) {
         await fs.promises.mkdir(this.storagePath, { recursive: true });
+        // Set directory permissions in Railway environment
+        if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+          await fs.promises.chmod(this.storagePath, '777');
+        }
       }
 
       // Create empty storage if it doesn't exist
@@ -123,7 +138,20 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
           lastUpdated: Date.now(),
           results: []
         };
-        await this.writeStorage(emptyStorage);
+        const tempFile = `${this.storageFile}.tmp`;
+        await fs.promises.writeFile(tempFile, JSON.stringify(emptyStorage, null, 2));
+        
+        // Set proper permissions on temp file in Railway environment
+        if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+          await fs.promises.chmod(tempFile, '666');
+        }
+
+        await fs.promises.rename(tempFile, this.storageFile);
+        
+        // Set proper permissions on final file in Railway environment
+        if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+          await fs.promises.chmod(this.storageFile, '666');
+        }
       }
     } catch (error) {
       console.error(`Error initializing storage for ${this.name}:`, error);
@@ -191,7 +219,18 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
         // Write normally if data is small enough
         await fs.promises.writeFile(tempFile, dataString);
       }
+
+      // Set proper permissions on temp file in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        await fs.promises.chmod(tempFile, '666');
+      }
+
       await fs.promises.rename(tempFile, this.storageFile);
+
+      // Set proper permissions on final file in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        await fs.promises.chmod(this.storageFile, '666');
+      }
     } catch (error) {
       console.error(`Error writing storage for ${this.name}:`, error);
       if (fs.existsSync(tempFile)) {
