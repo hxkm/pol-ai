@@ -1,7 +1,10 @@
 import { DeepSeekClient } from './deepseek';
 
 async function testDeepSeek() {
-  const apiKey = 'sk-3f1398530f2e450eac9016f894ac787b';
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) {
+    throw new Error('DEEPSEEK_API_KEY environment variable is not set');
+  }
   const client = new DeepSeekClient(apiKey);
 
   try {
