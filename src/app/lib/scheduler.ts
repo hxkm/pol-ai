@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { loadEnvConfig } from '@next/env';
 import { Summarizer } from './Summarizer';
 import { paths } from '@/app/utils/paths';
+import fs from 'fs';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
@@ -12,14 +13,59 @@ async function runScraper() {
   return scrape();
 }
 
+async function checkThreadAvailability(): Promise<number> {
+  try {
+    if (!fs.existsSync(paths.threadsDir)) {
+      console.log('Threads directory does not exist');
+      return 0;
+    }
+    const files = fs.readdirSync(paths.threadsDir).filter(f => f.endsWith('.json'));
+    console.log(`Found ${files.length} thread files`);
+    return files.length;
+  } catch (error) {
+    console.error('Error checking thread availability:', error);
+    return 0;
+  }
+}
+
+async function waitForThreads(requiredCount: number = 12, maxAttempts: number = 8): Promise<boolean> {
+  console.log(`Waiting for at least ${requiredCount} threads to be available...`);
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const threadCount = await checkThreadAvailability();
+    console.log(`Attempt ${attempt}/${maxAttempts}: Found ${threadCount} threads`);
+    
+    if (threadCount >= requiredCount) {
+      console.log('Sufficient threads found!');
+      return true;
+    }
+    
+    if (attempt < maxAttempts) {
+      console.log('Waiting 15 seconds before next check...');
+      await new Promise(resolve => setTimeout(resolve, 15000)); // 15 second wait
+    }
+  }
+  
+  console.log('Timed out waiting for threads');
+  return false;
+}
+
 async function runSummarizer() {
   console.log(`[${new Date().toISOString()}] Checking summarizer prerequisites...`);
+  
+  // Check API key
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     console.error('DEEPSEEK_API_KEY environment variable is not set');
     throw new Error('DEEPSEEK_API_KEY environment variable is not set');
   }
   console.log('API key verified');
+
+  // Check thread availability
+  const hasThreads = await waitForThreads();
+  if (!hasThreads) {
+    throw new Error('Insufficient threads available for analysis');
+  }
   
   const summarizer = new Summarizer(apiKey);
   const { loadAllThreads } = await import('../utils/fileLoader');
@@ -76,12 +122,15 @@ export class Scheduler {
     console.log(`[${new Date().toISOString()}] Starting scheduler...`);
     console.log('Current UTC time:', new Date().toUTCString());
 
-    // Run both jobs immediately on startup
-    console.log(`[${new Date().toISOString()}] Running initial jobs on startup...`);
+    // Run scraper immediately on startup
+    console.log(`[${new Date().toISOString()}] Running initial scraper job...`);
     try {
-      console.log(`[${new Date().toISOString()}] Running initial scraper job...`);
       await runScraper();
       console.log(`[${new Date().toISOString()}] Initial scraper job completed`);
+      
+      // Wait 2 minutes before running summarizer to ensure threads are available
+      console.log('Waiting 2 minutes for threads to be properly saved...');
+      await new Promise(resolve => setTimeout(resolve, 120000));
       
       console.log(`[${new Date().toISOString()}] Running initial summarizer job...`);
       await runSummarizer();

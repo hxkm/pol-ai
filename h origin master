@@ -1,0 +1,67 @@
+warning: in the working copy of 'src/app/api/summarize/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/api/thread-count/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/ArticleGenerator.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/analyzers/AntisemitismMatrix.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/analyzers/base.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/analyzers/media/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/scheduler.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/lib/scraper/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/scripts/summarize.ts', LF will be replaced by CRLF the next time Git touches it
+data/media/OP/500620897.png
+data/media/OP/500623484.jpg
+data/media/OP/500624026.jpg
+data/media/OP/500626610.png
+data/media/OP/500629570.jpg
+data/media/OP/500635400.png
+data/media/OP/500635668.gif
+data/media/OP/500637759.jpg
+data/media/OP/500638869.jpg
+data/media/OP/500641274.png
+data/media/OP/500642550.png
+data/media/OP/500645727.jpg
+data/media/OP/500646131.jpg
+data/media/OP/500646750.png
+data/media/OP/500649240.jpg
+data/media/OP/500653738.jpg
+data/media/OP/500655442.png
+data/media/OP/500656561.png
+data/media/OP/500659840.png
+data/media/OP/500659872.jpg
+data/media/OP/500659884.png
+data/media/OP/500659885.jpg
+data/media/OP/500660003.png
+data/media/OP/500660025.png
+data/media/OP/500660073.jpg
+data/media/OP/500660077.jpg
+data/media/OP/500660095.jpg
+data/media/OP/500660217.png
+data/media/OP/500660236.png
+data/media/OP/500660320.png
+data/media/OP/500660383.png
+data/media/OP/500660438.jpg
+data/media/OP/500660449.jpg
+data/media/OP/500660547.png
+data/media/OP/500660557.jpg
+data/media/OP/500660590.jpg
+data/media/OP/500660685.jpg
+data/media/pepe/1741999296871_1741998345114093.png
+src/app/api/analysis/geo/route.ts
+src/app/api/analysis/get/route.ts
+src/app/api/analysis/link/route.ts
+src/app/api/analysis/reply/route.ts
+src/app/api/analysis/route.ts
+src/app/api/analysis/slur/route.ts
+src/app/api/summarize/route.ts
+src/app/api/thread-count/route.ts
+src/app/lib/ArticleGenerator.ts
+src/app/lib/Summarizer.ts
+src/app/lib/analyzers/AntisemitismMatrix.ts
+src/app/lib/analyzers/BigPictureGenerator.ts
+src/app/lib/analyzers/base.ts
+src/app/lib/analyzers/index.ts
+src/app/lib/analyzers/media/index.ts
+src/app/lib/scheduler.ts
+src/app/lib/scraper/index.ts
+src/app/lib/summarizer/index.ts
+src/app/lib/utils/paths.ts
+src/scripts/summarize.ts
