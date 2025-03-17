@@ -23,7 +23,7 @@ function countRepeatingTrailingDigits(postNumber: string): number {
   const digits = postNumber.split('');
   let maxCount = 1;
   let currentCount = 1;
-  let currentDigit = digits[digits.length - 1];
+  const currentDigit = digits[digits.length - 1];
 
   // Count from right to left
   for (let i = digits.length - 2; i >= 0; i--) {
