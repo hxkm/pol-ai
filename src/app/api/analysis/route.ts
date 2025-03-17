@@ -6,7 +6,7 @@ import { paths } from '@/app/lib/utils/paths';
 export async function GET() {
   try {
     // Ensure the analysis directory exists
-    const analysisDir = path.join(paths.dataDir, 'analysis');
+    const analysisDir = path.resolve(paths.dataDir, 'analysis');
     if (!fs.existsSync(analysisDir)) {
       return NextResponse.json({
         analyzers: [],
@@ -19,7 +19,7 @@ export async function GET() {
     
     // Get status for each analyzer
     const analyzerStatus = analyzerDirs.map(name => {
-      const resultsPath = path.join(analysisDir, name, 'results.json');
+      const resultsPath = path.resolve(analysisDir, name, 'results.json');
       
       if (!fs.existsSync(resultsPath)) {
         return {

@@ -6,7 +6,7 @@ import { paths } from '@/app/lib/utils/paths';
 export async function GET() {
   try {
     const analyzer = 'get';
-    const resultsPath = path.join(paths.dataDir, 'analysis', analyzer, 'results.json');
+    const resultsPath = path.resolve(paths.dataDir, 'analysis', analyzer, 'results.json');
     
     if (!fs.existsSync(resultsPath)) {
       return NextResponse.json(

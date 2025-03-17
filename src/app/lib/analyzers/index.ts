@@ -22,7 +22,7 @@ export async function initializeAnalyzers(): Promise<void> {
     analyzerRegistry.reset();
 
     // Ensure analysis directory exists
-    const analysisDir = path.join(paths.dataDir, 'analysis');
+    const analysisDir = path.resolve(paths.dataDir, 'analysis');
     if (!fs.existsSync(analysisDir)) {
       console.log('Creating analysis directory...');
       await fs.promises.mkdir(analysisDir, { recursive: true });

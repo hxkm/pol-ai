@@ -18,11 +18,11 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
   abstract analyze(threads: Thread[]): Promise<T[]>;
 
   protected get storagePath(): string {
-    return path.join(paths.dataDir, 'analysis', this.name);
+    return path.resolve(paths.dataDir, 'analysis', this.name);
   }
 
   protected get storageFile(): string {
-    return path.join(this.storagePath, 'results.json');
+    return path.resolve(this.storagePath, 'results.json');
   }
 
   /**
@@ -48,7 +48,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    * Get chunk file path
    */
   private getChunkPath(index: number): string {
-    return path.join(this.storagePath, `chunk_${index}.json`);
+    return path.resolve(this.storagePath, `chunk_${index}.json`);
   }
 
   /**
@@ -65,7 +65,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       while (chunkFiles.length >= MAX_CHUNKS) {
         const oldestChunk = chunkFiles.shift();
         if (oldestChunk) {
-          await fs.promises.unlink(path.join(this.storagePath, oldestChunk));
+          await fs.promises.unlink(path.resolve(this.storagePath, oldestChunk));
         }
       }
     } catch (error) {
@@ -297,7 +297,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       for (const chunkFile of chunkFiles) {
         try {
           const chunkData = await fs.promises.readFile(
-            path.join(this.storagePath, chunkFile),
+            path.resolve(this.storagePath, chunkFile),
             'utf-8'
           );
           const chunk = JSON.parse(chunkData);
@@ -346,7 +346,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
 
       for (const chunkFile of chunkFiles) {
         try {
-          const chunkPath = path.join(this.storagePath, chunkFile);
+          const chunkPath = path.resolve(this.storagePath, chunkFile);
           const chunkData = await fs.promises.readFile(chunkPath, 'utf-8');
           const chunk = JSON.parse(chunkData);
           
@@ -362,6 +362,23 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
       await this.writeStorage(storage);
     } catch (error) {
       console.error(`Error purging results for ${this.name}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove specified files from storage
+   */
+  async removeFiles(files: string[]): Promise<void> {
+    try {
+      for (const file of files) {
+        const filePath = path.resolve(this.storagePath, file);
+        if (fs.existsSync(filePath)) {
+          await fs.promises.unlink(filePath);
+        }
+      }
+    } catch (error) {
+      console.error(`Error removing files for ${this.name}:`, error);
       throw error;
     }
   }

@@ -108,19 +108,22 @@ export async function GET() {
 
     console.log('Found GETone:', getOne);
 
-    // Find getTwo from remaining results
-    const remainingResults = sortedResults.slice(1);
-    const getTwo = remainingResults.length > 0 ? {
-      postNumber: remainingResults[0].metadata.postNo.toString(),
-      comment: remainingResults[0].metadata.comment,
-      checkCount: remainingResults[0].metadata.checkCount
+    // Find getTwo from remaining results, ensuring it's different from getOne
+    const getTwo = sortedResults.slice(1).find(result => 
+      result.metadata.postNo.toString() !== getOne.postNumber
+    );
+
+    const getTwoResponse = getTwo ? {
+      postNumber: getTwo.metadata.postNo.toString(),
+      comment: getTwo.metadata.comment,
+      checkCount: getTwo.metadata.checkCount
     } : null;
 
-    console.log('Found GETtwo:', getTwo);
+    console.log('Found GETtwo:', getTwoResponse);
 
     return NextResponse.json({
       getOne,
-      getTwo
+      getTwo: getTwoResponse
     });
   } catch (error) {
     console.error('Error fetching significant GETs:', error);
