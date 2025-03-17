@@ -20,18 +20,10 @@ interface GetAnalyzerResult {
   };
 }
 
-interface FileSystemError extends Error {
-  code?: string;
-}
-
 const DEFAULT_DATA = {
   lastUpdated: Date.now(),
   results: []
 };
-
-function isFileSystemError(error: unknown): error is FileSystemError {
-  return error instanceof Error && 'code' in error;
-}
 
 function countRepeatingTrailingDigits(postNumber: string): number {
   const digits = postNumber.split('');

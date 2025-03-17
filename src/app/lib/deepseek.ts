@@ -82,7 +82,6 @@ export class DeepSeekClient {
 
         // Get raw response text
         const rawText = await response.text();
-        console.log('DeepSeek Raw Response:', rawText);
         
         // Try to parse the response
         let data;
@@ -90,7 +89,6 @@ export class DeepSeekClient {
           data = JSON.parse(rawText);
         } catch (parseError) {
           console.error('Failed to parse DeepSeek response:', parseError);
-          console.error('Raw response was:', rawText);
           throw parseError;
         }
 
