@@ -3,12 +3,16 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
+interface JsonValue {
+  [key: string]: string | number | boolean | null | JsonValue | JsonValue[];
+}
+
 interface FileInfo {
   name: string;
   size: number;
   permissions: string;
   lastModified: number;
-  contents?: any;
+  contents?: JsonValue;
 }
 
 interface DirectoryInfo {
@@ -32,7 +36,7 @@ function getFileInfo(filePath: string): FileInfo {
   if (filePath.endsWith('.json') && stats.size < 1024 * 1024) {
     try {
       const contents = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      info.contents = contents;
+      info.contents = contents as JsonValue;
     } catch (error) {
       console.error(`Error reading ${filePath}:`, error);
     }
