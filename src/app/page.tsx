@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { ThreadCount } from './components/ThreadCount';
 import { ScraperButton } from './components/ScraperButton';
 import { SummarizerButton } from './components/SummarizerButton';
+import { AntisemitismStats } from './components/AntisemitismStats';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -34,6 +35,9 @@ type CardItem = ContentCard | ControlCard | StatusCard;
 const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
   switch (card.type) {
     case 'content':
+      if (card.id === 'content-0') {
+        return <AntisemitismStats />;
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -65,8 +69,8 @@ export default function Home() {
   const contentCards: ContentCard[] = Array.from({ length: 13 }, (_, i) => ({
     id: `content-${i}`,
     type: 'content',
-    title: `Card ${i + 1}`,
-    content: 'Sample content for this card. Will be replaced with real data.'
+    title: i === 0 ? 'Antisemitism Per Post' : `Card ${i + 1}`,
+    content: i === 0 ? '9.4% Medium' : 'Sample content for this card. Will be replaced with real data.'
   }));
 
   // Thread count card (14th card)

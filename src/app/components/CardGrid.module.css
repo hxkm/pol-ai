@@ -1,9 +1,18 @@
 .grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 24px;
-  padding: 24px;
+  display: flex;
   width: 100%;
+  max-width: 100%;
+  margin-left: -24px; /* Compensate for column gap */
+}
+
+.gridColumn {
+  padding-left: 24px; /* Column gap */
+  background-clip: padding-box;
+}
+
+/* Ensure cards maintain proper spacing */
+.gridColumn > div {
+  margin-bottom: 24px;
 }
 
 /* Tablet breakpoint */
