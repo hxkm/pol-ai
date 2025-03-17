@@ -30,6 +30,11 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
    */
   private async checkDiskSpace(): Promise<boolean> {
     try {
+      // On Windows, statfs is not available, so we'll skip the check
+      if (process.platform === 'win32') {
+        return true;
+      }
+
       const stats = await fs.promises.statfs(this.storagePath);
       const freeSpace = stats.bfree * stats.bsize;
       return freeSpace >= MIN_DISK_SPACE;
