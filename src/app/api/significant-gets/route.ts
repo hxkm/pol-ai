@@ -16,6 +16,7 @@ interface GetAnalyzerResult {
   metadata: {
     postNo: number;
     checkCount: number;
+    comment: string;
   };
 }
 
@@ -48,6 +49,10 @@ function countRepeatingTrailingDigits(postNumber: string): number {
     }
   }
   return maxCount;
+}
+
+function isGet(postNumber: string): boolean {
+  return countRepeatingTrailingDigits(postNumber) >= 2;
 }
 
 export async function GET() {
@@ -92,26 +97,35 @@ export async function GET() {
       });
     }
 
-    // Convert analyzer results to Get format
-    const gets: Get[] = results.map(result => ({
-      postNumber: result.metadata.postNo.toString(),
-      comment: `Post #${result.metadata.postNo}`,
-      checkCount: result.metadata.checkCount
-    }));
+    // Convert analyzer results to Get format and filter for actual GETs
+    const gets: Get[] = results
+      .map(result => ({
+        postNumber: result.metadata.postNo.toString(),
+        comment: result.metadata.comment || '>pic related',
+        checkCount: result.metadata.checkCount
+      }))
+      .filter(get => isGet(get.postNumber));
 
-    // Find GETone (most checked)
+    // If no GETs found, return null
+    if (gets.length === 0) {
+      return NextResponse.json({
+        getOne: null,
+        getTwo: null
+      });
+    }
+
+    // Find GETone (most checked GET)
     const getOne = gets.reduce((max, current) => 
       current.checkCount > max.checkCount ? current : max
     , gets[0]);
 
-    // Find GETtwo (most repeating trailing digits, excluding GETone)
-    const getTwo = gets
-      .filter(get => get.postNumber !== getOne.postNumber && get.checkCount > 0)
-      .reduce((max, current) => {
-        const maxRepeating = countRepeatingTrailingDigits(max.postNumber);
-        const currentRepeating = countRepeatingTrailingDigits(current.postNumber);
-        return currentRepeating > maxRepeating ? current : max;
-      }, gets[0]);
+    // Find GETtwo (most repeating trailing digits among remaining GETs)
+    const remainingGets = gets.filter(get => get.postNumber !== getOne.postNumber);
+    const getTwo = remainingGets.length > 0 ? remainingGets.reduce((max, current) => {
+      const maxRepeating = countRepeatingTrailingDigits(max.postNumber);
+      const currentRepeating = countRepeatingTrailingDigits(current.postNumber);
+      return currentRepeating > maxRepeating ? current : max;
+    }, remainingGets[0]) : null;
 
     return NextResponse.json({
       getOne,

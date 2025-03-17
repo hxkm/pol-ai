@@ -80,7 +80,23 @@ export class DeepSeekClient {
           }
         );
 
-        const data = await response.json();
+        // Log response status and headers
+        console.log('DeepSeek Response Status:', response.status);
+        console.log('DeepSeek Response Headers:', Object.fromEntries(response.headers.entries()));
+        
+        // Get raw response text
+        const rawText = await response.text();
+        console.log('DeepSeek Raw Response:', rawText);
+        
+        // Try to parse the response
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseError) {
+          console.error('Failed to parse DeepSeek response:', parseError);
+          console.error('Raw response was:', rawText);
+          throw parseError;
+        }
 
         if (!response.ok) {
           const error = data as DeepSeekError;
