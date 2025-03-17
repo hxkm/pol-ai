@@ -24,5 +24,6 @@ export interface GetAnalyzerResult extends AnalyzerResult {
   metadata: {
     postNo: number;          // The post number that got the GET
     checkCount: number;      // Number of times this GET was checked
+    comment: string;         // The comment from the GET post
   };
 } 

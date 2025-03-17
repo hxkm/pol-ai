@@ -34,12 +34,23 @@
   color: #000;
   margin: 4px 0;
   word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.comment > span {
+  display: block;
+}
+
+.comment span[class^="quote"],
+.comment span[class*=" quote"] {
+  color: #789922;
 }
 
 .placeholderComment {
   background-color: rgba(128, 128, 128, 0.1);
   padding: 2px 6px;
   border-radius: 3px;
+  color: #789922;
 }
 
 .checkCount {

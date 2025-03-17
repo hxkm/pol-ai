@@ -80,10 +80,6 @@ export class DeepSeekClient {
           }
         );
 
-        // Log response status and headers
-        console.log('DeepSeek Response Status:', response.status);
-        console.log('DeepSeek Response Headers:', Object.fromEntries(response.headers.entries()));
-        
         // Get raw response text
         const rawText = await response.text();
         console.log('DeepSeek Raw Response:', rawText);

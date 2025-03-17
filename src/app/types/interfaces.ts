@@ -6,11 +6,11 @@
 export interface Thread {
   no: number;           // Thread ID
   time: number;         // Unix timestamp
-  name: string;         // Name field
+  name?: string;         // Name field
   sub?: string;         // Subject
   com?: string;         // Comment HTML
-  replies: number;      // Number of replies
-  images: number;       // Number of images
+  replies?: number;      // Number of replies
+  images?: number;       // Number of images
   sticky?: number;      // If thread is stickied
   closed?: number;      // If thread is closed
   archived?: number;    // If thread is archived
@@ -26,6 +26,12 @@ export interface Thread {
   h?: number;           // Image height
   tn_w?: number;        // Thumbnail width
   tn_h?: number;        // Thumbnail height
+  now: string;  // The formatted date string from 4chan
+  bumplimit?: number;
+  imagelimit?: number;
+  semantic_url?: string;
+  archived_on?: number;
+  last_modified?: number;
 }
 
 // 4chan Post structure

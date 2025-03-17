@@ -101,7 +101,7 @@ export async function GET() {
     const gets: Get[] = results
       .map(result => ({
         postNumber: result.metadata.postNo.toString(),
-        comment: result.metadata.comment || '>pic related',
+        comment: result.metadata.comment,
         checkCount: result.metadata.checkCount
       }))
       .filter(get => isGet(get.postNumber));

@@ -143,7 +143,7 @@ async function getTargetThreads(): Promise<Thread[]> {
     
     // Get top threads by replies
     const topThreads = [...allThreads]
-      .sort((a, b) => b.replies - a.replies)
+      .sort((a, b) => (b.replies || 0) - (a.replies || 0))
       .slice(0, MAX_THREADS_PER_CATEGORY);
     
     // Get newest threads
@@ -178,12 +178,19 @@ async function fetchFullThread(threadId: number): Promise<Thread | null> {
     // First post is always the OP
     const [op, ...replies] = data.posts;
     
+    // Ensure we have the 'now' field
+    if (!op.now) {
+      console.error(`Thread ${threadId} missing 'now' field`);
+      return null;
+    }
+    
     // Construct full thread object
     const thread: Thread = {
       ...op,
       no: op.no,
       time: op.time,
-      name: op.name,
+      name: op.name || 'Anonymous',
+      now: op.now,
       replies: replies.length,
       images: replies.filter(post => post.tim).length,
       posts: replies,
@@ -222,6 +229,45 @@ function saveThread(thread: Thread): void {
 }
 
 /**
+ * Parse 4chan date format to timestamp
+ * Format: "MM/DD/YY(Day)HH:MM:SS"
+ */
+function parseThreadDate(dateStr: string): number {
+  try {
+    // Extract date parts from format "03/15/25(Sat)10:49:41"
+    const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{2})\([^)]+\)(\d{2}):(\d{2}):(\d{2})/);
+    if (!match) return Date.now(); // Return current time if format doesn't match
+
+    const [, month, day, year, hours, minutes, seconds] = match;
+    // Convert to full year (assuming 20xx)
+    const fullYear = 2000 + parseInt(year);
+    
+    return new Date(
+      fullYear,
+      parseInt(month) - 1, // JS months are 0-based
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+      parseInt(seconds)
+    ).getTime();
+  } catch (error) {
+    console.error(`Error parsing thread date ${dateStr}:`, error);
+    return Date.now(); // Return current time on error
+  }
+}
+
+/**
+ * Get thread age in hours
+ */
+function getThreadAgeHours(thread: Thread): number {
+  if (!thread.now) return 0;
+  
+  const threadTime = parseThreadDate(thread.now);
+  const ageMs = Date.now() - threadTime;
+  return ageMs / (1000 * 60 * 60);
+}
+
+/**
  * Clean up threads older than 24 hours
  */
 async function cleanOldThreads(): Promise<void> {
@@ -232,17 +278,32 @@ async function cleanOldThreads(): Promise<void> {
       .filter(file => file.endsWith('.json'));
     
     let removedCount = 0;
-    const now = Date.now();
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const MAX_THREAD_AGE_HOURS = 24;
     
     for (const file of threadFiles) {
       const filePath = path.resolve(paths.threadsDir, file);
-      const stats = fs.statSync(filePath);
       
-      if (now - stats.mtimeMs > ONE_DAY_MS) {
-        console.log(`Removing old thread file: ${file}`);
-        fs.unlinkSync(filePath);
-        removedCount++;
+      try {
+        // Read and parse the thread file
+        const threadData = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Thread;
+        const ageHours = getThreadAgeHours(threadData);
+        
+        // If the thread is older than our threshold, remove it
+        if (ageHours > MAX_THREAD_AGE_HOURS) {
+          console.log(`Removing old thread file: ${file} (${ageHours.toFixed(1)} hours old)`);
+          fs.unlinkSync(filePath);
+          removedCount++;
+        }
+      } catch (error) {
+        console.error(`Error processing thread file ${file}:`, error);
+        // If we can't read/parse the file, remove it
+        try {
+          fs.unlinkSync(filePath);
+          removedCount++;
+          console.log(`Removed invalid thread file: ${file}`);
+        } catch {
+          console.error(`Failed to remove invalid thread file: ${file}`);
+        }
       }
     }
     

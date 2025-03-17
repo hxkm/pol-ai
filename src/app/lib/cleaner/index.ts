@@ -8,22 +8,48 @@
 import fs from 'fs';
 import path from 'path';
 import { ensureDirectories, paths } from '../utils/paths';
+import { Thread } from '../../types/interfaces';
 
-// Maximum age of threads to keep (in days)
-const MAX_THREAD_AGE_DAYS = 1;
+// Maximum age of threads to keep (in hours)
+const MAX_THREAD_AGE_HOURS = 24;
 
 /**
- * Get the age of a file in days
+ * Parse 4chan date format to timestamp
+ * Format: "MM/DD/YY(Day)HH:MM:SS"
  */
-function getFileAgeDays(filePath: string): number {
+function parseThreadDate(dateStr: string): number {
   try {
-    const stats = fs.statSync(filePath);
-    const ageMs = Date.now() - stats.mtime.getTime();
-    return ageMs / (1000 * 60 * 60 * 24);
+    // Extract date parts from format "03/15/25(Sat)10:49:41"
+    const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{2})\([^)]+\)(\d{2}):(\d{2}):(\d{2})/);
+    if (!match) return Date.now(); // Return current time if format doesn't match
+
+    const [, month, day, year, hours, minutes, seconds] = match;
+    // Convert to full year (assuming 20xx)
+    const fullYear = 2000 + parseInt(year);
+    
+    return new Date(
+      fullYear,
+      parseInt(month) - 1, // JS months are 0-based
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+      parseInt(seconds)
+    ).getTime();
   } catch (error) {
-    console.error(`Error getting age of file ${filePath}:`, error);
-    return 0;
+    console.error(`Error parsing thread date ${dateStr}:`, error);
+    return Date.now(); // Return current time on error
   }
+}
+
+/**
+ * Get thread age in hours
+ */
+function getThreadAgeHours(thread: Thread): number {
+  if (!thread.now) return 0;
+  
+  const threadTime = parseThreadDate(thread.now);
+  const ageMs = Date.now() - threadTime;
+  return ageMs / (1000 * 60 * 60);
 }
 
 /**
@@ -39,16 +65,31 @@ function cleanThreads(): void {
     
     let removedCount = 0;
     
-    // Check each file's age
+    // Check each thread's age
     for (const file of threadFiles) {
       const filePath = path.join(paths.threadsDir, file);
-      const ageDays = getFileAgeDays(filePath);
       
-      // If the file is older than our threshold, remove it
-      if (ageDays > MAX_THREAD_AGE_DAYS) {
-        console.log(`Removing old thread file: ${file} (${ageDays.toFixed(1)} days old)`);
-        fs.unlinkSync(filePath);
-        removedCount++;
+      try {
+        // Read and parse the thread file
+        const threadData = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Thread;
+        const ageHours = getThreadAgeHours(threadData);
+        
+        // If the thread is older than our threshold, remove it
+        if (ageHours > MAX_THREAD_AGE_HOURS) {
+          console.log(`Removing old thread file: ${file} (${ageHours.toFixed(1)} hours old)`);
+          fs.unlinkSync(filePath);
+          removedCount++;
+        }
+      } catch (error) {
+        console.error(`Error processing thread file ${file}:`, error);
+        // If we can't read/parse the file, remove it
+        try {
+          fs.unlinkSync(filePath);
+          removedCount++;
+          console.log(`Removed invalid thread file: ${file}`);
+        } catch {
+          console.error(`Failed to remove invalid thread file: ${file}`);
+        }
       }
     }
     
