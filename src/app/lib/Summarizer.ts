@@ -10,6 +10,13 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
+interface Summary {
+  articles: ArticleBatch;
+  matrix: AntisemitismMatrix;
+  bigPicture: BigPictureAnalysis;
+  timestamp?: number;
+}
+
 export class Summarizer {
   private articleGenerator: ArticleGenerator;
   private matrixAnalyzer: AntisemitismMatrixAnalyzer;
@@ -26,7 +33,7 @@ export class Summarizer {
     this.outputFile = path.resolve(paths.dataDir, 'analysis', 'latest-summary.json');
   }
 
-  private async saveSummary(summary: any): Promise<void> {
+  private async saveSummary(summary: Summary): Promise<void> {
     const tempFile = `${this.outputFile}.tmp`;
     try {
       await fs.mkdir(path.dirname(this.outputFile), { recursive: true });
@@ -45,11 +52,7 @@ export class Summarizer {
     }
   }
 
-  async analyze(threads: Thread[]): Promise<{
-    articles: ArticleBatch;
-    matrix: AntisemitismMatrix;
-    bigPicture: BigPictureAnalysis;
-  }> {
+  async analyze(threads: Thread[]): Promise<Summary> {
     console.log(`Starting analysis of ${threads.length} threads...`);
     
     // Generate articles first
@@ -64,7 +67,7 @@ export class Summarizer {
     ]);
     
     // Combine all results and save
-    const summary = { articles, matrix, bigPicture };
+    const summary: Summary = { articles, matrix, bigPicture };
     await this.saveSummary(summary);
     
     console.log('\nAnalysis complete:');

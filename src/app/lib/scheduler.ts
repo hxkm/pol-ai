@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import { loadEnvConfig } from '@next/env';
 import { Summarizer } from './Summarizer';
-import { Thread } from '../types/interfaces';
 import { paths } from '@/app/utils/paths';
 
 // Load environment variables
