@@ -3,15 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
-interface RouteContext {
-  params: {
-    filename: string;
-  };
-}
-
 export async function GET(
   request: NextRequest,
-  context: RouteContext
+  context: { params: { filename: string } }
 ) {
   try {
     const filename = context.params.filename;
