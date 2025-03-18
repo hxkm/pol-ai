@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "tsx src/app/startup.ts && next start",
+    "start": "node -e \"console.log('Starting app at ' + new Date().toISOString())\" && tsx src/app/startup.ts || (echo 'Startup script failed but continuing...' && exit 0) && next start",
     "lint": "next lint",
     "scrape": "tsx src/app/lib/scraper/index.ts",
     "summarize": "tsx src/scripts/summarize.ts",

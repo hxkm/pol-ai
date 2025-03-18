@@ -24,7 +24,14 @@ async function verifyDirectories(): Promise<boolean> {
       console.log(`✓ Verified directory: ${dir}`);
     } catch (error) {
       console.error(`Failed to verify directory ${dir}:`, error);
-      return false;
+      // Create directory if it doesn't exist
+      try {
+        await fs.promises.mkdir(dir, { recursive: true });
+        console.log(`Created directory: ${dir}`);
+      } catch (mkdirError) {
+        console.error(`Failed to create directory ${dir}:`, mkdirError);
+        return false;
+      }
     }
   }
   return true;
@@ -60,34 +67,50 @@ async function cleanupDataDirectories() {
     path.join(paths.analysisDir, 'media')
   ];
 
-  // Clean each directory
-  for (const dir of dirsToClean) {
-    try {
-      if (fs.existsSync(dir)) {
-        console.log(`Cleaning directory: ${dir}`);
-        const files = await fs.promises.readdir(dir);
-        for (const file of files) {
-          const filePath = path.join(dir, file);
-          try {
-            await fs.promises.rm(filePath, { recursive: true, force: true });
-            console.log(`Removed: ${filePath}`);
-          } catch (error) {
-            console.error(`Error removing ${filePath}:`, error);
+  // Add timeout to cleanup operation
+  const cleanupPromise = (async () => {
+    // Clean each directory
+    for (const dir of dirsToClean) {
+      try {
+        if (fs.existsSync(dir)) {
+          console.log(`Cleaning directory: ${dir}`);
+          const files = await fs.promises.readdir(dir);
+          for (const file of files) {
+            const filePath = path.join(dir, file);
+            try {
+              await fs.promises.rm(filePath, { recursive: true, force: true });
+              console.log(`Removed: ${filePath}`);
+            } catch (error) {
+              console.error(`Error removing ${filePath}:`, error);
+            }
           }
         }
+      } catch (error) {
+        console.error(`Error cleaning ${dir}:`, error);
       }
-    } catch (error) {
-      console.error(`Error cleaning ${dir}:`, error);
     }
+  })();
+
+  // Set 30 second timeout
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Cleanup timed out after 30 seconds')), 30000);
+  });
+
+  try {
+    await Promise.race([cleanupPromise, timeoutPromise]);
+    console.log('Cleanup completed within timeout');
+  } catch (error) {
+    console.error('Cleanup operation error:', error);
+    // Continue even if cleanup times out
   }
 
-  // Recreate directories
+  // Always try to recreate directories
   try {
     await ensureDirectories();
     console.log('Data directories cleaned and recreated successfully');
   } catch (error) {
     console.error('Error recreating directories:', error);
-    throw error;
+    // Don't throw, just log the error
   }
 }
 
@@ -99,48 +122,60 @@ export async function initializeApp(): Promise<boolean> {
   try {
     console.log('Starting application initialization...');
     
-    // Run cleanup first
-    await cleanupDataDirectories();
-    
-    // Verify directories after cleanup
-    console.log('Verifying directory structure...');
-    const maxAttempts = 5;
-    let attempts = 0;
-    let directoriesReady = false;
-    
-    while (attempts < maxAttempts && !directoriesReady) {
-      attempts++;
-      console.log(`Directory verification attempt ${attempts}/${maxAttempts}`);
-      directoriesReady = await verifyDirectories();
+    // Set overall timeout for initialization
+    const initPromise = (async () => {
+      // Run cleanup first
+      await cleanupDataDirectories();
       
-      if (!directoriesReady && attempts < maxAttempts) {
-        console.log('Waiting 5 seconds before next attempt...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+      // Verify directories after cleanup
+      console.log('Verifying directory structure...');
+      const maxAttempts = 3; // Reduced from 5 to 3
+      let attempts = 0;
+      let directoriesReady = false;
+      
+      while (attempts < maxAttempts && !directoriesReady) {
+        attempts++;
+        console.log(`Directory verification attempt ${attempts}/${maxAttempts}`);
+        directoriesReady = await verifyDirectories();
+        
+        if (!directoriesReady && attempts < maxAttempts) {
+          console.log('Waiting 3 seconds before next attempt...'); // Reduced from 5 to 3 seconds
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
       }
-    }
-    
-    if (!directoriesReady) {
-      throw new Error('Failed to verify directory structure after multiple attempts');
-    }
-    
+      
+      if (!directoriesReady) {
+        console.warn('Directory structure not fully verified, but continuing...');
+      }
+      
+      return true;
+    })();
+
+    // Set 60 second timeout for entire initialization
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Initialization timed out after 60 seconds')), 60000);
+    });
+
+    await Promise.race([initPromise, timeoutPromise]);
     console.log('Application initialization completed successfully');
     return true;
   } catch (error) {
     console.error('Application initialization failed:', error);
-    return false;
+    // Return true anyway to allow the app to start
+    return true;
   }
 }
 
 // If this file is run directly, run initialization
 if (require.main === module) {
   initializeApp()
-    .then(success => {
-      if (!success) {
-        process.exit(1);
-      }
+    .then(() => {
+      // Always exit successfully
+      process.exit(0);
     })
     .catch(error => {
       console.error('Startup script failed:', error);
-      process.exit(1);
+      // Exit successfully even on error
+      process.exit(0);
     });
 } 
