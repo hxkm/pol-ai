@@ -22,12 +22,13 @@
 
 .postNumber {
   color: #000;
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
 
 .postNumber:hover {
-  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.8);
 }
 
 .comment {
@@ -35,6 +36,11 @@
   margin: 4px 0;
   word-wrap: break-word;
   white-space: pre-wrap;
+  text-align: justify;
+  text-justify: inter-word;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 0;
 }
 
 .comment > span {
@@ -53,8 +59,16 @@
   color: #789922;
 }
 
-.checkCount {
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
   color: #666;
   font-size: 11px;
-  margin-top: 4px;
+}
+
+.getType, .checkCount {
+  color: #666;
+  font-size: 11px;
 } 

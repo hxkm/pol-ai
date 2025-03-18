@@ -7,6 +7,7 @@ interface Get {
   postNumber: string;
   comment: string;
   checkCount: number;
+  getType: string;
 }
 
 interface GetAnalyzerResult {
@@ -103,7 +104,8 @@ export async function GET() {
     const getOne: Get = {
       postNumber: sortedResults[0].metadata.postNo.toString(),
       comment: sortedResults[0].metadata.comment,
-      checkCount: sortedResults[0].metadata.checkCount
+      checkCount: sortedResults[0].metadata.checkCount,
+      getType: sortedResults[0].getType
     };
 
     console.log('Found GETone:', getOne);
@@ -116,7 +118,8 @@ export async function GET() {
     const getTwoResponse = getTwo ? {
       postNumber: getTwo.metadata.postNo.toString(),
       comment: getTwo.metadata.comment,
-      checkCount: getTwo.metadata.checkCount
+      checkCount: getTwo.metadata.checkCount,
+      getType: getTwo.getType
     } : null;
 
     console.log('Found GETtwo:', getTwoResponse);

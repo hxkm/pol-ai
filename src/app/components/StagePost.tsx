@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useEffect, useState } from 'react';
 import styles from './StagePost.module.css';
 
@@ -7,14 +8,15 @@ interface Get {
   postNumber: string;
   comment: string;
   checkCount: number;
+  getType: string;
 }
 
 interface StagePostProps {
   position: 'top' | 'bottom';
 }
 
-function parseComment(html: string): string {
-  // Convert HTML to text
+function parseComment(html: string): React.ReactNode {
+  // Convert HTML to text first
   const div = document.createElement('div');
   div.innerHTML = html;
   
@@ -25,7 +27,7 @@ function parseComment(html: string): string {
   });
 
   // Convert <br> to newlines
-  const text = div.innerHTML
+  let text = div.innerHTML
     .replace(/<br\s*\/?>/g, '\n')
     // Convert quotes to greentext
     .replace(/<span class="quote">&gt;/g, '>')
@@ -33,12 +35,42 @@ function parseComment(html: string): string {
     .replace(/<[^>]+>/g, '');
 
   // Decode HTML entities
-  return text
+  text = text
     .replace(/&gt;/g, '>')
     .replace(/&lt;/g, '<')
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#x27;/g, "'");
+
+  // Split the text into segments, preserving post references
+  const segments = text.split(/(&gt;&gt;|>>)(\d+)/g);
+  
+  return (
+    <span>
+      {segments.map((segment, index) => {
+        // Every third element is a post number (after the '>>' match)
+        if (index % 3 === 2) {
+          return (
+            <a
+              key={index}
+              href={`https://archive.4plebs.org/pol/post/${segment}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.postNumber}
+            >
+              &gt;&gt;{segment}
+            </a>
+          );
+        }
+        // Skip the '>>' matches
+        if (index % 3 === 1) {
+          return null;
+        }
+        // Regular text
+        return segment;
+      })}
+    </span>
+  );
 }
 
 /**
@@ -105,7 +137,12 @@ export default function StagePost({ position }: StagePostProps) {
       <div className={styles.comment}>
         {parsedComment || <span className={styles.placeholderComment}>&gt;pic related</span>}
       </div>
-      <div className={styles.checkCount}>{formatCheckCount(data.checkCount)}</div>
+      <div className={styles.footer}>
+        <span className={styles.getType}>
+          {data.getType.charAt(0).toUpperCase() + data.getType.slice(1).toLowerCase()} •
+        </span>
+        <span className={styles.checkCount}>{formatCheckCount(data.checkCount)}</span>
+      </div>
     </div>
   );
 } 
