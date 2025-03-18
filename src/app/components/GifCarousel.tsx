@@ -44,7 +44,7 @@ export const GifCarousel = () => {
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
         <Image
-          src={`/api/gifs/${gifs[currentGifIndex]}`}
+          src={`/api/gifs?file=${encodeURIComponent(gifs[currentGifIndex])}`}
           alt="Rotating GIF"
           fill
           sizes="(max-width: 768px) 100vw, 400px"
