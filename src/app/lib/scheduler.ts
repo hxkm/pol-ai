@@ -137,19 +137,8 @@ export class Scheduler {
     try {
       await runScraper();
       console.log(`[${new Date().toISOString()}] Initial scraper job completed`);
-      
-      // Wait for threads to be available
-      console.log('Checking for thread availability...');
-      const hasThreads = await waitForThreads();
-      if (hasThreads) {
-        console.log(`[${new Date().toISOString()}] Running initial summarizer job...`);
-        await runSummarizer();
-        console.log(`[${new Date().toISOString()}] Initial summarizer job completed`);
-      } else {
-        console.log('Skipping initial summarizer job due to insufficient threads');
-      }
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Error running initial jobs:`, error);
+      console.error(`[${new Date().toISOString()}] Error running initial scraper job:`, error);
     }
 
     // Set up scheduled jobs
