@@ -3,12 +3,18 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
+interface RouteContext {
+  params: {
+    filename: string;
+  };
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  context: RouteContext
 ) {
   try {
-    const filename = params.filename;
+    const filename = context.params.filename;
     const gifDir = path.resolve(paths.dataDir, 'media', 'gif');
     const gifPath = path.resolve(gifDir, filename);
 
