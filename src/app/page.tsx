@@ -7,6 +7,7 @@ import { SummarizerButton } from './components/SummarizerButton';
 import { AntisemitismStats } from './components/AntisemitismStats';
 import StagePost from './components/StagePost';
 import { Card3 } from './components/Card3';
+import Card4 from './components/Card4';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -53,6 +54,9 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       }
       if (card.id === 'content-2') {
         return <Card3 />;
+      }
+      if (card.id === 'content-3') {
+        return <Card4 />;
       }
       return (
         <>
@@ -125,6 +129,7 @@ export default function Home() {
             <Card key={card.id} className={
               index === 0 ? styles.pinkCard :
               index === 1 ? styles.neonCard :
+              index === 3 ? styles.cyanCard :
               ''
             }>
               <CardContent card={card} />
