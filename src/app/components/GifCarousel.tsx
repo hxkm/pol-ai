@@ -8,6 +8,16 @@ export const GifCarousel = () => {
   const [currentGifIndex, setCurrentGifIndex] = useState(0);
   const [gifs, setGifs] = useState<string[]>([]);
 
+  // Function to get a random index different from the current one
+  const getNextRandomIndex = (currentIndex: number, length: number) => {
+    if (length <= 1) return 0;
+    let nextIndex;
+    do {
+      nextIndex = Math.floor(Math.random() * length);
+    } while (nextIndex === currentIndex);
+    return nextIndex;
+  };
+
   useEffect(() => {
     // Fetch the list of GIFs when component mounts
     const fetchGifs = async () => {
@@ -15,6 +25,8 @@ export const GifCarousel = () => {
         const response = await fetch('/api/gifs');
         const data = await response.json();
         setGifs(data.gifs);
+        // Set initial random index
+        setCurrentGifIndex(Math.floor(Math.random() * data.gifs.length));
       } catch (error) {
         console.error('Error fetching GIFs:', error);
       }
@@ -26,11 +38,9 @@ export const GifCarousel = () => {
   useEffect(() => {
     if (gifs.length === 0) return;
 
-    // Rotate through GIFs every 4 seconds
+    // Rotate through GIFs randomly every 4 seconds
     const interval = setInterval(() => {
-      setCurrentGifIndex((prevIndex) => 
-        prevIndex === gifs.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentGifIndex(prevIndex => getNextRandomIndex(prevIndex, gifs.length));
     }, 4000);
 
     return () => clearInterval(interval);

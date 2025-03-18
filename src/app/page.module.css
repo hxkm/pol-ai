@@ -229,3 +229,13 @@ a.secondary {
   font-weight: 500;
   white-space: nowrap;
 }
+
+.cyanCard {
+  background: #3decff !important;
+  color: black !important;
+}
+
+.cyanCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}

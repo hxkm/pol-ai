@@ -66,13 +66,6 @@ export const AntisemitismStats = () => {
         <span className={styles.level}>{stats.level}</span>
       </p>
       <span className={styles.trend}>{trendText}</span>
-      <div className={styles.badges}>
-        {stats.themes.map((theme) => (
-          <span key={theme.name} className={styles.badge}>
-            {theme.name} {Math.round(theme.frequency)}%
-          </span>
-        ))}
-      </div>
     </>
   );
 }; 
