@@ -3,9 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
+type RouteParams = { params: { filename: string } };
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: RouteParams
 ) {
   try {
     const filename = params.filename;

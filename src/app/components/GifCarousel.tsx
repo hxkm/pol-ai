@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import styles from './GifCarousel.module.css';
 
 export const GifCarousel = () => {
@@ -41,11 +42,16 @@ export const GifCarousel = () => {
 
   return (
     <div className={styles.container}>
-      <img
-        src={`/api/gifs/${gifs[currentGifIndex]}`}
-        alt="Rotating GIF"
-        className={styles.gif}
-      />
+      <div className={styles.imageWrapper}>
+        <Image
+          src={`/api/gifs/${gifs[currentGifIndex]}`}
+          alt="Rotating GIF"
+          fill
+          sizes="(max-width: 768px) 100vw, 400px"
+          priority
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
     </div>
   );
 }; 

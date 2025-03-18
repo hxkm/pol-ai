@@ -146,7 +146,7 @@ export class Scheduler {
     
     this.isRunning = true;
     console.log(`[${new Date().toISOString()}] Scheduler started successfully`);
-    console.log('Scraper schedule: Every 3 hours starting at 00:00 UTC');
+    console.log('Scraper schedule: Every 2 hours starting at 00:00 UTC');
     console.log('Summarizer schedule: Daily at 23:30 UTC');
     
     // Log current time for reference
@@ -157,8 +157,8 @@ export class Scheduler {
   }
 
   private setupScheduledJobs() {
-    // Scraper: At minute 0 of hours 0, 3, 6, 9, 12, 15, 18, and 21 (UTC)
-    this.scraperJob = cron.schedule('0 0,3,6,9,12,15,18,21 * * *', async () => {
+    // Scraper: At minute 0 of every even hour (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22) UTC
+    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', async () => {
       console.log(`[${new Date().toISOString()}] Starting scheduled scraper job`);
       try {
         await runScraper();
