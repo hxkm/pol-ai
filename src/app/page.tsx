@@ -6,6 +6,7 @@ import { ScraperButton } from './components/ScraperButton';
 import { SummarizerButton } from './components/SummarizerButton';
 import { AntisemitismStats } from './components/AntisemitismStats';
 import StagePost from './components/StagePost';
+import { Card3 } from './components/Card3';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -49,6 +50,9 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
             </div>
           </>
         );
+      }
+      if (card.id === 'content-2') {
+        return <Card3 />;
       }
       return (
         <>

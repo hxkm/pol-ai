@@ -1,0 +1,19 @@
+.container {
+  width: 100%;
+  position: relative;
+  padding-bottom: 100%; /* Creates a square aspect ratio */
+  background-color: #f0f0f0;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.gif {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This will ensure the GIF covers the square area */
+  transition: opacity 0.3s ease-in-out;
+} 
