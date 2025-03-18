@@ -3,12 +3,15 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '@/app/utils/paths';
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { filename: string } }
-): Promise<Response> {
+type Props = {
+  params: {
+    filename: string;
+  };
+};
+
+export async function GET(request: NextRequest, props: Props) {
   try {
-    const filename = params.filename;
+    const { filename } = props.params;
     const gifDir = path.resolve(paths.dataDir, 'media', 'gif');
     const gifPath = path.resolve(gifDir, filename);
 
