@@ -4,15 +4,10 @@ import { scrape } from './scraper';
 import { Summarizer } from './Summarizer';
 import { paths } from '@/app/utils/paths';
 import { loadEnvConfig } from '@next/env';
+import { loadAllThreads } from '../utils/fileLoader';
+import { selectThreads } from '../utils/threadSelector';
 
-// Load environment variables
-loadEnvConfig(process.cwd());
-
-// Helper functions
-async function runScraper() {
-  return scrape();
-}
-
+// Helper function to check thread availability
 async function checkThreadAvailability(): Promise<number> {
   try {
     if (!paths.threadsDir) {
@@ -38,62 +33,97 @@ async function checkThreadAvailability(): Promise<number> {
   }
 }
 
-async function waitForThreads(requiredCount: number = 12, maxAttempts: number = 8): Promise<boolean> {
-  console.log(`Waiting for at least ${requiredCount} threads to be available...`);
-  
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const threadCount = await checkThreadAvailability();
-    console.log(`Attempt ${attempt}/${maxAttempts}: Found ${threadCount} threads`);
-    
-    if (threadCount >= requiredCount) {
-      console.log('Sufficient threads found!');
-      return true;
-    }
-    
-    if (attempt < maxAttempts) {
-      console.log('Waiting 15 seconds before next check...');
-      await new Promise(resolve => setTimeout(resolve, 15000)); // 15 second wait
+// Helper function for the scraper job
+async function runScraperJob() {
+  console.log(`[${new Date().toISOString()}] Running scheduled scraper job`);
+  try {
+    await scrape();
+    console.log(`[${new Date().toISOString()}] Completed scheduled scraper job successfully`);
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Scraper job failed:`, error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
     }
   }
-  
-  console.log('Timed out waiting for threads');
-  return false;
 }
 
-async function runSummarizer() {
-  console.log(`[${new Date().toISOString()}] Checking summarizer prerequisites...`);
+// Helper function for the summarizer job
+async function runSummarizerJob() {
+  console.log(`[${new Date().toISOString()}] Running scheduled summarizer job`);
   
-  // Check API key
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) {
-    console.error('DEEPSEEK_API_KEY environment variable is not set');
-    throw new Error('DEEPSEEK_API_KEY environment variable is not set');
-  }
-  console.log('API key verified');
+  try {
+    // Ensure environment variables are loaded
+    loadEnvConfig(process.cwd());
+    
+    // Check API key
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      throw new Error('DEEPSEEK_API_KEY environment variable is not set');
+    }
+    console.log('API key verified');
 
-  // Check thread availability
-  const hasThreads = await waitForThreads();
-  if (!hasThreads) {
-    throw new Error('Insufficient threads available for analysis');
+    // Check thread availability
+    console.log('Checking thread availability...');
+    const threadCount = await checkThreadAvailability();
+    console.log(`Found ${threadCount} threads`);
+    
+    if (threadCount < 12) {
+      throw new Error(`Insufficient threads available for analysis: found ${threadCount}, need at least 12`);
+    }
+    
+    // Load threads with explicit path verification
+    console.log('Loading threads from:', paths.threadsDir);
+    try {
+      await fs.access(paths.threadsDir);
+      console.log('Threads directory exists and is accessible');
+    } catch (e) {
+      console.error('Threads directory not found or not accessible:', e);
+      throw new Error(`Threads directory not found at ${paths.threadsDir}`);
+    }
+    
+    const allThreads = await loadAllThreads(paths.threadsDir);
+    console.log(`Loaded ${allThreads.length} threads successfully`);
+    
+    if (allThreads.length === 0) {
+      throw new Error('No threads were loaded for analysis');
+    }
+
+    // Select threads for analysis
+    const selection = selectThreads(allThreads);
+    const threadsToAnalyze = [
+      ...selection.topByPosts,
+      ...selection.mediumHighPosts,
+      ...selection.mediumPosts,
+      ...selection.lowPosts
+    ];
+    
+    console.log(`Selected ${threadsToAnalyze.length} threads for analysis`);
+    
+    if (threadsToAnalyze.length !== 12) {
+      throw new Error(`Expected 12 threads for analysis, but got ${threadsToAnalyze.length}`);
+    }
+
+    // Initialize and run summarizer
+    console.log('Initializing summarizer with API key');
+    const summarizer = new Summarizer(apiKey);
+    console.log('Running analysis...');
+    const results = await summarizer.analyze(threadsToAnalyze);
+    console.log(`Analysis complete: ${results.articles.batchStats.totalThreads} threads analyzed`);
+    
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
   }
-  
-  const summarizer = new Summarizer(apiKey);
-  const { loadAllThreads } = await import('../utils/fileLoader');
-  const { selectThreads } = await import('../utils/threadSelector');
-  
-  // Load and select threads
-  console.log('Loading threads from:', paths.threadsDir);
-  const allThreads = await loadAllThreads(paths.threadsDir);
-  const selection = selectThreads(allThreads);
-  const threadsToAnalyze = [
-    ...selection.topByPosts,
-    ...selection.mediumHighPosts,
-    ...selection.mediumPosts,
-    ...selection.lowPosts
-  ];
-  
-  console.log(`Selected ${threadsToAnalyze.length} threads for analysis`);
-  return summarizer.analyze(threadsToAnalyze);
 }
 
 export class Scheduler {
@@ -110,8 +140,6 @@ export class Scheduler {
     if (!Scheduler.instance) {
       console.log(`[${new Date().toISOString()}] Creating new Scheduler instance`);
       Scheduler.instance = new Scheduler();
-    } else {
-      console.log(`[${new Date().toISOString()}] Reusing existing Scheduler instance`);
     }
     return Scheduler.instance;
   }
@@ -128,20 +156,10 @@ export class Scheduler {
       return;
     }
 
-    console.log(`[${new Date().toISOString()}] Starting scheduler in production mode...`);
-    console.log(`[${new Date().toISOString()}] Starting scheduler...`);
+    console.log(`[${new Date().toISOString()}] Starting scheduler in production mode`);
     console.log('Current UTC time:', new Date().toUTCString());
 
-    // Run scraper immediately on startup
-    console.log(`[${new Date().toISOString()}] Running initial scraper job...`);
-    try {
-      await runScraper();
-      console.log(`[${new Date().toISOString()}] Initial scraper job completed`);
-    } catch (error) {
-      console.error(`[${new Date().toISOString()}] Error running initial scraper job:`, error);
-    }
-
-    // Set up scheduled jobs
+    // Set up scheduled jobs (no immediate execution)
     this.setupScheduledJobs();
     
     this.isRunning = true;
@@ -158,34 +176,12 @@ export class Scheduler {
 
   private setupScheduledJobs() {
     // Scraper: At minute 0 of every even hour (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22) UTC
-    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', async () => {
-      console.log(`[${new Date().toISOString()}] Starting scheduled scraper job`);
-      try {
-        await runScraper();
-        console.log(`[${new Date().toISOString()}] Completed scheduled scraper job`);
-      } catch (error) {
-        console.error(`[${new Date().toISOString()}] Scraper job failed:`, error);
-      }
-    }, {
+    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', runScraperJob, {
       timezone: 'UTC'
     });
 
     // Summarizer: At 23:30 UTC daily
-    this.summarizerJob = cron.schedule('30 23 * * *', async () => {
-      console.log(`[${new Date().toISOString()}] Starting scheduled summarizer job`);
-      try {
-        // Check for threads before running summarizer
-        const hasThreads = await waitForThreads();
-        if (hasThreads) {
-          await runSummarizer();
-          console.log(`[${new Date().toISOString()}] Completed scheduled summarizer job`);
-        } else {
-          console.log('Skipping scheduled summarizer job due to insufficient threads');
-        }
-      } catch (error) {
-        console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
-      }
-    }, {
+    this.summarizerJob = cron.schedule('30 23 * * *', runSummarizerJob, {
       timezone: 'UTC'
     });
   }
@@ -209,7 +205,7 @@ export class Scheduler {
   async runSummarizerManually() {
     console.log(`[${new Date().toISOString()}] Manually running summarizer...`);
     try {
-      await runSummarizer();
+      await runSummarizerJob();
       console.log(`[${new Date().toISOString()}] Manual summarizer run completed`);
     } catch (error) {
       console.error(`[${new Date().toISOString()}] Manual summarizer run failed:`, error);
