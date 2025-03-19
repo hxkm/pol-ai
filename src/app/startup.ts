@@ -59,6 +59,8 @@ async function cleanupDataDirectories() {
     paths.threadsDir,
     paths.summariesDir,
     paths.analysisDir,
+    paths.mediaDir,
+    paths.mediaOpDir,
     path.join(paths.analysisDir, 'get'),
     path.join(paths.analysisDir, 'reply'),
     path.join(paths.analysisDir, 'link'),
@@ -75,15 +77,25 @@ async function cleanupDataDirectories() {
         if (fs.existsSync(dir)) {
           console.log(`Cleaning directory: ${dir}`);
           const files = await fs.promises.readdir(dir);
+          
+          // Log what we found
+          console.log(`Found ${files.length} files in ${dir}`);
+          
           for (const file of files) {
             const filePath = path.join(dir, file);
             try {
+              const stats = await fs.promises.stat(filePath);
+              console.log(`Removing ${stats.isDirectory() ? 'directory' : 'file'}: ${filePath}`);
               await fs.promises.rm(filePath, { recursive: true, force: true });
-              console.log(`Removed: ${filePath}`);
+              console.log(`Successfully removed: ${filePath}`);
             } catch (error) {
               console.error(`Error removing ${filePath}:`, error);
             }
           }
+          
+          console.log(`Finished cleaning directory: ${dir}`);
+        } else {
+          console.log(`Directory does not exist, skipping: ${dir}`);
         }
       } catch (error) {
         console.error(`Error cleaning ${dir}:`, error);
