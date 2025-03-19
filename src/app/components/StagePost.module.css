@@ -41,6 +41,8 @@
   border-top: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   padding: 6px 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .comment > span {
@@ -48,8 +50,11 @@
 }
 
 .comment span[class^="quote"],
-.comment span[class*=" quote"] {
+.comment span[class*=" quote"],
+.greentext {
   color: #789922;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
 .placeholderComment {

@@ -46,8 +46,8 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           <>
             <h2>{card.title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <StagePost position="top" />
-              <StagePost position="bottom" />
+              <StagePost position="top" cardType="gets" />
+              <StagePost position="bottom" cardType="gets" />
             </div>
           </>
         );
@@ -57,6 +57,18 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       }
       if (card.id === 'content-3') {
         return <Card4 />;
+      }
+      if (card.id === 'content-4') {
+        return (
+          <>
+            <h2>{card.title}</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+              <StagePost position="top" cardType="insights" />
+              <StagePost position="middle" cardType="insights" />
+              <StagePost position="bottom" cardType="insights" />
+            </div>
+          </>
+        );
       }
       return (
         <>
@@ -91,9 +103,11 @@ export default function Home() {
     type: 'content',
     title: i === 0 ? 'Antisemitism Per Post' : 
            i === 1 ? 'Most Significant GETs' :
+           i === 4 ? 'Key Insights' :
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
+             i === 4 ? '' :
              'Sample content for this card. Will be replaced with real data.'
   }));
 
@@ -130,6 +144,7 @@ export default function Home() {
               index === 0 ? styles.pinkCard :
               index === 1 ? styles.neonCard :
               index === 3 ? styles.cyanCard :
+              index === 4 ? styles.orangeCard :
               ''
             }>
               <CardContent card={card} />
