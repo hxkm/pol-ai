@@ -47,6 +47,23 @@ export async function GET() {
       .filter((post, index, self) => 
         index === self.findIndex((p) => p.sourcePost.no === post.sourcePost.no)
       )
+      // Filter out GETs (posts that end in 0000, 1111, etc)
+      .filter(post => {
+        const postNo = post.sourcePost.no.toString();
+        // Check if it's not a GET (not ending in repeating digits)
+        return !(
+          postNo.endsWith('0000') || 
+          postNo.endsWith('1111') || 
+          postNo.endsWith('2222') || 
+          postNo.endsWith('3333') || 
+          postNo.endsWith('4444') || 
+          postNo.endsWith('5555') || 
+          postNo.endsWith('6666') || 
+          postNo.endsWith('7777') || 
+          postNo.endsWith('8888') || 
+          postNo.endsWith('9999')
+        );
+      })
       .filter((post): post is ReplyResult => post && post.sourcePost !== undefined)
       .sort((a, b) => (b.replyCount || 0) - (a.replyCount || 0))
       .slice(0, 3);
@@ -56,7 +73,7 @@ export async function GET() {
     }
 
     // Log the top 3 posts for debugging
-    console.log('Top 3 most replied posts (deduplicated):', 
+    console.log('Top 3 most replied posts (deduplicated, no GETs):', 
       sortedResults.map(p => ({
         no: p.sourcePost.no,
         replies: p.replyCount,
