@@ -114,6 +114,7 @@ async function runSummarizerJob() {
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`Analysis complete: ${results.articles.batchStats.totalThreads} threads analyzed`);
     
+    return results;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
     if (error instanceof Error) {
@@ -123,6 +124,8 @@ async function runSummarizerJob() {
         stack: error.stack
       });
     }
+    // Rethrow the error so it can be caught by the scheduler's retry mechanism
+    throw error;
   }
 }
 
@@ -159,6 +162,27 @@ export class Scheduler {
     console.log(`[${new Date().toISOString()}] Starting scheduler in production mode`);
     console.log('Current UTC time:', new Date().toUTCString());
 
+    // Check if we missed today's summarizer run
+    const now = new Date();
+    const todayRun = new Date();
+    todayRun.setUTCHours(23, 30, 0, 0);
+    
+    // If it's past 23:30 UTC, we've missed today's run
+    if (now.getUTCHours() >= 23 && now.getUTCMinutes() >= 30) {
+      console.log(`[${new Date().toISOString()}] Past today's summarizer window, scheduling for tomorrow`);
+    } else if (now.getUTCHours() <= 23 && now.getUTCMinutes() <= 30) {
+      // If we're before today's run and haven't run today, run it
+      console.log(`[${new Date().toISOString()}] Checking if we need to run today's summarizer...`);
+      try {
+        // We could add a check here against a persistent store (like a file) to see if we already ran today
+        // For now, we'll just run it to be safe
+        console.log(`[${new Date().toISOString()}] Running missed summarizer job`);
+        await runSummarizerJob();
+      } catch (error) {
+        console.error(`[${new Date().toISOString()}] Failed to run missed summarizer job:`, error);
+      }
+    }
+
     // Set up scheduled jobs (no immediate execution)
     this.setupScheduledJobs();
     
@@ -168,7 +192,6 @@ export class Scheduler {
     console.log('Summarizer schedule: Daily at 23:30 UTC');
     
     // Log current time for reference
-    const now = new Date();
     console.log('Current time (UTC):', now.toUTCString());
     console.log('Current hour (UTC):', now.getUTCHours());
     console.log('Current minute (UTC):', now.getUTCMinutes());
@@ -180,8 +203,57 @@ export class Scheduler {
       timezone: 'UTC'
     });
 
+    // Enhanced logging for summarizer schedule
+    const now = new Date();
+    const targetTime = new Date();
+    targetTime.setUTCHours(23, 30, 0, 0);
+    
+    // If we've already passed today's run time, schedule for tomorrow
+    if (now > targetTime) {
+      targetTime.setDate(targetTime.getDate() + 1);
+    }
+    
+    const msUntilRun = targetTime.getTime() - now.getTime();
+    const hoursUntilRun = Math.floor(msUntilRun / (1000 * 60 * 60));
+    const minutesUntilRun = Math.floor((msUntilRun % (1000 * 60 * 60)) / (1000 * 60));
+    
+    console.log(`[Scheduler] Next summarizer run scheduled for: ${targetTime.toUTCString()}`);
+    console.log(`[Scheduler] Time until next run: ${hoursUntilRun}h ${minutesUntilRun}m`);
+
     // Summarizer: At 23:30 UTC daily
-    this.summarizerJob = cron.schedule('30 23 * * *', runSummarizerJob, {
+    this.summarizerJob = cron.schedule('30 23 * * *', async () => {
+      const startTime = new Date();
+      console.log(`[${startTime.toISOString()}] Starting scheduled summarizer job`);
+      console.log('Memory usage before run:', process.memoryUsage());
+      
+      try {
+        const results = await runSummarizerJob();
+        const endTime = new Date();
+        const duration = (endTime.getTime() - startTime.getTime()) / 1000;
+        
+        console.log(`[${endTime.toISOString()}] Summarizer completed successfully in ${duration} seconds`);
+        console.log('Memory usage after run:', process.memoryUsage());
+      } catch (error) {
+        const failTime = new Date();
+        console.error(`[${failTime.toISOString()}] Critical: Scheduled summarizer job failed:`, error);
+        console.error('Memory usage at failure:', process.memoryUsage());
+        
+        // Attempt retry after 5 minutes
+        console.log(`[${new Date().toISOString()}] Scheduling retry in 5 minutes...`);
+        setTimeout(async () => {
+          const retryStart = new Date();
+          console.log(`[${retryStart.toISOString()}] Attempting summarizer retry`);
+          try {
+            await runSummarizerJob();
+            const retryEnd = new Date();
+            console.log(`[${retryEnd.toISOString()}] Retry completed successfully`);
+          } catch (retryError) {
+            console.error(`[${new Date().toISOString()}] Critical: Retry also failed:`, retryError);
+            console.error('Memory usage at retry failure:', process.memoryUsage());
+          }
+        }, 5 * 60 * 1000);
+      }
+    }, {
       timezone: 'UTC'
     });
   }
