@@ -138,15 +138,49 @@ async function runSummarizerJob() {
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`Analysis complete: ${results.articles.batchStats.totalThreads} threads analyzed`);
     
-    // Ensure the big-picture.json file exists with proper permissions
-    const bigPicturePath = path.resolve(paths.dataDir, 'analysis/big-picture.json');
+    // Ensure the big-picture.json file exists with proper permissions and content
     try {
-      // Create an empty big-picture.json if it doesn't exist
-      await fs.writeFile(bigPicturePath, JSON.stringify({
+      // Create a properly structured big-picture content
+      const bigPictureContent = {
         lastUpdated: new Date().toISOString(),
-        content: {}
-      }, null, 2), { mode: 0o666 });
-      console.log(`Ensured big-picture.json exists at: ${bigPicturePath}`);
+        themes: results.matrix.themes.map(theme => ({
+          name: theme.name,
+          frequency: theme.frequency
+        })),
+        sentiments: results.bigPicture.sentiments,
+        overview: results.bigPicture.overview,
+        statistics: {
+          totalThreads: results.articles.batchStats.totalThreads,
+          totalPosts: results.articles.batchStats.totalAnalyzedPosts,
+          averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
+        }
+      };
+
+      // Ensure the analysis directory exists with proper permissions
+      await fs.mkdir(path.dirname(paths.bigPicturePath), { recursive: true, mode: 0o777 });
+      
+      // Write the file with proper permissions
+      await fs.writeFile(
+        paths.bigPicturePath,
+        JSON.stringify(bigPictureContent, null, 2),
+        { mode: 0o666 }
+      );
+      
+      console.log(`Successfully wrote big-picture.json to: ${paths.bigPicturePath}`);
+      console.log('Content summary:', {
+        themes: bigPictureContent.themes.length,
+        sentiments: bigPictureContent.sentiments.length,
+        lastUpdated: bigPictureContent.lastUpdated
+      });
+
+      // Verify the file was written correctly
+      const stats = await fs.stat(paths.bigPicturePath);
+      console.log('File stats:', {
+        size: stats.size,
+        mode: stats.mode.toString(8),
+        created: stats.birthtime,
+        modified: stats.mtime
+      });
     } catch (error) {
       console.error(`Failed to create/update big-picture.json:`, error);
       throw error;

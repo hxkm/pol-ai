@@ -40,6 +40,10 @@ export const paths = {
   
   // Analysis data storage
   analysisDir: path.resolve(DATA_DIR, 'analysis'),
+  
+  // Analysis specific paths
+  bigPicturePath: path.resolve(DATA_DIR, 'analysis', 'big-picture.json'),
+  trendsPath: path.resolve(DATA_DIR, 'analysis', 'antisemitism-trends.json'),
 
   // Media storage
   mediaDir: path.resolve(DATA_DIR, 'media'),
