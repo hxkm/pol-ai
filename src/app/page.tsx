@@ -8,6 +8,7 @@ import { AntisemitismStats } from './components/AntisemitismStats';
 import StagePost from './components/StagePost';
 import { Card3 } from './components/Card3';
 import Card4 from './components/Card4';
+import TopLinkDomains from './components/TopLinkDomains';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -67,6 +68,14 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
               <StagePost position="middle" cardType="insights" />
               <StagePost position="bottom" cardType="insights" />
             </div>
+          </>
+        );
+      }
+      if (card.id === 'content-6') {  // Card 7
+        return (
+          <>
+            <h2>{card.title}</h2>
+            <TopLinkDomains />
           </>
         );
       }
@@ -142,14 +151,13 @@ export default function Home() {
       <main className={styles.main}>
         <CardGrid>
           {cardLayout.map((card, index) => (
-            <Card key={card.id} className={
-              index === 0 ? styles.pinkCard :
-              index === 1 ? styles.neonCard :
-              index === 3 ? styles.cyanCard :
-              index === 4 ? styles.orangeCard :
-              index === 6 ? styles.purpleCard :  // Apply purple style to Card 7
-              ''
-            }>
+            <Card key={card.id} className={`
+              ${index === 0 ? styles.pinkCard : ''}
+              ${index === 1 ? styles.neonCard : ''}
+              ${index === 3 ? styles.cyanCard : ''}
+              ${index === 4 ? styles.orangeCard : ''}
+              ${index === 6 ? styles.purpleCard : ''}
+            `.trim()}>
               <CardContent card={card} />
             </Card>
           ))}
