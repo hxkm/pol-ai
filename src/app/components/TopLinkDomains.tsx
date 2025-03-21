@@ -27,7 +27,7 @@ export default function TopLinkDomains() {
         }
 
         // Ensure we have the correct data structure
-        const validDomains = data.filter((item: any) => 
+        const validDomains = data.filter((item: LinkDomain) => 
           item && 
           typeof item.domain === 'string' && 
           typeof item.count === 'number'
@@ -58,7 +58,7 @@ export default function TopLinkDomains() {
 
   return (
     <div className={styles.container}>
-      {domains.map((domain, index) => (
+      {domains.map((domain) => (
         <div key={domain.domain} className={styles.domainRow}>
           <span className={styles.domain}>{domain.domain}</span>
           <span className={styles.count}>{domain.count}</span>
