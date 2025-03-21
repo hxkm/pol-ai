@@ -6,6 +6,7 @@ import { paths } from '@/app/utils/paths';
 import { loadEnvConfig } from '@next/env';
 import { loadAllThreads } from '../utils/fileLoader';
 import { selectThreads } from '../utils/threadSelector';
+import path from 'path';
 
 // Helper function to check thread availability
 async function checkThreadAvailability(): Promise<number> {
@@ -66,6 +67,29 @@ async function runSummarizerJob() {
     }
     console.log('API key verified');
 
+    // Ensure all required directories exist
+    console.log('Verifying and creating required directories...');
+    const requiredDirs = [
+      paths.dataDir,
+      path.resolve(paths.dataDir, 'analysis'),
+      path.resolve(paths.dataDir, 'analysis/get'),
+      path.resolve(paths.dataDir, 'analysis/reply')
+    ];
+
+    for (const dir of requiredDirs) {
+      try {
+        await fs.access(dir);
+        console.log(`Directory exists: ${dir}`);
+        // Log directory permissions
+        const stats = await fs.stat(dir);
+        console.log(`Directory permissions for ${dir}: ${stats.mode}`);
+      } catch {
+        console.log(`Creating directory: ${dir}`);
+        await fs.mkdir(dir, { recursive: true, mode: 0o777 });
+        console.log(`Created directory with full permissions: ${dir}`);
+      }
+    }
+
     // Check thread availability
     console.log('Checking thread availability...');
     const threadCount = await checkThreadAvailability();
@@ -113,6 +137,20 @@ async function runSummarizerJob() {
     console.log('Running analysis...');
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`Analysis complete: ${results.articles.batchStats.totalThreads} threads analyzed`);
+    
+    // Ensure the big-picture.json file exists with proper permissions
+    const bigPicturePath = path.resolve(paths.dataDir, 'analysis/big-picture.json');
+    try {
+      // Create an empty big-picture.json if it doesn't exist
+      await fs.writeFile(bigPicturePath, JSON.stringify({
+        lastUpdated: new Date().toISOString(),
+        content: {}
+      }, null, 2), { mode: 0o666 });
+      console.log(`Ensured big-picture.json exists at: ${bigPicturePath}`);
+    } catch (error) {
+      console.error(`Failed to create/update big-picture.json:`, error);
+      throw error;
+    }
     
     return results;
   } catch (error) {
