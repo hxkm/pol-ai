@@ -104,10 +104,12 @@ export default function Home() {
     title: i === 0 ? 'Antisemitism Per Post' : 
            i === 1 ? 'Most Significant GETs' :
            i === 4 ? 'Key Insights' :
+           i === 6 ? 'Top Link Domains' :  // Add title for Card 7
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
              i === 4 ? '' :
+             i === 6 ? '' :  // Keep content empty for Card 7
              'Sample content for this card. Will be replaced with real data.'
   }));
 
@@ -145,6 +147,7 @@ export default function Home() {
               index === 1 ? styles.neonCard :
               index === 3 ? styles.cyanCard :
               index === 4 ? styles.orangeCard :
+              index === 6 ? styles.purpleCard :  // Apply purple style to Card 7
               ''
             }>
               <CardContent card={card} />
