@@ -233,6 +233,11 @@ export class Scheduler {
         
         console.log(`[${endTime.toISOString()}] Summarizer completed successfully in ${duration} seconds`);
         console.log('Memory usage after run:', process.memoryUsage());
+        console.log('Summary results:', {
+          threadsAnalyzed: results.articles.batchStats.totalThreads,
+          postsAnalyzed: results.articles.batchStats.totalAnalyzedPosts,
+          averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
+        });
       } catch (error) {
         const failTime = new Date();
         console.error(`[${failTime.toISOString()}] Critical: Scheduled summarizer job failed:`, error);
@@ -244,9 +249,14 @@ export class Scheduler {
           const retryStart = new Date();
           console.log(`[${retryStart.toISOString()}] Attempting summarizer retry`);
           try {
-            await runSummarizerJob();
+            const retryResults = await runSummarizerJob();
             const retryEnd = new Date();
             console.log(`[${retryEnd.toISOString()}] Retry completed successfully`);
+            console.log('Retry results:', {
+              threadsAnalyzed: retryResults.articles.batchStats.totalThreads,
+              postsAnalyzed: retryResults.articles.batchStats.totalAnalyzedPosts,
+              averageAntisemiticPercentage: retryResults.articles.batchStats.averageAntisemiticPercentage
+            });
           } catch (retryError) {
             console.error(`[${new Date().toISOString()}] Critical: Retry also failed:`, retryError);
             console.error('Memory usage at retry failure:', process.memoryUsage());
