@@ -67,6 +67,14 @@ async function runSummarizerJob() {
     }
     console.log('API key verified');
 
+    // Log environment info
+    console.log('Environment:', {
+      NODE_ENV: process.env.NODE_ENV,
+      RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+      CWD: process.cwd(),
+      DATA_DIR: process.env.DATA_DIR
+    });
+
     // Ensure all required directories exist
     console.log('Verifying and creating required directories...');
     const requiredDirs = [
@@ -138,54 +146,6 @@ async function runSummarizerJob() {
     const results = await summarizer.analyze(threadsToAnalyze);
     console.log(`Analysis complete: ${results.articles.batchStats.totalThreads} threads analyzed`);
     
-    // Ensure the big-picture.json file exists with proper permissions and content
-    try {
-      // Create a properly structured big-picture content
-      const bigPictureContent = {
-        lastUpdated: new Date().toISOString(),
-        themes: results.matrix.themes.map(theme => ({
-          name: theme.name,
-          frequency: theme.frequency
-        })),
-        sentiments: results.bigPicture.sentiments,
-        overview: results.bigPicture.overview,
-        statistics: {
-          totalThreads: results.articles.batchStats.totalThreads,
-          totalPosts: results.articles.batchStats.totalAnalyzedPosts,
-          averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
-        }
-      };
-
-      // Ensure the analysis directory exists with proper permissions
-      await fs.mkdir(path.dirname(paths.bigPicturePath), { recursive: true, mode: 0o777 });
-      
-      // Write the file with proper permissions
-      await fs.writeFile(
-        paths.bigPicturePath,
-        JSON.stringify(bigPictureContent, null, 2),
-        { mode: 0o666 }
-      );
-      
-      console.log(`Successfully wrote big-picture.json to: ${paths.bigPicturePath}`);
-      console.log('Content summary:', {
-        themes: bigPictureContent.themes.length,
-        sentiments: bigPictureContent.sentiments.length,
-        lastUpdated: bigPictureContent.lastUpdated
-      });
-
-      // Verify the file was written correctly
-      const stats = await fs.stat(paths.bigPicturePath);
-      console.log('File stats:', {
-        size: stats.size,
-        mode: stats.mode.toString(8),
-        created: stats.birthtime,
-        modified: stats.mtime
-      });
-    } catch (error) {
-      console.error(`Failed to create/update big-picture.json:`, error);
-      throw error;
-    }
-    
     return results;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
@@ -196,7 +156,6 @@ async function runSummarizerJob() {
         stack: error.stack
       });
     }
-    // Rethrow the error so it can be caught by the scheduler's retry mechanism
     throw error;
   }
 }
@@ -292,49 +251,49 @@ export class Scheduler {
     console.log(`[Scheduler] Next summarizer run scheduled for: ${targetTime.toUTCString()}`);
     console.log(`[Scheduler] Time until next run: ${hoursUntilRun}h ${minutesUntilRun}m`);
 
-    // Summarizer: At 23:30 UTC daily
+    // Summarizer: At 23:30 UTC daily with retries
     this.summarizerJob = cron.schedule('30 23 * * *', async () => {
-      const startTime = new Date();
-      console.log(`[${startTime.toISOString()}] Starting scheduled summarizer job`);
-      console.log('Memory usage before run:', process.memoryUsage());
-      
-      try {
-        const results = await runSummarizerJob();
-        const endTime = new Date();
-        const duration = (endTime.getTime() - startTime.getTime()) / 1000;
-        
-        console.log(`[${endTime.toISOString()}] Summarizer completed successfully in ${duration} seconds`);
-        console.log('Memory usage after run:', process.memoryUsage());
-        console.log('Summary results:', {
-          threadsAnalyzed: results.articles.batchStats.totalThreads,
-          postsAnalyzed: results.articles.batchStats.totalAnalyzedPosts,
-          averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
-        });
-      } catch (error) {
-        const failTime = new Date();
-        console.error(`[${failTime.toISOString()}] Critical: Scheduled summarizer job failed:`, error);
-        console.error('Memory usage at failure:', process.memoryUsage());
-        
-        // Attempt retry after 5 minutes
-        console.log(`[${new Date().toISOString()}] Scheduling retry in 5 minutes...`);
-        setTimeout(async () => {
-          const retryStart = new Date();
-          console.log(`[${retryStart.toISOString()}] Attempting summarizer retry`);
-          try {
-            const retryResults = await runSummarizerJob();
-            const retryEnd = new Date();
-            console.log(`[${retryEnd.toISOString()}] Retry completed successfully`);
-            console.log('Retry results:', {
-              threadsAnalyzed: retryResults.articles.batchStats.totalThreads,
-              postsAnalyzed: retryResults.articles.batchStats.totalAnalyzedPosts,
-              averageAntisemiticPercentage: retryResults.articles.batchStats.averageAntisemiticPercentage
-            });
-          } catch (retryError) {
-            console.error(`[${new Date().toISOString()}] Critical: Retry also failed:`, retryError);
-            console.error('Memory usage at retry failure:', process.memoryUsage());
+      const maxRetries = 3;
+      const retryDelayMinutes = 5;
+      let currentRetry = 0;
+      let lastError = null;
+
+      const attemptSummarizer = async (): Promise<void> => {
+        try {
+          const startTime = new Date();
+          console.log(`[${startTime.toISOString()}] Starting scheduled summarizer job (attempt ${currentRetry + 1}/${maxRetries})`);
+          console.log('Memory usage before run:', process.memoryUsage());
+          
+          const results = await runSummarizerJob();
+          
+          const endTime = new Date();
+          const duration = (endTime.getTime() - startTime.getTime()) / 1000;
+          
+          console.log(`[${endTime.toISOString()}] Summarizer completed successfully in ${duration} seconds`);
+          console.log('Memory usage after run:', process.memoryUsage());
+          console.log('Summary results:', {
+            threadsAnalyzed: results.articles.batchStats.totalThreads,
+            postsAnalyzed: results.articles.batchStats.totalAnalyzedPosts,
+            averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
+          });
+        } catch (error) {
+          lastError = error;
+          console.error(`[${new Date().toISOString()}] Summarizer attempt ${currentRetry + 1} failed:`, error);
+          console.error('Memory usage at failure:', process.memoryUsage());
+          
+          currentRetry++;
+          if (currentRetry < maxRetries) {
+            console.log(`[${new Date().toISOString()}] Scheduling retry ${currentRetry} in ${retryDelayMinutes} minutes...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelayMinutes * 60 * 1000));
+            return attemptSummarizer();
+          } else {
+            console.error(`[${new Date().toISOString()}] All ${maxRetries} attempts failed. Last error:`, lastError);
+            // Send notification or alert here if needed
           }
-        }, 5 * 60 * 1000);
-      }
+        }
+      };
+
+      await attemptSummarizer();
     }, {
       timezone: 'UTC'
     });
