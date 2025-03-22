@@ -11,22 +11,23 @@ import path from 'path';
 // Helper function to check thread availability
 async function checkThreadAvailability(): Promise<number> {
   try {
-    if (!paths.threadsDir) {
-      console.log('Threads directory path is not defined');
-      return 0;
-    }
+    // Use the same path resolution as the manual trigger
+    const threadsDir = path.resolve(process.cwd(), 'data', 'threads');
+    console.log('Looking for threads in:', threadsDir);
 
     // Check if directory exists
     try {
-      await fs.access(paths.threadsDir);
+      await fs.access(threadsDir);
+      console.log('Threads directory exists and is accessible');
     } catch {
       console.log('Threads directory does not exist');
       return 0;
     }
 
     // Read directory contents
-    const files = await fs.readdir(paths.threadsDir);
+    const files = await fs.readdir(threadsDir);
     const jsonFiles = files.filter(file => file.endsWith('.json'));
+    console.log(`Found ${jsonFiles.length} thread files`);
     return jsonFiles.length;
   } catch (error) {
     console.error('Error checking thread availability:', error);
@@ -108,16 +109,17 @@ async function runSummarizerJob() {
     }
     
     // Load threads with explicit path verification
-    console.log('Loading threads from:', paths.threadsDir);
+    const threadsDir = path.resolve(process.cwd(), 'data', 'threads');
+    console.log('Loading threads from:', threadsDir);
     try {
-      await fs.access(paths.threadsDir);
+      await fs.access(threadsDir);
       console.log('Threads directory exists and is accessible');
     } catch (e) {
       console.error('Threads directory not found or not accessible:', e);
-      throw new Error(`Threads directory not found at ${paths.threadsDir}`);
+      throw new Error(`Threads directory not found at ${threadsDir}`);
     }
     
-    const allThreads = await loadAllThreads(paths.threadsDir);
+    const allThreads = await loadAllThreads(threadsDir);
     console.log(`Loaded ${allThreads.length} threads successfully`);
     
     if (allThreads.length === 0) {
