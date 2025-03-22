@@ -285,17 +285,28 @@ function getThreadAgeHours(thread: Thread): number {
 }
 
 /**
- * Clean up threads older than 24 hours
+ * Clean up threads older than 48 hours
  */
 async function cleanOldThreads(): Promise<void> {
   console.log('Cleaning up old thread files...');
   
   try {
+    // Don't clean if we're within 1 hour of the summarizer run (23:30 UTC)
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
+    
+    // If we're between 22:30 and 23:30 UTC, skip cleanup
+    if (hour === 22 && minute >= 30 || hour === 23 && minute < 30) {
+      console.log('Skipping cleanup as we are approaching summarizer run time');
+      return;
+    }
+
     const threadFiles = fs.readdirSync(paths.threadsDir)
       .filter(file => file.endsWith('.json'));
     
     let removedCount = 0;
-    const MAX_THREAD_AGE_HOURS = 24;
+    const MAX_THREAD_AGE_HOURS = 48; // Increased from 24 to 48 hours
     
     for (const file of threadFiles) {
       const filePath = path.resolve(paths.threadsDir, file);
