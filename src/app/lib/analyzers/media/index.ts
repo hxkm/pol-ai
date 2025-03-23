@@ -17,14 +17,14 @@ export class MediaAnalyzer extends BaseAnalyzer<MediaAnalyzerResult> {
   // Base URL for 4chan media
   private static MEDIA_BASE_URL = 'https://i.4cdn.org/pol';
 
-  // Maximum age of files (24 hours in milliseconds)
-  private static MAX_FILE_AGE = 24 * 60 * 60 * 1000;
+  // Maximum age of files (48 hours in milliseconds)
+  private static MAX_FILE_AGE = 48 * 60 * 60 * 1000;
 
   // Maximum number of random images to keep
-  private static MAX_RANDOM_IMAGES = 20;
+  private static MAX_RANDOM_IMAGES = 50;
 
   // Maximum number of recent files to track in results
-  private static MAX_RECENT_FILES = 50;
+  private static MAX_RECENT_FILES = 100;
 
   // Map to track downloaded files by MD5
   private fileHashes = new Map<string, string>();
