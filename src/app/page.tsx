@@ -10,6 +10,8 @@ import { Card3 } from './components/Card3';
 import Card4 from './components/Card4';
 import Card6 from './components/Card6';
 import TopLinkDomains from './components/TopLinkDomains';
+import RareFlags from './components/RareFlags';
+import CommonFlags from './components/CommonFlags';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -83,6 +85,22 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
+      if (card.id === 'content-8') {
+        return (
+          <>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{card.title}</h2>
+            <RareFlags />
+          </>
+        );
+      }
+      if (card.id === 'content-11') {
+        return (
+          <>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{card.title}</h2>
+            <CommonFlags />
+          </>
+        );
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -117,12 +135,16 @@ export default function Home() {
     title: i === 0 ? 'Antisemitism Per Post' : 
            i === 1 ? 'Most Significant GETs' :
            i === 4 ? 'Key Insights' :
-           i === 6 ? 'Top Link Domains' :  // Add title for Card 7
+           i === 6 ? 'Top Link Domains' :
+           i === 8 ? 'Rarest Flags' :
+           i === 11 ? 'Most Common Flags' :
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
              i === 4 ? '' :
-             i === 6 ? '' :  // Keep content empty for Card 7
+             i === 6 ? '' :
+             i === 8 ? '' :
+             i === 11 ? '' :
              'Sample content for this card. Will be replaced with real data.'
   }));
 

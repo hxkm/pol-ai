@@ -60,7 +60,14 @@ export default function TopLinkDomains() {
     <div className={styles.container}>
       {domains.map((domain) => (
         <div key={domain.domain} className={styles.domainRow}>
-          <span className={styles.domain}>{domain.domain}</span>
+          <a 
+            href={`https://${domain.domain}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.domain}
+          >
+            {domain.domain}
+          </a>
           <span className={styles.count}>{domain.count}</span>
         </div>
       ))}
