@@ -45,7 +45,7 @@ export async function GET() {
 
     // Read and parse the file
     const jsonData = await fs.readFile(filePath, 'utf-8');
-    const data = JSON.parse(jsonData);
+    const data: { results: GeoResultData[] } = JSON.parse(jsonData);
 
     // Ensure we have valid data
     if (!data?.results?.[0]) {
@@ -54,7 +54,7 @@ export async function GET() {
     }
 
     // Get the most recent result
-    const latestResult = data.results[0];
+    const latestResult: GeoResultData = data.results[0];
     
     // Create a map to store all countries and their counts
     const countryMap = new Map<string, ProcessedCountry>();
