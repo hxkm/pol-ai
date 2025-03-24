@@ -10,7 +10,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
   description = 'Tracks country statistics and participation across threads';
 
   // Maximum number of countries to track in each category
-  private static MAX_COUNTRIES = 5;
+  private static MAX_COUNTRIES = 4;
 
   /**
    * Process posts to gather country statistics
