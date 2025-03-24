@@ -22,7 +22,7 @@ interface GeoResultData {
   postId: number;
   totalUniqueCountries: number;
   mostCommonCountries: CountryData[];
-  mostUniqueCountries: CountryData[];
+  rarestCountries: CountryData[];
   metadata: {
     totalPostsAnalyzed: number;
     postsWithLocation: number;
@@ -56,9 +56,8 @@ export async function GET() {
     // Get the most recent result
     const latestResult: GeoResultData = data.results[0];
     
-    // Get the 4 most common countries
+    // Get the most common countries
     const commonCountries = latestResult.mostCommonCountries
-      .slice(0, 4)
       .map((country: CountryData): ProcessedCountry => ({
         country: country.code,
         count: country.postCount,

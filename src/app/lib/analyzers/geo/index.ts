@@ -10,7 +10,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
   description = 'Tracks country statistics and participation across threads';
 
   // Maximum number of countries to track in each category
-  private static MAX_COUNTRIES = 6;
+  private static MAX_COUNTRIES = 5;
 
   /**
    * Process posts to gather country statistics
@@ -125,14 +125,17 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
     const { countryStats, totalPosts, postsWithLocation, firstPostWithLocation } = 
       this.processCountryStats(threads);
 
-    // Convert stats to array and sort for most common countries
-    const mostCommonCountries = Array.from(countryStats.values())
+    // Convert stats to array for sorting
+    const allCountries = Array.from(countryStats.values());
+
+    // Get most common countries (top 5 by post count)
+    const mostCommonCountries = allCountries
       .sort((a, b) => b.postCount - a.postCount)
       .slice(0, GeoAnalyzer.MAX_COUNTRIES);
 
-    // Sort for countries with most unique posters
-    const mostUniqueCountries = Array.from(countryStats.values())
-      .sort((a, b) => b.uniquePosters - a.uniquePosters)
+    // Get rarest countries (bottom 5 by post count)
+    const rarestCountries = allCountries
+      .sort((a, b) => a.postCount - b.postCount)
       .slice(0, GeoAnalyzer.MAX_COUNTRIES);
 
     // Create single result
@@ -142,7 +145,7 @@ export class GeoAnalyzer extends BaseAnalyzer<GeoAnalyzerResult> {
       postId: firstPostWithLocation?.postId || threads[0]?.posts?.[0]?.no || 0,
       totalUniqueCountries: countryStats.size,
       mostCommonCountries,
-      mostUniqueCountries,
+      rarestCountries,
       metadata: {
         totalPostsAnalyzed: totalPosts,
         postsWithLocation

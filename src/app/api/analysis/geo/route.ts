@@ -22,7 +22,7 @@ interface GeoResultData {
   postId: number;
   totalUniqueCountries: number;
   mostCommonCountries: CountryData[];
-  mostUniqueCountries: CountryData[];
+  rarestCountries: CountryData[];
   metadata: {
     totalPostsAnalyzed: number;
     postsWithLocation: number;
@@ -56,36 +56,19 @@ export async function GET() {
     // Get the most recent result
     const latestResult: GeoResultData = data.results[0];
     
-    // Create a map to store all countries and their counts
-    const countryMap = new Map<string, ProcessedCountry>();
+    // Debug log the data we're working with
+    console.log('Total unique countries:', latestResult.totalUniqueCountries);
+    console.log('Most common countries length:', latestResult.mostCommonCountries.length);
+    console.log('Most unique countries length:', latestResult.rarestCountries.length);
+    console.log('Posts with location:', latestResult.metadata.postsWithLocation);
+    console.log('Total posts analyzed:', latestResult.metadata.totalPostsAnalyzed);
 
-    // Function to add countries to the map
-    const addCountriesToMap = (countries: CountryData[]) => {
-      countries.forEach((country) => {
-        // Only update if count is lower or country doesn't exist
-        if (!countryMap.has(country.code) || 
-            countryMap.get(country.code)!.count > country.postCount) {
-          countryMap.set(country.code, {
-            country: country.code,
-            count: country.postCount,
-            name: country.name
-          });
-        }
-      });
-    };
-
-    // Add countries from both arrays
-    addCountriesToMap(latestResult.mostCommonCountries);
-    addCountriesToMap(latestResult.mostUniqueCountries);
-
-    // Convert map to array and sort by count ascending
-    const allCountries = Array.from(countryMap.values());
-    console.log(`Total countries found: ${allCountries.length} out of ${latestResult.totalUniqueCountries} total`);
-    
-    // Sort by count ascending to get the rarest
-    const rareCountries = allCountries
-      .sort((a: ProcessedCountry, b: ProcessedCountry) => a.count - b.count)
-      .slice(0, 4);
+    // Return the rarest countries directly
+    const rareCountries = latestResult.rarestCountries.map((country): ProcessedCountry => ({
+      country: country.code,
+      count: country.postCount,
+      name: country.name
+    }));
 
     console.log('Rarest countries:', rareCountries);
     return NextResponse.json(rareCountries);

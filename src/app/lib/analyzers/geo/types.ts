@@ -16,8 +16,8 @@ export interface CountryStats {
  */
 export interface GeoAnalyzerResult extends AnalyzerResult {
   totalUniqueCountries: number;        // Total count of unique countries seen
-  mostUniqueCountries: CountryStats[]; // Top 6 countries with most unique posters
-  mostCommonCountries: CountryStats[]; // Top 6 countries with most total posts
+  mostCommonCountries: CountryStats[]; // Top 5 countries with most total posts
+  rarestCountries: CountryStats[];     // Bottom 5 countries with least total posts
   metadata: {
     totalPostsAnalyzed: number;        // Total number of posts processed
     postsWithLocation: number;         // Number of posts that had country data
