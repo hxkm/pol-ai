@@ -4,29 +4,42 @@ import { useEffect, useState } from 'react';
 
 export const ThreadCount = () => {
   const [count, setCount] = useState<number | null>(null);
+  const [analyzedPosts, setAnalyzedPosts] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCount = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/thread-count');
-        const data = await response.json();
+        // Fetch thread count
+        const threadResponse = await fetch('/api/thread-count');
+        const threadData = await threadResponse.json();
         
-        if (data.error) {
-          setError(data.error);
+        if (threadData.error) {
+          setError(threadData.error);
           return;
         }
         
-        setCount(data.count);
-      } catch {
-        setError('Failed to fetch thread count');
+        setCount(threadData.count);
+
+        // Fetch latest summary for analyzed posts count
+        const summaryResponse = await fetch('/api/analysis/latest-summary');
+        const summaryData = await summaryResponse.json();
+        
+        // Access the correct path in the data structure
+        const totalPosts = summaryData?.articles?.batchStats?.totalAnalyzedPosts;
+        if (totalPosts) {
+          setAnalyzedPosts(totalPosts);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch data');
       }
     };
 
-    fetchCount();
+    fetchData();
     
-    // Refresh count every 10 minutes
-    const interval = setInterval(fetchCount, 600000);
+    // Refresh every 10 minutes
+    const interval = setInterval(fetchData, 600000);
     return () => clearInterval(interval);
   }, []);
 
@@ -36,11 +49,10 @@ export const ThreadCount = () => {
 
   return (
     <div>
-      <h3>Current Thread Count</h3>
       {count === null ? (
         <p>Loading...</p>
       ) : (
-        <p>{count} threads in database</p>
+        <p>{count} Threads in Database, {analyzedPosts || '...'} Comments Analyzed</p>
       )}
     </div>
   );
