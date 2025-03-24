@@ -112,10 +112,12 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       return (
         <>
           <LastScrapeTime />
-          {/* <ScraperButton />
-          <div style={{ marginTop: '1rem' }}>
-            <SummarizerButton />
-          </div> */}
+          <div style={{ display: 'none' }}>
+            <ScraperButton />
+            <div style={{ marginTop: '1rem' }}>
+              <SummarizerButton />
+            </div>
+          </div>
         </>
       );
     case 'status':
