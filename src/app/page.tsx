@@ -112,7 +112,7 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       return (
         <>
           <LastScrapeTime />
-          <div style={{ display: 'none' }}>
+          <div>
             <ScraperButton />
             <div style={{ marginTop: '1rem' }}>
               <SummarizerButton />
