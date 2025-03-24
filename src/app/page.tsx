@@ -8,6 +8,7 @@ import { AntisemitismStats } from './components/AntisemitismStats';
 import StagePost from './components/StagePost';
 import { Card3 } from './components/Card3';
 import Card4 from './components/Card4';
+import Card6 from './components/Card6';
 import TopLinkDomains from './components/TopLinkDomains';
 import styles from './page.module.css';
 
@@ -71,7 +72,10 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
-      if (card.id === 'content-6') {  // Card 7
+      if (card.id === 'content-5') {
+        return <Card6 />;
+      }
+      if (card.id === 'content-6') {
         return (
           <>
             <h2>{card.title}</h2>

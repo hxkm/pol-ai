@@ -42,3 +42,22 @@ src/app/api/analysis/route.ts
 src/app/api/significant-gets/route.ts
 src/app/lib/analyzers/base.ts
 src/app/lib/analyzers/index.ts
+[33mcommit eedb11a0f31fad2272507aa0049fcfac7be3160d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: hxkm <k.ryan.hartley@gmail.com>
+Date:   Sun Mar 23 17:51:40 2025 -0700
+
+    fix: remove unused index parameter in Card6
+
+[1mdiff --git a/src/app/components/Card6.tsx b/src/app/components/Card6.tsx[m
+[1mindex fe8fe8d..5b06ac0 100644[m
+[1m--- a/src/app/components/Card6.tsx[m
+[1m+++ b/src/app/components/Card6.tsx[m
+[36m@@ -73,7 +73,7 @@[m [mexport default function Card6() {[m
+     <div className={styles.container}>[m
+       <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Slur Tally</h2>[m
+       <div className={styles.badges}>[m
+[31m-        {topTerms.map((term, index) => ([m
+[32m+[m[32m        {topTerms.map((term) => ([m
+           <div[m
+             key={term.term}[m
+             className={styles.badge}[m
