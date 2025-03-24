@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import { paths } from '@/app/lib/utils/paths';
+import { SlurAnalyzer } from '@/app/lib/analyzers/slur';
+import { loadAllThreads } from '@/app/utils/fileLoader';
 
 export async function GET() {
   try {
@@ -12,10 +14,38 @@ export async function GET() {
     
     if (!fs.existsSync(resultsPath)) {
       console.log('Results file not found at:', resultsPath);
-      return NextResponse.json(
-        { error: 'No results available' },
-        { status: 404 }
-      );
+      
+      // Try to generate results
+      try {
+        console.log('Attempting to generate slur analysis results...');
+        
+        // Load threads
+        const threads = await loadAllThreads(paths.threadsDir);
+        if (threads.length === 0) {
+          return NextResponse.json(
+            { error: 'No threads available for analysis' },
+            { status: 404 }
+          );
+        }
+        
+        // Run analyzer
+        const slurAnalyzer = new SlurAnalyzer();
+        const results = await slurAnalyzer.analyze(threads);
+        await slurAnalyzer.saveResults(results);
+        
+        // Return the newly generated results
+        return NextResponse.json({
+          name: analyzer,
+          results,
+          timestamp: Date.now()
+        });
+      } catch (error) {
+        console.error('Failed to generate slur analysis:', error);
+        return NextResponse.json(
+          { error: 'No results available and failed to generate new ones' },
+          { status: 404 }
+        );
+      }
     }
 
     try {
