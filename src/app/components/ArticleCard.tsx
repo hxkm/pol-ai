@@ -19,6 +19,10 @@ interface ArticleResponse {
   articles: Article[];
 }
 
+interface ArticleCardProps {
+  index?: number;
+}
+
 function toTitleCase(str: string) {
   // Words that shouldn't be capitalized (articles, conjunctions, prepositions)
   const minorWords = new Set([
@@ -108,7 +112,7 @@ function FitText({ text, threadId }: { text: string; threadId: number }) {
   );
 }
 
-export default function ArticleCard() {
+export default function ArticleCard({ index = 0 }: ArticleCardProps) {
   const [article, setArticle] = useState<Article | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -123,7 +127,10 @@ export default function ArticleCard() {
         if (!data.articles || data.articles.length === 0) {
           throw new Error('No articles available');
         }
-        setArticle(data.articles[0]);
+        if (index >= data.articles.length) {
+          throw new Error('Article index out of bounds');
+        }
+        setArticle(data.articles[index]);
       } catch (err) {
         console.error('Error fetching article:', err);
         setError('Failed to load article');
@@ -131,7 +138,7 @@ export default function ArticleCard() {
     };
 
     fetchArticle();
-  }, []);
+  }, [index]);
 
   if (error) return <div className={styles.error}>{error}</div>;
   if (!article) return <div className={styles.loading}>Loading...</div>;

@@ -274,3 +274,93 @@ a.secondary {
   font-size: 1.25rem;
   margin-bottom: 1rem;
 }
+
+.tealCard {
+  background: #00ffd5 !important;
+  color: black !important;
+}
+
+.tealCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.magentaCard {
+  background: #ff00ff !important;
+  color: white !important;
+}
+
+.magentaCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.goldCard {
+  background: #ffd700 !important;
+  color: black !important;
+}
+
+.goldCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.indigoCard {
+  background: #4b0082 !important;
+  color: white !important;
+}
+
+.indigoCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.limeCard {
+  background: #bfff00 !important;
+  color: black !important;
+}
+
+.limeCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.crimsonCard {
+  background: #dc143c !important;
+  color: white !important;
+}
+
+.crimsonCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.turquoiseCard {
+  background: #40e0d0 !important;
+  color: black !important;
+}
+
+.turquoiseCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.violetCard {
+  background: #9400d3 !important;
+  color: white !important;
+}
+
+.violetCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.brightBlueCard {
+  background: #2129ff !important;
+  color: white !important;
+}
+
+.brightBlueCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}

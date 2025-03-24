@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 1rem;
   height: 100%;
+  color: inherit;
 }
 
 .headline {
@@ -33,6 +34,7 @@
   background: white;
   padding: 1rem;
   border-radius: 4px;
+  color: black !important;
 }
 
 .stats {
@@ -42,6 +44,7 @@
   opacity: 0.8;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 1rem;
+  color: inherit;
 }
 
 .statsLink {

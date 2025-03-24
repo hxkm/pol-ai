@@ -114,6 +114,16 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       if (card.id === 'content-12') {
         return <ArticleCard />;
       }
+      if (card.id.startsWith('content-') && parseInt(card.id.split('-')[1]) >= 13 && parseInt(card.id.split('-')[1]) <= 23) {
+        const articleIndex = parseInt(card.id.split('-')[1]) - 12;
+        if (parseInt(card.id.split('-')[1]) === 22) {
+          return null;
+        }
+        return <ArticleCard index={articleIndex} />;
+      }
+      if (card.id === 'content-24') {
+        return <ArticleCard index={10} />;
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -143,8 +153,8 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
 };
 
 export default function Home() {
-  // Regular content cards (first 13 cards)
-  const contentCards: ContentCard[] = Array.from({ length: 13 }, (_, i) => ({
+  // Regular content cards (first 25 cards)
+  const contentCards: ContentCard[] = Array.from({ length: 25 }, (_, i) => ({
     id: `content-${i}`,
     type: 'content',
     title: i === 0 ? 'Antisemitism Per Post' : 
@@ -155,6 +165,7 @@ export default function Home() {
            i === 9 ? 'Thread Count' :
            i === 11 ? 'Most Common Flags' :
            i === 12 ? '' :
+           (i >= 13 && i <= 23) || i === 24 ? '' :  // Clear titles for all article cards
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
@@ -164,6 +175,7 @@ export default function Home() {
              i === 9 ? '' :
              i === 11 ? '' :
              i === 12 ? '' :
+             i >= 13 ? '' :  // Clear content for all new cards
              'Sample content for this card. Will be replaced with real data.'
   }));
 
@@ -205,6 +217,16 @@ export default function Home() {
               ${index === 9 ? styles.blackCard : ''}
               ${index === 12 ? styles.neonGreenCard : ''}
               ${index === 14 ? styles.blackCard : ''}
+              ${index === 15 ? styles.brightBlueCard : ''}
+              ${index === 16 ? styles.magentaCard : ''}
+              ${index === 17 ? styles.goldCard : ''}
+              ${index === 18 ? styles.indigoCard : ''}
+              ${index === 19 ? styles.limeCard : ''}
+              ${index === 20 ? styles.crimsonCard : ''}
+              ${index === 21 ? styles.turquoiseCard : ''}
+              ${index === 22 ? styles.violetCard : ''}
+              ${index === 23 ? styles.goldCard : ''}
+              ${index === 24 ? styles.purpleCard : ''}
             `.trim()}>
               <CardContent card={{...card, title: index === 14 ? '' : card.title}} />
             </Card>
