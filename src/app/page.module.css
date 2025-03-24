@@ -259,3 +259,8 @@ a.secondary {
   font-size: 1.25rem;
   margin-bottom: 1rem;
 }
+
+.blackCard {
+  background: #000000 !important;
+  color: white !important;
+}

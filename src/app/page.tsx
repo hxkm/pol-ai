@@ -12,6 +12,7 @@ import Card6 from './components/Card6';
 import TopLinkDomains from './components/TopLinkDomains';
 import RareFlags from './components/RareFlags';
 import CommonFlags from './components/CommonFlags';
+import { LastScrapeTime } from './components/LastScrapeTime';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -110,11 +111,11 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
     case 'control':
       return (
         <>
-          <h2>{card.title}</h2>
-          <ScraperButton />
+          <LastScrapeTime />
+          {/* <ScraperButton />
           <div style={{ marginTop: '1rem' }}>
             <SummarizerButton />
-          </div>
+          </div> */}
         </>
       );
     case 'status':
@@ -160,7 +161,7 @@ export default function Home() {
   const scraperCard: ControlCard = {
     id: 'scraper-control',
     type: 'control',
-    title: 'Card 15',
+    title: '',
     component: 'scraper'
   };
 
@@ -183,8 +184,9 @@ export default function Home() {
               ${index === 3 ? styles.cyanCard : ''}
               ${index === 4 ? styles.orangeCard : ''}
               ${index === 6 ? styles.purpleCard : ''}
+              ${index === 14 ? styles.blackCard : ''}
             `.trim()}>
-              <CardContent card={card} />
+              <CardContent card={{...card, title: index === 14 ? '' : card.title}} />
             </Card>
           ))}
         </CardGrid>

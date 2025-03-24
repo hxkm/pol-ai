@@ -29,7 +29,6 @@ export const ScraperButton = () => {
 
   return (
     <div className={styles.container}>
-      <h3>Manual Scraper Control</h3>
       <button 
         onClick={triggerScraper}
         disabled={isLoading}
