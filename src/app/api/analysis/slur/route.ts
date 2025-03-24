@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
-import path from 'path';
 import { paths } from '@/app/lib/utils/paths';
 
 export async function GET() {
   try {
     const analyzer = 'slur';
-    const resultsPath = path.resolve(paths.dataDir, 'analysis', analyzer, 'results.json');
+    const resultsPath = paths.analyzerResultsFile(analyzer);
+    
+    // Log the path we're trying to read from
+    console.log('Looking for slur results at:', resultsPath);
     
     if (!fs.existsSync(resultsPath)) {
+      console.log('Results file not found at:', resultsPath);
       return NextResponse.json(
         { error: 'No results available' },
         { status: 404 }
@@ -17,6 +20,7 @@ export async function GET() {
 
     try {
       const data = JSON.parse(fs.readFileSync(resultsPath, 'utf-8'));
+      console.log('Successfully loaded slur analysis data');
       return NextResponse.json({
         name: analyzer,
         ...data,
