@@ -13,6 +13,7 @@ import TopLinkDomains from './components/TopLinkDomains';
 import RareFlags from './components/RareFlags';
 import CommonFlags from './components/CommonFlags';
 import { LastScrapeTime } from './components/LastScrapeTime';
+import ArticleCard from './components/ArticleCard';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -110,6 +111,9 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
+      if (card.id === 'content-12') {
+        return <ArticleCard />;
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -150,6 +154,7 @@ export default function Home() {
            i === 8 ? 'Rarest Flags' :
            i === 9 ? 'Thread Count' :
            i === 11 ? 'Most Common Flags' :
+           i === 12 ? '' :
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
@@ -158,6 +163,7 @@ export default function Home() {
              i === 8 ? '' :
              i === 9 ? '' :
              i === 11 ? '' :
+             i === 12 ? '' :
              'Sample content for this card. Will be replaced with real data.'
   }));
 
@@ -197,6 +203,7 @@ export default function Home() {
               ${index === 4 ? styles.orangeCard : ''}
               ${index === 6 ? styles.purpleCard : ''}
               ${index === 9 ? styles.blackCard : ''}
+              ${index === 12 ? styles.neonGreenCard : ''}
               ${index === 14 ? styles.blackCard : ''}
             `.trim()}>
               <CardContent card={{...card, title: index === 14 ? '' : card.title}} />
