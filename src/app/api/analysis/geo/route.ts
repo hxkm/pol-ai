@@ -10,7 +10,13 @@ interface CountryData {
   lastSeen: number;
 }
 
-interface GeoResult {
+interface ProcessedCountry {
+  country: string;
+  count: number;
+  name: string;
+}
+
+interface GeoResultData {
   timestamp: number;
   threadId: number;
   postId: number;
@@ -21,12 +27,6 @@ interface GeoResult {
     totalPostsAnalyzed: number;
     postsWithLocation: number;
   };
-}
-
-interface ProcessedCountry {
-  country: string;
-  count: number;
-  name: string;
 }
 
 export async function GET() {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import styles from './RareFlags.module.css'; // Reusing the same styles
 
 interface GeoResult {
@@ -83,11 +84,13 @@ export default function CommonFlags() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img
+            <Image
               src={`https://flagcdn.com/w160/${flag.country.toLowerCase()}.png`}
               alt={`Flag of ${flag.name}`}
               className={styles.flag}
-              loading="lazy"
+              width={160}
+              height={100}
+              priority={true}
               onError={(e) => {
                 console.warn(`Failed to load flag for ${flag.name}`);
                 e.currentTarget.style.display = 'none';
