@@ -94,6 +94,14 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
+      if (card.id === 'content-9') {
+        return (
+          <>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{card.title}</h2>
+            <ThreadCount />
+          </>
+        );
+      }
       if (card.id === 'content-11') {
         return (
           <>
@@ -105,7 +113,7 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       return (
         <>
           <h2>{card.title}</h2>
-          <p>{card.content}</p>
+          {card.id !== 'content-9' && <p>{card.content}</p>}
         </>
       );
     case 'control':
@@ -140,6 +148,7 @@ export default function Home() {
            i === 4 ? 'Key Insights' :
            i === 6 ? 'Top Link Domains' :
            i === 8 ? 'Rarest Flags' :
+           i === 9 ? 'Thread Count' :
            i === 11 ? 'Most Common Flags' :
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
@@ -147,6 +156,7 @@ export default function Home() {
              i === 4 ? '' :
              i === 6 ? '' :
              i === 8 ? '' :
+             i === 9 ? '' :
              i === 11 ? '' :
              'Sample content for this card. Will be replaced with real data.'
   }));
@@ -186,6 +196,7 @@ export default function Home() {
               ${index === 3 ? styles.cyanCard : ''}
               ${index === 4 ? styles.orangeCard : ''}
               ${index === 6 ? styles.purpleCard : ''}
+              ${index === 9 ? styles.blackCard : ''}
               ${index === 14 ? styles.blackCard : ''}
             `.trim()}>
               <CardContent card={{...card, title: index === 14 ? '' : card.title}} />
