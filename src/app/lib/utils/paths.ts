@@ -40,11 +40,17 @@ export const paths = {
   // Summary data storage
   summariesDir: path.resolve(DATA_DIR, 'summaries'),
   
+  // Analysis data storage
+  analysisDir: path.resolve(DATA_DIR, 'analysis'),
+  
   // Helper to get thread file path by ID
   threadFile: (threadId: string) => path.resolve(DATA_DIR, 'threads', `${threadId}.json`),
   
   // Helper to get summary file path by ID
   summaryFile: (threadId: string) => path.resolve(DATA_DIR, 'summaries', `${threadId}.json`),
+  
+  // Helper to get analyzer results file path
+  analyzerResultsFile: (analyzer: string) => path.resolve(DATA_DIR, 'analysis', analyzer, 'results.json'),
 };
 
 console.log('DEBUG - Threads Dir:', paths.threadsDir);
@@ -55,10 +61,26 @@ console.log('DEBUG - Threads Dir:', paths.threadsDir);
  */
 export function ensureDirectories(): void {
   // Create directories if they don't exist
-  [paths.dataDir, paths.threadsDir, paths.summariesDir].forEach(dir => {
+  [
+    paths.dataDir,
+    paths.threadsDir,
+    paths.summariesDir,
+    paths.analysisDir,
+    path.resolve(paths.analysisDir, 'slur'),
+  ].forEach(dir => {
     if (!fs.existsSync(dir)) {
       console.log(`Creating directory: ${dir}`);
       fs.mkdirSync(dir, { recursive: true });
+      
+      // Set proper permissions in Railway environment
+      if (process.env.RAILWAY_ENVIRONMENT === 'production') {
+        try {
+          fs.chmodSync(dir, '777');
+          console.log(`Set permissions for ${dir}`);
+        } catch (error) {
+          console.error(`Failed to set permissions for ${dir}:`, error);
+        }
+      }
     }
   });
 }

@@ -18,7 +18,7 @@ export abstract class BaseAnalyzer<T extends AnalyzerResult> implements Analyzer
   abstract analyze(threads: Thread[]): Promise<T[]>;
 
   protected get storagePath(): string {
-    return path.resolve(paths.dataDir, 'analysis', this.name);
+    return path.resolve(paths.analysisDir, this.name);
   }
 
   protected get storageFile(): string {
