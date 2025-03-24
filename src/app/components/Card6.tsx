@@ -73,7 +73,7 @@ export default function Card6() {
     <div className={styles.container}>
       <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Slur Tally</h2>
       <div className={styles.badges}>
-        {topTerms.map((term, index) => (
+        {topTerms.map((term) => (
           <div
             key={term.term}
             className={styles.badge}
