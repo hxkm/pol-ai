@@ -19,6 +19,41 @@ interface ArticleResponse {
   articles: Article[];
 }
 
+function toTitleCase(str: string) {
+  // Words that shouldn't be capitalized (articles, conjunctions, prepositions)
+  const minorWords = new Set([
+    'a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 
+    'to', 'by', 'in', 'of', 'up', 'as', 'yet', 'so'
+  ]);
+
+  // Common acronyms that should always be uppercase
+  const acronyms = new Set([
+    'us', 'usa', 'uk', 'un', 'eu', 'uae', 'idf', 'cia', 'fbi', 'nsa',
+    'nato', 'isis', 'usd', 'ccp', 'cdc', 'who', 'doj', 'esg', 'lgbt',
+    'lgbtq', 'bbc', 'cnn', 'nbc', 'abc', 'nyt', 'wsj'
+  ]);
+
+  return str.toLowerCase().split(' ').map((word, index) => {
+    // Check for acronyms first
+    if (acronyms.has(word.toLowerCase())) {
+      return word.toUpperCase();
+    }
+
+    // Always capitalize the first and last word
+    if (index === 0 || index === str.split(' ').length - 1) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+    
+    // Don't capitalize minor words
+    if (minorWords.has(word.toLowerCase())) {
+      return word.toLowerCase();
+    }
+    
+    // Capitalize other words
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+}
+
 function formatArticleText(text: string) {
   // Split by quotes but keep the quotes in the result
   const parts = text.split(/(".*?")/g);
@@ -67,7 +102,7 @@ function FitText({ text, threadId }: { text: string; threadId: number }) {
         target="_blank"
         rel="noopener noreferrer"
       >
-        {text}
+        {toTitleCase(text)}
       </a>
     </div>
   );
@@ -114,7 +149,9 @@ export default function ArticleCard() {
         >
           Replies: {article.metadata.totalPosts}
         </a>
-        <span>Antisemitism: {article.antisemiticStats.percentage.toFixed(1)}%</span>
+        {article.antisemiticStats.percentage > 10 && (
+          <span>Antisemitism: {article.antisemiticStats.percentage.toFixed(1)}%</span>
+        )}
       </div>
     </div>
   );
