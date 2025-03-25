@@ -409,44 +409,7 @@ a.secondary {
   display: none !important;
 }
 
-/* Custom grid for manual card placement */
-.customGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  width: 100%;
-}
-
-.gridColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Media queries for responsive behavior */
-@media screen and (max-width: 1024px) {
-  .customGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  /* Hide the third column on tablets */
-  .gridColumn:nth-child(3) {
-    display: none;
-  }
-  
-  /* Merge third column content into the first two columns */
-  .gridColumn:nth-child(1),
-  .gridColumn:nth-child(2) {
-    gap: 1rem;
-  }
-}
-
-@media screen and (max-width: 640px) {
-  .customGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .gridColumn:nth-child(2) {
-    display: none;
-  }
+.noPadding {
+  padding: 0 !important;
+  overflow: hidden !important;
 }

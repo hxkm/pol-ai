@@ -17,6 +17,7 @@ import ArticleCard from './components/ArticleCard';
 import BigPictureArticle from './components/BigPictureArticle';
 import SparklingLogo from './components/SparklingLogo';
 import { FlippableCard } from './components/FlippableCard';
+import CatalogView from './components/CatalogView';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -135,6 +136,13 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       if (card.id === 'content-24') {
         return <ArticleCard index={10} />;
       }
+      if (card.id === 'bottom-left-card') {
+        return (
+          <div style={{ position: 'relative', minHeight: '800px', width: '100%' }}>
+            <CatalogView />
+          </div>
+        );
+      }
       return (
         <>
           <h2>{card.title}</h2>
@@ -201,113 +209,63 @@ export default function Home() {
   // Combine all cards in the same order as before
   const cardLayout: CardItem[] = [
     ...contentCards,
-    scraperCard
+    scraperCard,
+    {
+      id: 'bottom-left-card',
+      type: 'content',
+      title: 'Live Catalog View',
+      content: ''
+    }
   ];
-
-  // Function to reorder cards to ensure index 23 appears in the left column
-  const getOrderedCards = () => {
-    // Create three arrays for the three columns
-    const leftColumn: React.ReactNode[] = [];
-    const middleColumn: React.ReactNode[] = [];
-    const rightColumn: React.ReactNode[] = [];
-    
-    // Create all card elements
-    const allCards = cardLayout.map((card, index) => {
-      if (index === 0) {
-        return (
-          <FlippableCard key={card.id} className={styles.pinkCard}>
-            <CardContent card={card} />
-          </FlippableCard>
-        );
-      }
-      
-      if (index === 1) {
-        return (
-          <FlippableCard key={card.id} className={styles.neonCard} backContent="About">
-            <CardContent card={card} />
-          </FlippableCard>
-        );
-      }
-      
-      return (
-        <Card key={card.id} className={`
-          ${index === 3 ? styles.cyanCard : ''}
-          ${index === 4 ? styles.orangeCard : ''}
-          ${index === 6 ? styles.purpleCard : ''}
-          ${index === 7 ? styles.blackCard : ''}
-          ${index === 9 ? styles.blackCard : ''}
-          ${index === 10 ? styles.blackCard : ''}
-          ${index === 12 ? styles.neonGreenCard : ''}
-          ${index === 15 ? styles.brightBlueCard : ''}
-          ${index === 16 ? styles.magentaCard : ''}
-          ${index === 17 ? styles.goldCard : ''}
-          ${index === 18 ? styles.indigoCard : ''}
-          ${index === 19 ? styles.limeCard : ''}
-          ${index === 20 ? styles.crimsonCard : ''}
-          ${index === 21 ? styles.turquoiseCard : ''}
-          ${index === 22 ? styles.hidden : ''}
-          ${index === 23 ? styles.brightGreenCard : ''}
-          ${index === 24 ? styles.purpleCard : ''}
-        `.trim()}>
-          <CardContent card={card} />
-        </Card>
-      );
-    });
-
-    // Create a new array with card 23 moved to the beginning (for mobile view)
-    const orderedCards = [...allCards];
-    // Take card 23 out
-    const card23 = orderedCards.splice(23, 1)[0];
-    // Place it after the first two cards (Antisemitism and GETs)
-    orderedCards.splice(2, 0, card23);
-    
-    // Distribute cards to columns
-    orderedCards.forEach((cardElement, index) => {
-      // For the first three cards, ensure proper column placement
-      if (index === 0) {
-        leftColumn.push(cardElement);
-      } else if (index === 1) {
-        middleColumn.push(cardElement);
-      } else if (index === 2) { // This is our moved card 23
-        leftColumn.push(cardElement);
-      } else {
-        // For other cards, distribute them evenly across columns
-        // Skip every third card for left column since we already have 2 cards there
-        const adjustedIndex = index % 3;
-        if (adjustedIndex === 0) {
-          middleColumn.push(cardElement);
-        } else if (adjustedIndex === 1) {
-          rightColumn.push(cardElement);
-        } else {
-          leftColumn.push(cardElement);
-        }
-      }
-    });
-
-    return {
-      leftColumn,
-      middleColumn,
-      rightColumn
-    };
-  };
-
-  const { leftColumn, middleColumn, rightColumn } = getOrderedCards();
 
   return (
     <>
       <Header />
       <main className={styles.main}>
-        <div className={styles.customGrid}>
-          <div className={styles.gridColumn}>
-            {leftColumn}
-          </div>
-          <div className={styles.gridColumn}>
-            {middleColumn}
-          </div>
-          <div className={styles.gridColumn}>
-            {rightColumn}
-          </div>
-        </div>
+        <CardGrid>
+          {cardLayout.map((card, index) => {
+            if (index === 0) {
+              return (
+                <FlippableCard key={card.id} className={styles.pinkCard}>
+                  <CardContent card={card} />
+                </FlippableCard>
+              );
+            }
+            
+            if (index === 1) {
+              return (
+                <FlippableCard key={card.id} className={styles.neonCard} backContent="About">
+                  <CardContent card={card} />
+                </FlippableCard>
+              );
+            }
+            
+            return (
+              <Card key={card.id} className={`
+                ${index === 3 ? styles.cyanCard : ''}
+                ${index === 4 ? styles.orangeCard : ''}
+                ${index === 6 ? styles.purpleCard : ''}
+                ${index === 7 ? styles.blackCard : ''}
+                ${index === 9 ? styles.blackCard : ''}
+                ${index === 10 ? styles.blackCard : ''}
+                ${index === 12 ? styles.neonGreenCard : ''}
+                ${index === 15 ? styles.brightBlueCard : ''}
+                ${index === 16 ? styles.magentaCard : ''}
+                ${index === 17 ? styles.goldCard : ''}
+                ${index === 18 ? styles.indigoCard : ''}
+                ${index === 19 ? styles.limeCard : ''}
+                ${index === 20 ? styles.crimsonCard : ''}
+                ${index === 21 ? styles.turquoiseCard : ''}
+                ${index === 22 ? styles.hidden : ''}
+                ${index === 23 ? styles.brightGreenCard : ''}
+                ${index === 24 ? styles.purpleCard : ''}
+                ${card.id === 'bottom-left-card' ? styles.noPadding : ''}
+              `.trim()}>
+                <CardContent card={card} />
+              </Card>
+            );
+          })}
+        </CardGrid>
       </main>
     </>
   );
