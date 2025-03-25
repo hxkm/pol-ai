@@ -201,6 +201,21 @@ a.secondary {
   margin-bottom: 1rem;
 }
 
+@media (max-width: 600px) {
+  .neonCard div {
+    width: 100%;
+    padding: 0.5rem;
+  }
+  .neonCard img {
+    max-width: 100%;
+    height: auto;
+  }
+  .neonCard h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
 .level {
   font-size: 1rem;
   font-weight: normal;
@@ -248,6 +263,21 @@ a.secondary {
 .orangeCard h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+  .orangeCard div {
+    width: 100%;
+    padding: 0.5rem;
+  }
+  .orangeCard img {
+    max-width: 100%;
+    height: auto;
+  }
+  .orangeCard h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .purpleCard {
