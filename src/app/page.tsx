@@ -16,6 +16,7 @@ import { LastScrapeTime } from './components/LastScrapeTime';
 import ArticleCard from './components/ArticleCard';
 import BigPictureArticle from './components/BigPictureArticle';
 import SparklingLogo from './components/SparklingLogo';
+import { FlippableCard } from './components/FlippableCard';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -208,31 +209,40 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <CardGrid>
-          {cardLayout.map((card, index) => (
-            <Card key={card.id} className={`
-              ${index === 0 ? styles.pinkCard : ''}
-              ${index === 1 ? styles.neonCard : ''}
-              ${index === 3 ? styles.cyanCard : ''}
-              ${index === 4 ? styles.orangeCard : ''}
-              ${index === 6 ? styles.purpleCard : ''}
-              ${index === 7 ? styles.blackCard : ''}
-              ${index === 9 ? styles.blackCard : ''}
-              ${index === 10 ? styles.blackCard : ''}
-              ${index === 12 ? styles.neonGreenCard : ''}
-              ${index === 15 ? styles.brightBlueCard : ''}
-              ${index === 16 ? styles.magentaCard : ''}
-              ${index === 17 ? styles.goldCard : ''}
-              ${index === 18 ? styles.indigoCard : ''}
-              ${index === 19 ? styles.limeCard : ''}
-              ${index === 20 ? styles.crimsonCard : ''}
-              ${index === 21 ? styles.turquoiseCard : ''}
-              ${index === 22 ? styles.hidden : ''}
-              ${index === 23 ? styles.brightGreenCard : ''}
-              ${index === 24 ? styles.purpleCard : ''}
-            `.trim()}>
-              <CardContent card={card} />
-            </Card>
-          ))}
+          {cardLayout.map((card, index) => {
+            if (index === 0) {
+              return (
+                <FlippableCard key={card.id} className={styles.pinkCard}>
+                  <CardContent card={card} />
+                </FlippableCard>
+              );
+            }
+            
+            return (
+              <Card key={card.id} className={`
+                ${index === 1 ? styles.neonCard : ''}
+                ${index === 3 ? styles.cyanCard : ''}
+                ${index === 4 ? styles.orangeCard : ''}
+                ${index === 6 ? styles.purpleCard : ''}
+                ${index === 7 ? styles.blackCard : ''}
+                ${index === 9 ? styles.blackCard : ''}
+                ${index === 10 ? styles.blackCard : ''}
+                ${index === 12 ? styles.neonGreenCard : ''}
+                ${index === 15 ? styles.brightBlueCard : ''}
+                ${index === 16 ? styles.magentaCard : ''}
+                ${index === 17 ? styles.goldCard : ''}
+                ${index === 18 ? styles.indigoCard : ''}
+                ${index === 19 ? styles.limeCard : ''}
+                ${index === 20 ? styles.crimsonCard : ''}
+                ${index === 21 ? styles.turquoiseCard : ''}
+                ${index === 22 ? styles.hidden : ''}
+                ${index === 23 ? styles.brightGreenCard : ''}
+                ${index === 24 ? styles.purpleCard : ''}
+              `.trim()}>
+                <CardContent card={card} />
+              </Card>
+            );
+          })}
         </CardGrid>
       </main>
     </>
