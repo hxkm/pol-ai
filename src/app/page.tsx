@@ -19,6 +19,7 @@ import SparklingLogo from './components/SparklingLogo';
 import { FlippableCard } from './components/FlippableCard';
 import CatalogView from './components/CatalogView';
 import ChanCatalogView from './components/ChanCatalogView';
+import WarningOverlay from './components/WarningOverlay';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -160,8 +161,16 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
     case 'control':
       return (
         <>
-          <LastScrapeTime />
-          <div>
+          <h2 style={{ 
+            fontSize: '2.5rem', 
+            marginBottom: '1rem', 
+            color: 'inherit',
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            2050 © &amp
+          </h2>
+          <div style={{ display: 'none' }}>
             <ScraperButton />
             <div style={{ marginTop: '1rem' }}>
               <SummarizerButton />
@@ -234,6 +243,7 @@ export default function Home() {
 
   return (
     <>
+      <WarningOverlay />
       <Header />
       <main className={styles.main}>
         <CardGrid>
