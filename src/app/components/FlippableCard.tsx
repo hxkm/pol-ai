@@ -105,7 +105,7 @@ export const FlippableCard: React.FC<FlippableCardProps> = ({
                   padding: '0 1rem'
                 }}>
                   This dashboard collects data from 4chan and uses artificial intelligence to analyze, process, and summarize it for research purposes. 
-                  The statistics in this console represent roughly 15% of /pol/'s daily activity, with an emphasis on curating data from the catalog's most active threads. 
+                  The statistics in this console represent roughly 15% of /pol/&apos;s daily activity, with an emphasis on curating data from the catalog&apos;s most active threads. 
                   Certain elements of this page, including the Antisemitism per Post, Dominiant Themes, and Article Summaries, are generated once daily at 00:00 UTC, all other elements update every two hours and retain data for up to two days.
                 </p>
                 <p style={{ 
