@@ -14,6 +14,8 @@ import RareFlags from './components/RareFlags';
 import CommonFlags from './components/CommonFlags';
 import { LastScrapeTime } from './components/LastScrapeTime';
 import ArticleCard from './components/ArticleCard';
+import BigPictureArticle from './components/BigPictureArticle';
+import SparklingLogo from './components/SparklingLogo';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -87,6 +89,14 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
+      if (card.id === 'content-7') {
+        return (
+          <>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'white' }}>Discourse Overview</h2>
+            <BigPictureArticle />
+          </>
+        );
+      }
       if (card.id === 'content-8') {
         return (
           <>
@@ -103,6 +113,9 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           </>
         );
       }
+      if (card.id === 'content-10') {
+        return <SparklingLogo />;
+      }
       if (card.id === 'content-11') {
         return (
           <>
@@ -116,9 +129,6 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       }
       if (card.id.startsWith('content-') && parseInt(card.id.split('-')[1]) >= 13 && parseInt(card.id.split('-')[1]) <= 23) {
         const articleIndex = parseInt(card.id.split('-')[1]) - 12;
-        if (parseInt(card.id.split('-')[1]) === 22) {
-          return null;
-        }
         return <ArticleCard index={articleIndex} />;
       }
       if (card.id === 'content-24') {
@@ -145,7 +155,7 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
     case 'status':
       return (
         <>
-          <h2>{card.title}</h2>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#333', fontWeight: 500 }}>{card.title}</h2>
           <ThreadCount />
         </>
       );
@@ -165,7 +175,7 @@ export default function Home() {
            i === 9 ? 'Thread Count' :
            i === 11 ? 'Most Common Flags' :
            i === 12 ? '' :
-           (i >= 13 && i <= 23) || i === 24 ? '' :  // Clear titles for all article cards
+           (i >= 13 && i <= 23) || i === 24 ? '' :  // Clear titles for article cards
            `Card ${i + 1}`,
     content: i === 0 ? '9.4% Medium' : 
              i === 1 ? '' :
@@ -175,17 +185,9 @@ export default function Home() {
              i === 9 ? '' :
              i === 11 ? '' :
              i === 12 ? '' :
-             i >= 13 ? '' :  // Clear content for all new cards
+             i >= 13 ? '' :  // Clear content for article cards
              'Sample content for this card. Will be replaced with real data.'
   }));
-
-  // Thread count card (14th card)
-  const threadCountCard: StatusCard = {
-    id: 'thread-count',
-    type: 'status',
-    title: 'Card 14',
-    component: 'thread-count'
-  };
 
   // Scraper control card (15th card)
   const scraperCard: ControlCard = {
@@ -198,7 +200,6 @@ export default function Home() {
   // Combine all cards in the same order as before
   const cardLayout: CardItem[] = [
     ...contentCards,
-    threadCountCard,
     scraperCard
   ];
 
@@ -214,9 +215,10 @@ export default function Home() {
               ${index === 3 ? styles.cyanCard : ''}
               ${index === 4 ? styles.orangeCard : ''}
               ${index === 6 ? styles.purpleCard : ''}
+              ${index === 7 ? styles.blackCard : ''}
               ${index === 9 ? styles.blackCard : ''}
+              ${index === 10 ? styles.blackCard : ''}
               ${index === 12 ? styles.neonGreenCard : ''}
-              ${index === 14 ? styles.blackCard : ''}
               ${index === 15 ? styles.brightBlueCard : ''}
               ${index === 16 ? styles.magentaCard : ''}
               ${index === 17 ? styles.goldCard : ''}
@@ -224,11 +226,11 @@ export default function Home() {
               ${index === 19 ? styles.limeCard : ''}
               ${index === 20 ? styles.crimsonCard : ''}
               ${index === 21 ? styles.turquoiseCard : ''}
-              ${index === 22 ? styles.violetCard : ''}
-              ${index === 23 ? styles.goldCard : ''}
+              ${index === 22 ? styles.hidden : ''}
+              ${index === 23 ? styles.brightGreenCard : ''}
               ${index === 24 ? styles.purpleCard : ''}
             `.trim()}>
-              <CardContent card={{...card, title: index === 14 ? '' : card.title}} />
+              <CardContent card={card} />
             </Card>
           ))}
         </CardGrid>

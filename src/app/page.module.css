@@ -364,3 +364,17 @@ a.secondary {
   font-size: 1.25rem;
   margin-bottom: 1rem;
 }
+
+.brightGreenCard {
+  background: #00ff11 !important;
+  color: black !important;
+}
+
+.brightGreenCard h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.hidden {
+  display: none !important;
+}

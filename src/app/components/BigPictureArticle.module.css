@@ -1,0 +1,29 @@
+.container {
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.paragraph {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  font-size: 0.8rem;
+  color: white;
+  text-align: justify;
+  text-justify: inter-word;
+  font-weight: 500;
+}
+
+.error {
+  color: #ff4444;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 1rem;
+  color: white;
+  font-size: 0.875rem;
+} 
