@@ -12,7 +12,6 @@ import Card6 from './components/Card6';
 import TopLinkDomains from './components/TopLinkDomains';
 import RareFlags from './components/RareFlags';
 import CommonFlags from './components/CommonFlags';
-import { LastScrapeTime } from './components/LastScrapeTime';
 import ArticleCard from './components/ArticleCard';
 import BigPictureArticle from './components/BigPictureArticle';
 import SparklingLogo from './components/SparklingLogo';
