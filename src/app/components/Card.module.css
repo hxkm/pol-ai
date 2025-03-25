@@ -3,6 +3,7 @@
   width: 100%;
   position: relative;
   box-sizing: border-box;
+  transform-style: preserve-3d;
 }
 
 .cardInner {
@@ -29,12 +30,7 @@
 
 .cardFront {
   z-index: 2;
-  position: relative;
-  visibility: visible;
-}
-
-.flipped .cardFront {
-  visibility: hidden;
+  transform: rotateY(0deg);
 }
 
 .cardBack {
@@ -44,6 +40,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  display: flex;
 }
 
 .card {
@@ -96,10 +93,53 @@
 }
 
 .backContent {
-  height: 100%;
+  flex: 1;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-top: 50px; /* Add space for the title */
+}
+
+/* Simple flip card styles that work everywhere */
+.flipCard {
+  width: 100%;
+  perspective: 1000px;
+  position: relative;
+}
+
+.flipCardInner {
+  position: relative;
+  width: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flipCardInner.flipped {
+  transform: rotateY(180deg);
+}
+
+.flipCardFront, .flipCardBack {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  width: 100%;
+  min-height: 100%;
+}
+
+.flipCardFront {
+  z-index: 1;
+}
+
+.flipCardBack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  background: white;
+  color: black;
 } 

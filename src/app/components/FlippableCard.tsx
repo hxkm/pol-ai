@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './Card.module.css';
 
 interface FlippableCardProps {
@@ -17,6 +17,27 @@ export const FlippableCard: React.FC<FlippableCardProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [lastScrape, setLastScrape] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Match card sizes
+  useEffect(() => {
+    const matchSizes = () => {
+      if (frontRef.current && backRef.current && containerRef.current) {
+        const frontHeight = frontRef.current.offsetHeight;
+        backRef.current.style.height = `${frontHeight}px`;
+      }
+    };
+    
+    // Match initially and on window resize
+    matchSizes();
+    window.addEventListener('resize', matchSizes);
+    
+    return () => {
+      window.removeEventListener('resize', matchSizes);
+    };
+  }, [children, backContent, lastScrape, isLoading]);
 
   // Fetch the last scrape time when needed
   React.useEffect(() => {
@@ -65,10 +86,10 @@ export const FlippableCard: React.FC<FlippableCardProps> = ({
     : 'Unknown time';
 
   return (
-    <div className={styles.flipCard}>
+    <div className={styles.flipCard} ref={containerRef}>
       <div className={`${styles.flipCardInner} ${isFlipped ? styles.flipped : ''}`}>
         {/* Front of the card */}
-        <div className={`${styles.flipCardFront} ${styles.card} ${className}`}>
+        <div className={`${styles.flipCardFront} ${styles.card} ${className}`} ref={frontRef}>
           {children}
           <button 
             className={styles.flipButton}
@@ -80,7 +101,7 @@ export const FlippableCard: React.FC<FlippableCardProps> = ({
         </div>
         
         {/* Back of the card */}
-        <div className={`${styles.flipCardBack} ${styles.card}`}>
+        <div className={`${styles.flipCardBack} ${styles.card}`} ref={backRef}>
           {backContent ? (
             <>
               <h3 style={{ 
