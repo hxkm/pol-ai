@@ -53,7 +53,7 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       if (card.id === 'content-1') {
         return (
           <>
-            <h2>{card.title}</h2>
+            <h2 style={{ textAlign: 'left' }}>{card.title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <StagePost position="top" cardType="gets" />
               <StagePost position="bottom" cardType="gets" />
@@ -218,9 +218,16 @@ export default function Home() {
               );
             }
             
+            if (index === 1) {
+              return (
+                <FlippableCard key={card.id} className={styles.neonCard} backContent="About">
+                  <CardContent card={card} />
+                </FlippableCard>
+              );
+            }
+            
             return (
               <Card key={card.id} className={`
-                ${index === 1 ? styles.neonCard : ''}
                 ${index === 3 ? styles.cyanCard : ''}
                 ${index === 4 ? styles.orangeCard : ''}
                 ${index === 6 ? styles.purpleCard : ''}

@@ -5,7 +5,7 @@ import React from 'react';
 export const AntisemitismStats = () => {
   return (
     <div style={{ width: '100%' }}>
-      <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Antisemitism Per Post</h2>
+      <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', textAlign: 'left' }}>Antisemitism Per Post</h2>
       <p style={{ 
         fontSize: '3rem', 
         fontWeight: 'bold', 
