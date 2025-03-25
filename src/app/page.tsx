@@ -18,6 +18,7 @@ import BigPictureArticle from './components/BigPictureArticle';
 import SparklingLogo from './components/SparklingLogo';
 import { FlippableCard } from './components/FlippableCard';
 import CatalogView from './components/CatalogView';
+import ChanCatalogView from './components/ChanCatalogView';
 import styles from './page.module.css';
 
 type CardType = 'content' | 'control' | 'status';
@@ -138,8 +139,15 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       }
       if (card.id === 'bottom-left-card') {
         return (
-          <div style={{ position: 'relative', minHeight: '800px', width: '100%' }}>
+          <div style={{ position: 'relative', minHeight: '800px', width: '100%', margin: 0, padding: 0 }}>
             <CatalogView />
+          </div>
+        );
+      }
+      if (card.id === 'bottom-right-card') {
+        return (
+          <div style={{ position: 'relative', minHeight: '800px', width: '100%', margin: 0, padding: 0 }}>
+            <ChanCatalogView />
           </div>
         );
       }
@@ -215,6 +223,12 @@ export default function Home() {
       type: 'content',
       title: 'Live Catalog View',
       content: ''
+    },
+    {
+      id: 'bottom-right-card',
+      type: 'content',
+      title: '4chan Catalog View',
+      content: ''
     }
   ];
 
@@ -259,7 +273,7 @@ export default function Home() {
                 ${index === 22 ? styles.hidden : ''}
                 ${index === 23 ? styles.brightGreenCard : ''}
                 ${index === 24 ? styles.purpleCard : ''}
-                ${card.id === 'bottom-left-card' ? styles.noPadding : ''}
+                ${card.id === 'bottom-left-card' || card.id === 'bottom-right-card' ? styles.noPadding : ''}
               `.trim()}>
                 <CardContent card={card} />
               </Card>

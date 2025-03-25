@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const CatalogView = () => {
+const ChanCatalogView = () => {
   return (
     <div style={{ 
       width: '100%',
@@ -17,7 +17,7 @@ const CatalogView = () => {
       padding: 0
     }}>
       <iframe
-        src="https://archive.4plebs.org/pol/"
+        src="https://boards.4chan.org/pol/catalog"
         style={{
           width: '100%',
           height: '100%',
@@ -26,10 +26,10 @@ const CatalogView = () => {
           padding: 0,
           display: 'block'
         }}
-        title="4plebs /pol/"
+        title="4chan /pol/ catalog"
       />
     </div>
   );
 };
 
-export default CatalogView; 
+export default ChanCatalogView; 
