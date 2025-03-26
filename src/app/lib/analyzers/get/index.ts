@@ -8,7 +8,7 @@ import { GetAnalyzerResult, GetType } from './types';
 export class GetAnalyzer extends BaseAnalyzer<GetAnalyzerResult> {
   private static readonly CHECK_KEYWORDS = ['check', 'checked', 'get', 'digits', 'dubs', 'trips', 'quads', 'quints'];
   private static readonly MAX_RESULTS = 50;
-  private static readonly MAX_AGE_DAYS = 7;
+  private static readonly MAX_AGE_DAYS = 2;
   private static readonly MIN_CHECK_COUNT = 1;  // Minimum checks to be considered
 
   public readonly name = 'get';
