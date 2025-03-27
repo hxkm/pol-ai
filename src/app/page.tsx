@@ -16,7 +16,7 @@ import ArticleCard from './components/ArticleCard';
 import BigPictureArticle from './components/BigPictureArticle';
 import SparklingLogo from './components/SparklingLogo';
 import { FlippableCard } from './components/FlippableCard';
-import CatalogView from './components/CatalogView';
+import RecentXPosts from './components/RecentXPosts';
 import ChanCatalogView from './components/ChanCatalogView';
 import WarningOverlay from './components/WarningOverlay';
 import styles from './page.module.css';
@@ -139,8 +139,8 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
       }
       if (card.id === 'bottom-left-card') {
         return (
-          <div style={{ position: 'relative', minHeight: '800px', width: '100%', margin: 0, padding: 0 }}>
-            <CatalogView />
+          <div style={{ width: '100%', background: 'white' }}>
+            <RecentXPosts />
           </div>
         );
       }

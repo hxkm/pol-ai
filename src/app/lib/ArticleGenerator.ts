@@ -132,7 +132,7 @@ export class ArticleGenerator {
                    4. Use the same tone and style as the content
                    5. Never use asterisks or other markers
                    6. Never contextualize the content with phrases like "An online discussion" "discourse" or "debate" or "rhetoric"
-                   7. Never use the word "online" or "thread" or "rhetoric" or "discussion" or "discourse" etc, in the headline or article
+                   7. Never use the word "online" or "thread" or "rhetoric" or "discussion" or "discourse" or "comments" etc, in the headline or article
                    8. The headline should online refer to the actual topic and sentiment, not the discussion thereof
                    9. Double check to make sure the headline only mentions the topics discussed, not the discourse thereof
                    10. Capture the tone and sentiment of the content in an unbiased manner
