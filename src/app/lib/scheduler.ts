@@ -7,6 +7,7 @@ import { loadEnvConfig } from '@next/env';
 import { loadAllThreads } from '../utils/fileLoader';
 import { selectThreads } from '../utils/threadSelector';
 import path from 'path';
+import { xPoster } from './xposter/poster';
 
 // Helper function to check thread availability
 async function checkThreadAvailability(): Promise<number> {
@@ -162,10 +163,33 @@ async function runSummarizerJob() {
   }
 }
 
+// Helper function for the X poster job
+async function runXPosterJob() {
+  console.log(`[${new Date().toISOString()}] Running scheduled X poster job`);
+  try {
+    const result = await xPoster.postNextArticle();
+    if (result.success) {
+      console.log(`[${new Date().toISOString()}] Successfully posted tweet with ID: ${result.tweetId}`);
+    } else {
+      console.error(`[${new Date().toISOString()}] Failed to post tweet: ${result.error}`);
+    }
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] X poster job failed:`, error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
+  }
+}
+
 export class Scheduler {
   private static instance: Scheduler | null = null;
   private scraperJob: cron.ScheduledTask | null = null;
   private summarizerJob: cron.ScheduledTask | null = null;
+  private xPosterJob: cron.ScheduledTask | null = null;
   private isRunning: boolean = false;
 
   private constructor() {
@@ -237,16 +261,16 @@ export class Scheduler {
     });
 
     // Enhanced logging for summarizer schedule
-    const now = new Date();
+    const currentTime = new Date();
     const targetTime = new Date();
     targetTime.setUTCHours(23, 30, 0, 0);
     
     // If we've already passed today's run time, schedule for tomorrow
-    if (now > targetTime) {
+    if (currentTime > targetTime) {
       targetTime.setDate(targetTime.getDate() + 1);
     }
     
-    const msUntilRun = targetTime.getTime() - now.getTime();
+    const msUntilRun = targetTime.getTime() - currentTime.getTime();
     const hoursUntilRun = Math.floor(msUntilRun / (1000 * 60 * 60));
     const minutesUntilRun = Math.floor((msUntilRun % (1000 * 60 * 60)) / (1000 * 60));
     
@@ -299,6 +323,19 @@ export class Scheduler {
     }, {
       timezone: 'UTC'
     });
+
+    // X Poster: Three times daily at 01:30, 11:30, and 17:30 UTC
+    // Times are after scraper runs to ensure fresh data
+    this.xPosterJob = cron.schedule('30 1,11,17 * * *', runXPosterJob, {
+      timezone: 'UTC'
+    });
+
+    // Log scheduled jobs
+    console.log('Current time (UTC):', currentTime.toUTCString());
+    console.log('Scheduled jobs:');
+    console.log('- Scraper: Every 2 hours starting at 00:00 UTC');
+    console.log('- Summarizer: Daily at 23:30 UTC');
+    console.log('- X Poster: Daily at 01:30, 11:30, and 17:30 UTC');
   }
 
   stop() {
@@ -310,6 +347,7 @@ export class Scheduler {
     console.log(`[${new Date().toISOString()}] Stopping scheduler...`);
     this.scraperJob?.stop();
     this.summarizerJob?.stop();
+    this.xPosterJob?.stop();
     this.isRunning = false;
     console.log(`[${new Date().toISOString()}] Scheduler stopped`);
   }
@@ -324,6 +362,20 @@ export class Scheduler {
       console.log(`[${new Date().toISOString()}] Manual summarizer run completed`);
     } catch (error) {
       console.error(`[${new Date().toISOString()}] Manual summarizer run failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Manually run the X poster - useful for development
+   */
+  async runXPosterManually() {
+    console.log(`[${new Date().toISOString()}] Manually running X poster...`);
+    try {
+      await runXPosterJob();
+      console.log(`[${new Date().toISOString()}] Manual X poster run completed`);
+    } catch (error) {
+      console.error(`[${new Date().toISOString()}] Manual X poster run failed:`, error);
       throw error;
     }
   }

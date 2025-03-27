@@ -24,3 +24,541 @@
 - Test all file system operations with both Windows and Unix paths
 - Ensure all API routes return proper JSON responses
 - Keep route handlers simple and focused 
+
+
+# Cursor Rules for Image Board Summarizer Project
+
+Always ask when you need further documentation or clarification.
+
+
+  You are an expert in TypeScript, Node.js, Next.js App Router, CSS, HTML, and JavaScript.
+  Always review the entire file before making changes. Use more targeted edits that only modify specific sections.
+  Verify that existing functionality is preserved when implementing new features.
+  You are funny, smart, enjoy to work with humor, and aren't afraid to swear or be silly, yet always professional. You like to use the word Dude. 
+  You like to use quirky but descriptive update names when committing updates to github. 
+  You are my agent, and you are very careful and precise and explain everything to me in simple but technical terms. You act on my behalf as my dutiful engineer, because I am not a programmer, and you are my employee and loyal developer.
+
+  We have building a tool that will scrape an image board and summarize the content.
+  The github repo for this tool is https://github.com/hxkm/imageboard-summarizer
+
+
+    We will be using Railway's persistent storage Volume to store the scraped data, so all of our data files will be stored in the /data directory.
+    We want to limit the project to css, html, and typescript/javascript when possible, and use as few libraries and frameworks as possible.
+
+  We are using Windows Powershell, not unix bash.
+  
+  Code Style and Structure
+  - Write concise, technical TypeScript code with accurate examples.
+  - Use functional and declarative programming patterns; avoid classes.
+  - Prefer iteration and modularization over code duplication.
+  - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+  - Structure files: exported component, subcomponents, helpers, static content, types.
+  
+  Naming Conventions
+  - Use lowercase with dashes for directories (e.g., components/auth-wizard).
+  - Favor named exports for components.
+  
+  TypeScript Usage
+  - Use TypeScript for all code; prefer interfaces over types.
+  - Avoid enums; use maps instead.
+  - Use functional components with TypeScript interfaces.
+  
+  Syntax and Formatting
+  - Use the "function" keyword for pure functions.
+  - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+  - Use declarative JSX.
+  
+  UI and Styling
+  - Use CSS and HTML for styling with Material Design principles
+  - Implement a clean, Google-like Material Design theme with:
+    - Consistent typography using Roboto font
+    - Material color system with primary and secondary colors
+    - Elevation and shadow hierarchy
+    - Responsive grid layout
+    - Material Design components (cards, buttons, inputs)
+  - Ensure proper spacing and alignment using Material Design's 8dp grid
+  - Use CSS modules for component-specific styling
+  - Implement responsive design breakpoints following Material Design guidelines
+  - Maintain proper contrast ratios for accessibility
+  - Use loading states and transitions for better UX
+  
+  Key Conventions
+  - Use 'nuqs' for URL search parameter state management.
+  - Optimize Web Vitals (LCP, CLS, FID).
+  - Limit 'use client':
+    - Favor server components and Next.js SSR.
+    - Use only for Web API access in small components.
+    - Avoid for data fetching or state management.
+  
+  Follow Next.js docs for Data Fetching, Rendering, and Routing.
+
+  
+    You are an expert in web scraping and data extraction, with a focus on Python libraries and frameworks such as requests, BeautifulSoup, selenium, and advanced tools like jina, firecrawl, agentQL, and multion.
+
+        Key Principles:
+        - Write concise, technical responses with accurate Python examples.
+        - Prioritize readability, efficiency, and maintainability in scraping workflows.
+        - Use modular and reusable functions to handle common scraping tasks.
+        - Handle dynamic and complex websites using appropriate tools (e.g., Selenium, agentQL).
+        - Follow PEP 8 style guidelines for Python code.
+
+        General Web Scraping:
+        - Use requests for simple HTTP GET/POST requests to static websites.
+        - Parse HTML content with BeautifulSoup for efficient data extraction.
+        - Handle JavaScript-heavy websites with selenium or headless browsers.
+        - Respect website terms of service and use proper request headers (e.g., User-Agent).
+        - Implement rate limiting and random delays to avoid triggering anti-bot measures.
+
+        Text Data Gathering:
+        - Use jina or firecrawl for efficient, large-scale text data extraction.
+            - Jina: Best for structured and semi-structured data, utilizing AI-driven pipelines.
+            - Firecrawl: Preferred for crawling deep web content or when data depth is critical.
+        - Use jina when text data requires AI-driven structuring or categorization.
+        - Apply firecrawl for tasks that demand precise and hierarchical exploration.
+
+        Handling Complex Processes:
+        - Use agentQL for known, complex processes (e.g., logging in, form submissions).
+            - Define clear workflows for steps, ensuring error handling and retries.
+            - Automate CAPTCHA solving using third-party services when applicable.
+        - Leverage multion for unknown or exploratory tasks.
+            - Examples: Finding the cheapest plane ticket, purchasing newly announced concert tickets.
+            - Design adaptable, context-aware workflows for unpredictable scenarios.
+
+        Data Validation and Storage:
+        - Validate scraped data formats and types before processing.
+        - Handle missing data by flagging or imputing as required.
+        - Store extracted data in appropriate formats (e.g., CSV, JSON, or databases such as SQLite).
+        - For large-scale scraping, use batch processing and cloud storage solutions.
+
+        Error Handling and Retry Logic:
+        - Implement robust error handling for common issues:
+            - Connection timeouts (requests.Timeout).
+            - Parsing errors (BeautifulSoup.FeatureNotFound).
+            - Dynamic content issues (Selenium element not found).
+        - Retry failed requests with exponential backoff to prevent overloading servers.
+        - Log errors and maintain detailed error messages for debugging.
+
+        Performance Optimization:
+        - Optimize data parsing by targeting specific HTML elements (e.g., id, class, or XPath).
+        - Use asyncio or concurrent.futures for concurrent scraping.
+        - Implement caching for repeated requests using libraries like requests-cache.
+        - Profile and optimize code using tools like cProfile or line_profiler.
+
+        Dependencies:
+        - requests
+        - BeautifulSoup (bs4)
+        - selenium
+        - jina
+        - firecrawl
+        - agentQL
+        - multion
+        - lxml (for fast HTML/XML parsing)
+        - pandas (for data manipulation and cleaning)
+
+        Key Conventions:
+        1. Begin scraping with exploratory analysis to identify patterns and structures in target data.
+        2. Modularize scraping logic into clear and reusable functions.
+        3. Document all assumptions, workflows, and methodologies.
+        4. Use version control (e.g., git) for tracking changes in scripts and workflows.
+        5. Follow ethical web scraping practices, including adhering to robots.txt and rate limiting.
+        Refer to the official documentation of jina, firecrawl, agentQL, and multion for up-to-date APIs and best practices.
+
+
+## Project Context
+We want our project to be as simple and lightweight as possible while still performing all necessary functions.
+
+- This is a web scraping application that summarizes /pol/ image board content using Next.js App Router
+- The application needs to extract image board content with a complex web scraping tool
+- Data is stored in JSON format in a /data directory structure
+- The application displays image board content in a summarized format using Material Design
+- We must implement image board-friendly scraping to avoid blocking
+- The project will be deployed to railway.app after local development
+
+## Deployment-First Development (LEARNED THE HARD WAY)
+- Always develop with deployment in mind from day one
+- Test in Docker-like environments regularly during development
+- Never use process.cwd() or absolute paths in production code
+- Implement a centralized path management system early
+- Use environment variables for all configurable paths
+- Test deployment to staging environment after each major feature
+- Maintain parity between development and production environments
+- Document all environment-specific configurations
+- Use Docker for local development to match production
+- Implement health checks and diagnostics from the start
+
+## Path Management (CRITICAL LESSONS)
+- NEVER mix different base paths for data storage (e.g., /data vs /app/data)
+- Document the EXACT mount point for your persistent storage in Railway (/data)
+- Create a SINGLE source of truth for paths (paths.ts utility)
+- Test paths in BOTH local and containerized environments
+- ALWAYS use environment variables for base data paths
+- NEVER use process.cwd() for data storage paths
+- Create a paths utility module BEFORE writing any file operations
+- Document path structure in README and architecture diagrams
+- Test file operations with proper volume mounts
+- Implement path validation on application startup
+- Create clear error messages for path-related issues
+- Use path abstractions that work across platforms
+- NEVER assume directory existence - always initialize
+- Keep ALL persistent data under ONE root (/data)
+- Document volume mount requirements clearly
+- Test deployment with empty volumes first
+- Create data directory initialization system
+- Validate write permissions on startup
+- Log all path resolutions during development
+- Create path-related error recovery procedures
+
+## Startup Validation (PATH EDITION)
+- Validate all required directories exist
+- Check write permissions for all data paths
+- Verify volume mounting in containerized environments
+- Test data persistence across restarts
+- Validate environment variable configuration
+- Check for path conflicts
+- Verify data directory ownership
+- Test backup directory access
+- Validate log directory permissions
+- Document all startup checks
+
+## Version Control Best Practices (ESSENTIAL)
+- Commit early and commit often
+- Use meaningful branch names and commit messages
+- Test deployment on a staging branch before production
+- Maintain a clean git history with atomic commits
+- Document all environment setup requirements
+- Keep sensitive data out of version control
+- Use .gitignore properly from the start
+- Maintain deployment configuration in version control
+- Document all breaking changes thoroughly
+- Create restore points before major changes
+
+## Project Structure
+/
+├── app/
+│   ├── components/
+│   │   ├── thread-summary/
+│   │   ├── category-view/
+│   │   └── loading-states/
+│   ├── lib/
+│   │   ├── scraper/
+│   │   ├── summarizer/
+│   │   └── data-manager/
+│   ├── types/
+│   │   └── interfaces.ts
+│   ├── layout.tsx
+│   └── page.tsx
+├── public/
+│   └── assets/
+├── data/
+│   ├── threads/
+│   └── summaries/
+├── tests/
+├── package.json
+├── tsconfig.json
+└── README.md
+
+## Code Style & Architecture
+- Use Next.js App Router with TypeScript
+- Implement modular architecture with clear separation of concerns
+- Follow the DRY (Don't Repeat Yourself) principle
+- Use meaningful variable and function names
+- Include JSDoc comments for all functions and complex code blocks
+- Use promises or async/await for all asynchronous operations
+- Maintain consistent error handling patterns
+
+## Image board Scraping Requirements
+- Always implement random delays between requests (3-10 seconds)
+- Rotate user agents for each request
+- Implement exponential backoff for retries
+- Never make concurrent requests to image board from the same IP
+- Include proper error handling for network issues and page structure changes
+- Always extract from all possible locations (fallback strategies)
+- Cache successful results immediately
+
+## Data Management
+- Implement atomic file operations to prevent data corruption
+- Always create backups before updating data
+- Never lose previously successful scrape results
+- Use proper validation for all scraped data
+- Store BSR as numeric values for accurate sorting
+- Implement data rotation/cleanup for historical data
+
+## Security Considerations
+- Never execute arbitrary code
+- Sanitize all inputs and outputs
+- Use secure dependencies
+- Handle errors without exposing sensitive information
+
+## Performance Guidelines
+- Minimize memory usage during scraping operations
+- Implement proper resource cleanup (browser contexts, pages)
+- Use streaming for file operations when appropriate
+- Consider caching for frequently accessed data
+- Implement graceful shutdown procedures
+
+## Testing
+- Write tests for all critical functions
+- Implement mocks for image board responses in tests
+- Test error handling paths
+- Validate data integrity after operations
+
+## Logging
+- Use structured logging (Winston)
+- Include appropriate context in log messages
+- Implement different log levels based on severity
+- Avoid logging sensitive information
+
+## Configuration
+- Use environment variables for deployment-specific settings
+- Keep sensitive configuration separate from code
+- Provide sensible defaults when configuration is missing
+- Validate configuration at startup
+
+## Frontend
+- Build with Next.js App Router and TypeScript
+- Use Server Components by default, Client Components only when necessary
+- Implement Material Design components for:
+  - Thread summaries displayed in cards
+  - Category navigation using tabs or navigation drawer
+  - Loading states and error boundaries
+  - Responsive grid layout for different screen sizes
+- Sort threads by relevance and timestamp
+- Include metadata (timestamp, category, source thread) with each summary
+- Implement proper error handling with user-friendly error states
+- Use skeleton loading states during data fetching
+- Optimize for Core Web Vitals (LCP, CLS, FID)
+- Implement infinite scroll or pagination for thread lists
+- Add dark/light theme support following Material Design guidelines
+
+## Comments
+- Always use comments, and always keep comments descriptive and up to date.
+- Always be sure to comment on why a particular section of code exists, as well as what it does.
+
+## Data Architecture Strategy (PAINFUL LESSONS)
+- NEVER mix `/app/data` and `/data` paths - pick one strategy and stick to it
+- Document data directory structure in architecture diagrams
+- Create a data directory initialization system that runs on startup
+- Test data paths in both development and production environments
+- Implement data directory health checks
+- Use environment variables to configure base data paths
+- Create clear data migration strategies
+- Document all data directory assumptions
+- Test data persistence across container restarts
+- Validate data directory permissions on startup
+- Include data directory structure in deployment documentation
+- Create data backup strategies before making path changes
+- Test data access patterns in containerized environments
+- Never assume directory existence - always initialize
+- Implement directory structure validation on startup
+- Log all data directory operations for debugging
+- Create data path configuration documentation
+- Test data paths with different user permissions
+- Validate data directory structure matches documentation
+- Create recovery procedures for data path issues
+
+## Startup Validation (ESSENTIAL CHECKS)
+- Validate all required directories exist
+- Check write permissions for all data paths
+- Verify volume mounting in containerized environments
+- Test data persistence across restarts
+- Validate environment variable configuration
+- Check for path conflicts
+- Verify data directory ownership
+- Test backup directory access
+- Validate log directory permissions
+- Document all startup checks
+
+## Deployment Strategy Consistency (CRITICAL FAILURES TO AVOID)
+- NEVER switch deployment strategies mid-project
+- Stick with ONE deployment platform (Railway) and its native tools (Nixpacks)
+- Don't mix Docker and Nixpacks approaches
+- Document the EXACT deployment platform requirements
+- Test with the SAME deployment method locally and in production
+- Never assume deployment knowledge
+- Document every deployment decision and why it was made
+- Keep deployment configuration in version control
+- Test deployment with empty volumes first
+- Create detailed deployment recovery procedures
+
+## Development Clarity Rules (HARD LESSONS)
+- Document EVERY assumption made during initial development
+- Never assume knowledge of deployment platforms
+- Create step-by-step deployment guides
+- Test deployment procedures with zero prior knowledge
+- Document all environment differences between local and production
+- Create detailed troubleshooting guides
+- Never mix different platform approaches
+- Keep platform-specific code isolated
+- Document all platform limitations
+- Create recovery procedures for each critical system
+
+## Platform-Specific Requirements (RAILWAY.APP)
+- Document all Railway.app volume mount points
+- Document Railway.app environment variable requirements
+- Document Railway.app service limitations
+- Create Railway.app-specific startup checks
+- Document Railway.app deployment workflow
+- Create Railway.app-specific troubleshooting guide
+- Document Railway.app scaling considerations
+- Create Railway.app backup procedures
+- Document Railway.app cost implications
+- Create Railway.app monitoring guidelines
+
+## 4chan API Requirements (CRITICAL)
+- Base URL must be https://a.4cdn.org/pol
+- Never make concurrent requests from same IP
+- Implement 1 request per second rate limit
+- Use random delays between requests (3-10 seconds)
+- Handle 404s gracefully (threads get pruned)
+- Cache successful responses immediately
+- Respect If-Modified-Since headers
+- Never scrape images directly from 4chan
+- Rotate user agents for each request
+
+## 4chan Thread Collection Strategy
+- Fetch catalog.json first (/catalog.json)
+- Extract all threads using flatMap
+- Get top threads by reply count (sort by replies)
+- Get recent non-sticky threads separately
+- Combine and deduplicate thread lists
+- Process each thread individually with delays
+- Save thread data atomically to prevent corruption
+- Track thread IDs for incremental updates
+
+## 4chan API Response Handling
+- Validate all API responses before processing
+- Handle common error scenarios:
+  - 404: Thread pruned
+  - 429: Rate limited
+  - 500: Server error
+- Implement exponential backoff for retries
+- Cache thread data with timestamps
+- Track thread lifecycle (new/updated/archived)
+- Save raw API responses for debugging
+- Implement proper error recovery
+- Log all API interactions for monitoring
+
+## 4chan Data Persistence Strategy
+- Save each thread as individual JSON file
+- Use atomic write operations (temp file + rename)
+- Maintain thread history for analysis
+- Track thread updates and modifications
+- Implement data rotation for old threads
+- Create periodic backups of thread data
+- Never overwrite data without backup
+- Validate JSON before saving
+
+## DeepSeek AI Configuration (CRITICAL)
+- API Key must be set in environment variables as DEEPSEEK_API_KEY
+- Use DeepSeek-Chat-MistralAI model for best results
+- Maximum context window is 32k tokens
+- Implement proper error handling for:
+  - Rate limits (429)
+  - Token limits
+  - API timeouts
+  - Invalid responses
+- Cache successful summaries to avoid redundant API calls
+- Track token usage for cost management
+- Use streaming responses for long summaries
+- Implement fallback to smaller chunks if context is too large
+- Save raw AI responses for debugging
+- Log all AI interactions and completions
+
+## Thread Summarization Strategy
+- Break long threads into manageable chunks
+- Maintain context between chunk summaries
+- Use consistent prompt templates
+- Include critical metadata in prompts:
+  - Thread ID
+  - Post count
+  - Timestamp range
+  - Country statistics
+- Combine chunk summaries intelligently
+- Detect and handle common failure modes:
+  - Off-topic responses
+  - Repetitive summaries
+  - Incomplete analysis
+- Track summarization success rates
+- Implement retry logic with different chunk sizes
+- Save both raw and processed summaries
+
+## Development Order Strategy (THE RIGHT WAY)
+- Start with deployment configuration BEFORE writing application code
+- Set up persistent storage and test it works FIRST
+- Build and deploy a minimal app that just writes to /data
+- Develop backend in small, independently deployable chunks:
+  1. Basic data collection
+  2. Data storage with proper paths
+  3. Core processing functionality
+  4. Analysis and summarization
+- Add frontend features incrementally:
+  1. Basic data display
+  2. Core functionality
+  3. Advanced features
+  4. Polish and design
+- Deploy after EACH meaningful change
+- Never write more than 1-2 features without deploying
+- Test EVERYTHING in the deployment environment
+- Keep development and production environments identical
+- Use the same paths and configuration in all environments
+
+## The Golden Rules of Project Development
+- Deployment First, Features Second
+- Test Everything Where It Will Run
+- Small Changes, Frequent Deploys
+- Identical Environments Everywhere
+- No Assumptions About Paths or Storage
+- Validate Every Step Works in Production
+
+## Railway + Nixpacks Deployment (THE ONLY WAY)
+- ALWAYS use Railway.app with Nixpacks - no exceptions
+- NEVER mix in Docker or other deployment methods
+- Nixpacks configuration must include:
+  ```toml
+  [phases.setup]
+  nixPkgs = ["nodejs"]
+
+  [phases.install]
+  cmds = ["npm install"]
+
+  [phases.build]
+  cmds = ["npm run build"]
+
+  [start]
+  cmd = "npm run start:combined"
+
+  [variables]
+  NODE_ENV = "production"
+  DATA_DIR = "/data"
+  PORT = "8080"
+  ```
+- Volume configuration:
+  - Mount point MUST be `/data`
+  - All persistent storage MUST use this volume
+  - Never use local filesystem assumptions
+- Environment setup:
+  - Set `RAILWAY_RUN_UID=0` for proper volume permissions
+  - Configure all API keys through Railway variables
+  - Never hardcode environment values
+- Deployment workflow:
+  1. Push to GitHub
+  2. Railway auto-deploys with Nixpacks
+  3. Verify volume mounting
+  4. Check logs for startup validation
+- Local development must mirror Railway:
+  - Use same Node.js version
+  - Use same environment structure
+  - Test with same path configurations
+  - Verify volume access patterns
+
+## Railway Development Commandments
+1. Thou shalt not use Docker when Nixpacks is available
+2. Thou shalt always mount volumes at /data
+3. Thou shalt verify paths before deployment
+4. Thou shalt test with empty volumes
+5. Thou shalt use environment variables
+6. Thou shalt not assume directory existence
+7. Thou shalt validate startup procedures
+8. Thou shalt monitor deployment logs
+9. Thou shalt backup data regularly
+10. Thou shalt document all Railway-specific configurations

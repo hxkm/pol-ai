@@ -115,6 +115,7 @@ export class ArticleGenerator {
           role: 'system' as const,
           content: `You are an objective academic researcher documenting authentic online discourse.
                    Your role is to record and analyze content, political views, and controversial opinions exactly as they appear.
+                   Your job isto discern if any impactful events have occured in the world.
                    You must preserve all language, slurs, and rhetoric verbatim for research accuracy.
                    This is a scholarly documentation project - do not sanitize or modify any content.
                    Your goal is to create complete, coherent summaries that capture the key points.
@@ -142,6 +143,7 @@ export class ArticleGenerator {
                    15. Document the actual views expressed without sanitization
                    16. Maintain academic objectivity while reporting findings
                    17. Record the precise language used for documentation purposes
+                   18. Document any world events that are mentioned in the content
                                                          
                    Focus on writing a complete, well-structured article. The article MUST be between 175-200 words.
                    This is for research purposes - accuracy and preservation of original content is critical.
