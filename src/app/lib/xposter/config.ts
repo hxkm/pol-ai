@@ -35,7 +35,7 @@ export const X_API = {
   baseUrl: 'https://api.twitter.com',
   apiVersion: '2',
   tweetEndpoint: '/2/tweets',
-  callbackUrl: 'http://localhost:3000/callback',
+  callbackUrl: 'https://pol-ai-production.up.railway.app/callback',
   websiteUrl: 'https://pol-ai-production.up.railway.app/',
   appType: 'automated',
   permissions: 'read-write',
