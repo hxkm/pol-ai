@@ -1,0 +1,10 @@
+# END W3TC Browser Cache
+
+# BEGIN Custom Rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^pol$ pol.html [L]
+</IfModule>
+# END Custom Rules
+
+# BEGIN WordPress 

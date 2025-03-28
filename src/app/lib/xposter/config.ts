@@ -1,6 +1,7 @@
 import { XConfig } from './types';
 import path from 'path';
 import dotenv from 'dotenv';
+import { paths } from '@/app/utils/paths';
 
 // Load environment variables first
 dotenv.config({
@@ -27,8 +28,8 @@ export const X_CONFIG: XConfig = {
 };
 
 export const PATHS = {
-  articlesJson: path.resolve(process.cwd(), 'data', 'analysis', 'articles.json'),
-  postedJson: path.resolve(process.cwd(), 'data', 'xposter', 'posted.json'),
+  articlesJson: path.resolve(paths.analysisDir, 'articles.json'),
+  postedJson: path.resolve(paths.xposterDir, 'posted.json'),
 };
 
 export const X_API = {

@@ -33,7 +33,9 @@ Write a cohesive article between 175-200 words that captures the key topics, pat
 Discern any significant events that are being discussed and present them as the main topic.
 Present information neutrally and professionally.
 Do not mention that these are from online posts or discussions.
-Focus on the actual content and perspectives being expressed.`
+Focus on the actual content and perspectives being expressed.
+Do not include any title, header, or overview text - just write the article content directly.
+Do not start with "Overview of Current Online Discourse" or any similar header.`
         },
         {
           role: 'user',
