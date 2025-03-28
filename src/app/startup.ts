@@ -55,10 +55,18 @@ async function cleanupDataDirectories() {
   console.log('CWD:', process.cwd());
   console.log('Data Dir:', paths.dataDir);
 
+  // Add specific check for antisemitism-trends.json
+  const trendsFile = path.join(paths.analysisDir, 'antisemitism-trends.json');
+  if (fs.existsSync(trendsFile)) {
+    console.log('Found antisemitism-trends.json, will be cleaned with analysis directory');
+  } else {
+    console.log('antisemitism-trends.json not found');
+  }
+
   const dirsToClean = [
+    paths.analysisDir,
     paths.threadsDir,
     paths.summariesDir,
-    paths.analysisDir,
     paths.mediaDir,
     paths.mediaOpDir,
     path.join(paths.analysisDir, 'get'),
