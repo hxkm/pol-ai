@@ -1,0 +1,161 @@
+[33m1e30e90[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m 🔧 Fix: Make analyzer purging less aggressive, preserve recent results
+[33ma6f112e[m 🔧 Fix: Enhance paths utility with robust validation and atomic operations
+[33m1f3af81[m 🔧 Fix: Ensure proper directory permissions when saving thread files
+[33md4a1942[m 🔧 Fix: Add debug endpoint and improve thread count error handling
+[33m2d996fd[m 🎨 Fix: Improve logo image resolution and rendering
+[33m421b1f4[m 🔧 Fix: Remove unused imports and integrate thread availability check
+[33m86351e2[m 🐛 Fix: ESLint errors and optimize images/fonts
+[33mf6319b6[m 🔧 Fix: Add TypeScript ESLint plugin and configure rules
+[33m1c86e2b[m 🐛 Fix: Update ESLint config and make scheduler.start() return Promise
+[33m7a19183[m 🐛 Fix: Replace Geist with Inter font and restore react-tweet dependency
+[33m2431e12[m 🔄 Refactor: Extract Xposter to standalone service - Move implementation to separate dir, remove dependencies, keep RecentXPosts for future
+[33ma22d323[m 📝 Adjust About text size in FlippableCard for better readability
+[33m2aff8e6[m 🔄 Update AntisemitismStats to fetch real-time data instead of hardcoded values
+[33mcdcac9c[m 🧹 Fix antisemitism-trends.json cleanup and improve data retention logging
+[33mf740003[m 🔧 Fix path resolution for X Poster and remove overview header from BigPicture
+[33mbda6a31[m 🤖 Config: Set up X poster for deployment with proper paths and callback URLs
+[33m983f77e[m 📏 Adjust: Reduced text size and spacing in FlippableCard about section for better fit
+[33m511245b[m 📝 Update: Modified text in FlippableCard about posting results on X.com
+[33ma51a1cd[m 🎨 UI Updates: Changed site title to /pol/-AI, improved X Bot card styling and layout
+[33m67ace5f[m 🐦 Tweet Tweet MFs! Added X poster with optimal schedule for maximum chaos distribution
+[33m38c21b7[m Reduce GET analyzer data retention from 7 to 2 days
+[33m8d42cc5[m fix: remove unused import and keep working img tag
+[33mbe25148[m feat: add NSFW warning overlay and update styling
+[33m746e421[m fix: make iframes fill entire card space without padding
+[33m346235f[m fix: remove unused styles import
+[33ma53a4b1[m feat: add 4plebs iframe view to bottom card
+[33m9173a53[m feat: add 4plebs iframe view to bottom card
+[33mb621639[m Fix: Ensure flippable cards maintain exact same size front-to-back
+[33m10c25a5[m Fix unescaped apostrophes in FlippableCard component
+[33m0d6c49a[m Fix card alignment issues: left-align labels for front cards, justify about text
+[33m318962a[m Add flip card functionality to first card showing last updated time
+[33m8ec50a1[m Improved mobile responsiveness for Most Significant GETs and Key Insights cards
+[33m9c6806a[m UI Updates: Changed card colors, added BigPicture and SparklingLogo components, updated card titles
+[33m7d32bda[m feat: reorganize article cards and improve color scheme
+[33m0603a4f[m feat(ArticleCard): improve title case handling with acronyms and hide low antisemitism stats
+[33maaf0d34[m fix: update articles API route to handle production paths
+[33mc0f18f3[m feat: add article card component with dynamic text sizing and quotes formatting
+[33m8b2f4e3[m Fix: Remove default content from Card 10
+[33m45b603e[m API: Add latest-summary endpoint and update ThreadCount to show analyzed comments
+[33m425c442[m UI: Make scraper buttons visible again
+[33m7ab4b4e[m UI: Hide scraper buttons with CSS instead of comments
+[33ma0bab8d[m UI: Improve LastScrapeTime component styling and layout - Left-aligned title - Time and date on single line - Commented out scraper buttons
+[33md9915d4[m refactor: update geo analyzer to track 4 countries instead of 5
+[33m55fd77f[m Update geo analyzer and API routes to handle rarest countries
+[33m250c0b3[m Fix unused interface errors by adding type annotations
+[33m40e5b33[m Fix ESLint errors and optimize images
+[33m8fd7953[m Add flag components and enhance UI: - Add RareFlags and CommonFlags components for displaying least/most common country flags - Create new API endpoint for common flags - Improve flag display with proper aspect ratios - Add Wikipedia links to flags - Fix link domains styling - Update page layout with new components
+[33m7dc9370[m feat: add on-demand slur analysis generation to API route
+[33m8384f44[m fix: update slur analysis API route to use correct path utility
+[33m8b09181[m fix: update analyzer paths and permissions for Railway
+[33m2f87537[m feat: add Card6 module CSS with spectrum color styling
+[33meedb11a[m fix: remove unused index parameter in Card6
+[33m6b870dd[m feat: enhance slur tally card with spectrum colors and increase to top 12
+[33mbe4a551[m feat: increase media file retention from 24 to 48 hours
+[33m76d0270[m feat: increase thread retention to 48 hours and skip cleanup near summarizer runtime
+[33m4708fd9[m fix: update scheduler path resolution to match manual trigger
+[33m6db056c[m fix(scheduler): Improve summarizer job reliability and error handling
+[33mf1bddb7[m fix: resolve TypeScript and ESLint errors in TopLinkDomains component
+[33m6f0c6ff[m fix: improve link domains API route with better error handling and logging
+[33mafe6cda[m fix: update card styling and component structure
+[33maadcb3b[m fix: ensure purpleCard style is applied to Top Link Domains card
+[33m5ff3165[m fix: update link domains API to handle correct data structure and improve UI styling
+[33mb665bb0[m fix(api): use centralized paths for big-picture.json access
+[33m9acc17f[m fix(scheduler): ensure required directories and files exist with proper permissions
+[33me3ccc7c[m fix(scheduler): add result logging and fix unused variable linting error
+[33m21bcc2f[m fix(scheduler): enhance summarizer job reliability and logging - Add proper error propagation, memory tracking, and detailed logging
+[33m8514928[m fix: Exclude posts with any trailing repeating digits from Key Insights
+[33mdbb1e4c[m fix: Filter out GETs from Key Insights card
+[33mb95bf45[m feat: UI and data improvements - Added reply API endpoint, updated Card4 heading size, added deduplication to reply data, fixed StagePost component, updated styling
+[33m8420e04[m fix: improve media file cleanup in Railway deployment - Add media directories to paths utility - Include media directories in cleanup process - Add detailed cleanup logging
+[33mf80dbb0[m refactor: simplify scheduler to core tasks
+[33m397dbdb[m fix: add Card4.module.css and fix component structure
+[33m2ef18fe[m feat: improve ThemesBadges styling - Remove section labels - Make badges smaller - Add warm color gradient based on percentages - Improve text contrast
+[33m56d8c50[m refactor(api): Consolidate GIF handling into single route using query parameters
+[33m2972d37[m fix(api): Use Next.js 15.2.2 compatible route types
+[33mc114e4e[m fix(api): Rewrite GIF route handler with proper Next.js App Router types
+[33m32773dc[m fix(api): Simplify GIF route handler to use native Response
+[33m07a3edc[m fix: Use exact Next.js route handler types
+[33m2f61fa2[m Comprehensive update: GIF carousel optimization, API route fixes, Next.js config, code cleanup, and build improvements
+[33m1a2e9b1[m Fix: Update route handler types to match Next.js App Router specs
+[33m0f886b0[m Fix: Update GIF route handler types for Next.js compatibility
+[33m6dc4cab[m Enhanced GIF carousel implementation and fixed build issues: 1) Updated GIF API route types 2) Replaced img with Next.js Image component 3) Added proper CSS styling 4) Added Next.js config for GIF domains 5) Updated scheduler timing
+[33m9916220[m feat: add GIF carousel for Card3 - Add GifCarousel component with auto-rotation - Create API routes for serving GIFs - Update page layout to include Card3
+[33me5a9c71[m feat: enhance StagePost styling and GET display - Add borders around comments - Improve GET type display - Update significant-gets route
+[33m20df214[m fix: make startup script more resilient with timeouts and better error handling
+[33m297e4e6[m refactor: remove initial summarizer run from scheduler startup
+[33m1d7387f[m Remove unused path import from scheduler
+[33m1106991[m Improve scheduler with robust thread availability checks and better error handling
+[33m0010161[m Improve application initialization with proper directory checks and sequencing
+[33me5c422b[m Reset to working local version with fixed summarizer and scheduler
+[33m563c604[m Fix ESLint errors: 1. Replace any type with proper Summary interface 2. Remove unused Thread import
+[33mf294158[m Improve file handling and scheduler: 1. Add atomic writes with proper error handling 2. Disable scheduler in dev 3. Add manual summarizer trigger
+[33m81a88ee[m refactor: replace path.join with path.resolve for consistent path handling
+[33mb63b17d[m Add startup script for Railway data cleanup and modify start command
+[33m28ede22[m Fix: Remove unused countRepeatingTrailingDigits function
+[33mea7a97c[m Fix: Update significant GETs API to handle analyzer data format correctly
+[33m329e42f[m Fix: Update antisemitism stats API to use correct data sources and format
+[33m3ee2d88[m Fix: Replace any type with proper JsonValue interface in debug API route
+[33mb78f5cd[m Add debug API route to inspect data directory contents
+[33m7af73f4[m Fix: Ensure proper file permissions are set when writing analyzer data in Railway environment
+[33m6cd1cb7[m Fix: Update file permissions handling in Railway - Set proper permissions for directories (777) and files (666) - Add permission handling for new files - Add detailed permission logging
+[33m096bdb2[m Fix: Remove unused code and logging - Remove unused FileSystemError interface from significant-gets route - Remove DeepSeek raw response logging
+[33mbdaa2fb[m Add debug logging to API routes to diagnose Railway issues
+[33m60a2536[m Fix: Update path handling and permissions for Railway deployment
+[33m6e14ce9[m Remove test files and test scripts
+[33mcfa67b3[m Fix: Add default values for postCount and imageCount in ThreadSummary
+[33m8105fc3[m Fix: Add default 'Anonymous' name for thread OP in ReplyAnalyzer and SlurAnalyzer
+[33mbb547c5[m Fix: Add default 'Anonymous' name for thread OP in GeoAnalyzer
+[33ma208c92[m Multiple improvements: 1. Enhanced GET display with natural language check counts (once/twice/thrice) 2. Optimized thread cleanup using actual timestamps 3. Removed verbose DeepSeek header logging 4. Fixed GET analyzer result sorting
+[33m0bb209f[m security: remove hardcoded DeepSeek API key
+[33m24f45c5[m feat: add DeepSeek test script and improve GET handling
+[33m68722b3[m refactor: replace any with unknown type and add proper type guards
+[33m7dc8e01[m fix: handle missing data files in API routes with default values
+[33md2e6317[m fix: ESLint prefer-const error in significant-gets route
+[33md507817[m fix: update paths handling for Railway deployment and add GET analysis directories
+[33m8f67bba[m Fix TypeScript errors in antisemitism-stats route - Replace any with proper types and add type guards
+[33m00dd68a[m Add react-masonry-css dependency
+[33m9f7b7b7[m Add real-time antisemitism statistics with masonry layout - Implement AntisemitismStats component, API endpoint, and responsive card layout
+[33mf8b7176[m fix: improve Railway path handling and directory initialization
+[33mf987088[m Enhance path handling and debug logging, improve UI components
+[33m69aa6e3[m fix: Add persistent hash storage to prevent duplicate media downloads
+[33m59e9510[m feat: Run scraper and summarizer immediately on startup
+[33m58ce5e6[m feat: Enhance scheduler logging and improve article generation prompt
+[33m5152d69[m fix: Use getInstance for scheduler initialization
+[33md7134f7[m feat: Add scheduler for automated scraping and summarizing
+[33m5c03fae[m fix: revert to stable version with correct path handling
+[33m0405fb2[m fix: temporarily disable ESLint no-explicit-any for logging function
+[33m3a672d8[m fix: replace any types with specific types in media analyzer and paths utility
+[33ma38d7c0[m feat: enhance logging across analyzers and path utilities - Add comprehensive logging in BaseAnalyzer with timestamps, categories, and detailed stats
+[33m2832369[m fix: remove unused imports and functions from summarize.ts
+[33me2aaf25[m fix: replace @/ imports with relative paths for Railway compatibility
+[33m2fd7793[m fix: centralize path handling for Railway deployment compatibility
+[33m3a74e9d[m feat: Enhance GET analyzer with improved keyword detection and type handling
+[33mc405099[m Refactor log rotation to avoid unused variable warnings
+[33m52eba75[m Fix ESLint: use underscore for ignored catch parameter
+[33md94e84a[m Fix type error in summarize route
+[33mce0bc48[m Fix ESLint errors: remove unused imports and fix type issues
+[33mbea1c8d[m Fix theme generation and file management in AntisemitismMatrix
+[33mdfaf787[m fix: remove unused request parameter from summarize route
+[33m287f5c1[m fix: resolve ESLint errors in summarize route
+[33m01c05fa[m feat: Add article generation and summarization with DeepSeek integration
+[33me17828a[m fix: resolve linting errors and improve type safety
+[33m3aa9712[m feat: Add article generation and summarization with DeepSeek integration
+[33m7bb0068[m Fix slur analyzer validation by using -1 for summary IDs
+[33m690778d[m Fix media analyzer validation by using -1 for summary IDs
+[33m662f351[m Add automatic thread cleanup to scraper, set thread age limit to 24 hours
+[33mfe314e6[m Fix ESLint error: Remove unused post parameter from categorizeFile method
+[33m10d9436[m Add media analyzer for downloading and managing media files
+[33md6a6d37[m feat: Add slur analyzer to track discriminatory term usage
+[33m230ca08[m fix: Handle analyzer re-registration gracefully in scraper
+[33m5ab1d34[m fix: Remove unused uniquePosters variable in geo analyzer
+[33m0c0b29f[m feat: Add geo analyzer to track country statistics - Implement GeoAnalyzer, track post origins and unique posters, add API endpoint
+[33m2422a55[m Add link analyzer with domain tracking and random link sampling - Implement top 10 domains tracking, random sampling of 10 links, API endpoint, and cursor rules
+[33m3e426ed[m Replace dynamic analyzer route with specific routes for get and reply
+[33mf6e6ac2[m Fix analyzer route type to use NextRequest
+[33m98bccee[m Fix ESLint errors: remove unused variables and fix any type
+[33m47047c6[m Add missing components and API routes: ThreadCount, thread-count API, analysis APIs, and update paths handling
+[33m7c1884c[m Add manual scraper trigger button and API endpoint
+[33mad5d82e[m Fix: ESLint and TypeScript errors
+[33m4f00047[m Initial commit: Basic frontend structure with responsive card grid
+[33m4cced67[m Initial commit from Create Next App

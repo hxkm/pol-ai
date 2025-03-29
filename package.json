@@ -10,8 +10,7 @@
     "scrape": "tsx src/app/lib/scraper/index.ts",
     "summarize": "tsx src/scripts/summarize.ts",
     "schedule": "tsx src/scripts/schedule.ts",
-    "cleanup": "tsx src/app/startup.ts",
-    "post": "tsx src/scripts/post-to-x.ts"
+    "cleanup": "tsx src/app/startup.ts"
   },
   "dependencies": {
     "@types/dotenv": "^6.1.1",
@@ -22,7 +21,6 @@
     "next": "15.2.2",
     "node-cron": "^3.0.3",
     "node-fetch": "^2.7.0",
-    "oauth-1.0a": "^2.2.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-masonry-css": "^1.0.16",

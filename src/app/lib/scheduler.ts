@@ -38,12 +38,12 @@ async function checkThreadAvailability(): Promise<number> {
 
 // Helper function for the scraper job
 async function runScraperJob() {
-  console.log(`[${new Date().toISOString()}] Running scheduled scraper job`);
+  console.log('Running scheduled scraper job');
   try {
     await scrape();
-    console.log(`[${new Date().toISOString()}] Completed scheduled scraper job successfully`);
+    console.log('Completed scheduled scraper job successfully');
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Scraper job failed:`, error);
+    console.error('Scraper job failed:', error);
     if (error instanceof Error) {
       console.error('Error details:', {
         name: error.name,
@@ -56,7 +56,7 @@ async function runScraperJob() {
 
 // Helper function for the summarizer job
 async function runSummarizerJob() {
-  console.log(`[${new Date().toISOString()}] Running scheduled summarizer job`);
+  console.log('Running scheduled summarizer job');
   
   try {
     // Ensure environment variables are loaded
@@ -151,7 +151,7 @@ async function runSummarizerJob() {
     
     return results;
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Summarizer job failed:`, error);
+    console.error('Summarizer job failed:', error);
     if (error instanceof Error) {
       console.error('Error details:', {
         name: error.name,
@@ -193,135 +193,67 @@ export class Scheduler {
   private isRunning: boolean = false;
 
   private constructor() {
-    console.log(`[${new Date().toISOString()}] Scheduler instance created`);
+    console.log('Scheduler instance created');
   }
 
   static getInstance(): Scheduler {
     if (!Scheduler.instance) {
-      console.log(`[${new Date().toISOString()}] Creating new Scheduler instance`);
       Scheduler.instance = new Scheduler();
     }
     return Scheduler.instance;
   }
 
   async start() {
-    // Only run scheduler in production
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[${new Date().toISOString()}] Scheduler disabled in non-production environment`);
-      return;
-    }
-
     if (this.isRunning) {
-      console.log(`[${new Date().toISOString()}] Scheduler is already running`);
+      console.log('Scheduler is already running');
       return;
     }
 
-    console.log(`[${new Date().toISOString()}] Starting scheduler in production mode`);
-    console.log('Current UTC time:', new Date().toUTCString());
-
-    // Check if we missed today's summarizer run
-    const now = new Date();
-    const todayRun = new Date();
-    todayRun.setUTCHours(23, 30, 0, 0);
-    
-    // If it's past 23:30 UTC, we've missed today's run
-    if (now.getUTCHours() >= 23 && now.getUTCMinutes() >= 30) {
-      console.log(`[${new Date().toISOString()}] Past today's summarizer window, scheduling for tomorrow`);
-    } else if (now.getUTCHours() <= 23 && now.getUTCMinutes() <= 30) {
-      // If we're before today's run and haven't run today, run it
-      console.log(`[${new Date().toISOString()}] Checking if we need to run today's summarizer...`);
-      try {
-        // We could add a check here against a persistent store (like a file) to see if we already ran today
-        // For now, we'll just run it to be safe
-        console.log(`[${new Date().toISOString()}] Running missed summarizer job`);
-        await runSummarizerJob();
-      } catch (error) {
-        console.error(`[${new Date().toISOString()}] Failed to run missed summarizer job:`, error);
-      }
-    }
-
-    // Set up scheduled jobs (no immediate execution)
-    this.setupScheduledJobs();
-    
+    console.log('Starting scheduler...');
     this.isRunning = true;
-    console.log(`[${new Date().toISOString()}] Scheduler started successfully`);
-    console.log('Scraper schedule: Every 2 hours starting at 00:00 UTC');
-    console.log('Summarizer schedule: Daily at 23:30 UTC');
-    
-    // Log current time for reference
-    console.log('Current time (UTC):', now.toUTCString());
-    console.log('Current hour (UTC):', now.getUTCHours());
-    console.log('Current minute (UTC):', now.getUTCMinutes());
+
+    // Setup scheduled jobs
+    this.setupScheduledJobs();
+
+    console.log('Scheduler started successfully');
   }
 
   private setupScheduledJobs() {
-    // Scraper: At minute 0 of every even hour (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22) UTC
-    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', runScraperJob, {
-      timezone: 'UTC'
+    // Schedule scraper job - every 15 minutes
+    this.scraperJob = cron.schedule('*/15 * * * *', async () => {
+      console.log('Running scheduled scraper job');
+      await runScraperJob();
     });
 
-    // Enhanced logging for summarizer schedule
-    const currentTime = new Date();
-    const targetTime = new Date();
-    targetTime.setUTCHours(23, 30, 0, 0);
-    
-    // If we've already passed today's run time, schedule for tomorrow
-    if (currentTime > targetTime) {
-      targetTime.setDate(targetTime.getDate() + 1);
-    }
-    
-    const msUntilRun = targetTime.getTime() - currentTime.getTime();
-    const hoursUntilRun = Math.floor(msUntilRun / (1000 * 60 * 60));
-    const minutesUntilRun = Math.floor((msUntilRun % (1000 * 60 * 60)) / (1000 * 60));
-    
-    console.log(`[Scheduler] Next summarizer run scheduled for: ${targetTime.toUTCString()}`);
-    console.log(`[Scheduler] Time until next run: ${hoursUntilRun}h ${minutesUntilRun}m`);
-
-    // Summarizer: At 23:30 UTC daily with retries
-    this.summarizerJob = cron.schedule('30 23 * * *', async () => {
-      const maxRetries = 3;
-      const retryDelayMinutes = 5;
-      let currentRetry = 0;
-      let lastError = null;
-
+    // Schedule summarizer job - every 30 minutes
+    this.summarizerJob = cron.schedule('*/30 * * * *', async () => {
+      console.log('Running scheduled summarizer job');
       const attemptSummarizer = async (): Promise<void> => {
         try {
-          const startTime = new Date();
-          console.log(`[${startTime.toISOString()}] Starting scheduled summarizer job (attempt ${currentRetry + 1}/${maxRetries})`);
-          console.log('Memory usage before run:', process.memoryUsage());
-          
-          const results = await runSummarizerJob();
-          
-          const endTime = new Date();
-          const duration = (endTime.getTime() - startTime.getTime()) / 1000;
-          
-          console.log(`[${endTime.toISOString()}] Summarizer completed successfully in ${duration} seconds`);
-          console.log('Memory usage after run:', process.memoryUsage());
-          console.log('Summary results:', {
-            threadsAnalyzed: results.articles.batchStats.totalThreads,
-            postsAnalyzed: results.articles.batchStats.totalAnalyzedPosts,
-            averageAntisemiticPercentage: results.articles.batchStats.averageAntisemiticPercentage
-          });
+          await runSummarizerJob();
         } catch (error) {
-          lastError = error;
-          console.error(`[${new Date().toISOString()}] Summarizer attempt ${currentRetry + 1} failed:`, error);
-          console.error('Memory usage at failure:', process.memoryUsage());
-          
-          currentRetry++;
-          if (currentRetry < maxRetries) {
-            console.log(`[${new Date().toISOString()}] Scheduling retry ${currentRetry} in ${retryDelayMinutes} minutes...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelayMinutes * 60 * 1000));
-            return attemptSummarizer();
-          } else {
-            console.error(`[${new Date().toISOString()}] All ${maxRetries} attempts failed. Last error:`, lastError);
-            // Send notification or alert here if needed
-          }
+          console.error('Summarizer job failed:', error);
+          throw error;
         }
       };
 
-      await attemptSummarizer();
-    }, {
-      timezone: 'UTC'
+      try {
+        await attemptSummarizer();
+      } catch (error) {
+        console.error('Initial summarizer attempt failed:', error);
+        console.log('Scheduling retry in 5 minutes...');
+        
+        // Wait 5 minutes and try again
+        setTimeout(async () => {
+          console.log('Attempting retry...');
+          try {
+            await attemptSummarizer();
+            console.log('Retry attempt succeeded');
+          } catch (error) {
+            console.error('Retry attempt failed:', error);
+          }
+        }, 5 * 60 * 1000);
+      }
     });
 
     // X Poster: Three times daily at 01:30, 11:30, and 17:30 UTC
@@ -330,38 +262,44 @@ export class Scheduler {
       timezone: 'UTC'
     });
 
-    // Log scheduled jobs
-    console.log('Current time (UTC):', currentTime.toUTCString());
-    console.log('Scheduled jobs:');
-    console.log('- Scraper: Every 2 hours starting at 00:00 UTC');
-    console.log('- Summarizer: Daily at 23:30 UTC');
-    console.log('- X Poster: Daily at 01:30, 11:30, and 17:30 UTC');
+    console.log('Scheduled jobs setup complete');
   }
 
   stop() {
     if (!this.isRunning) {
-      console.log(`[${new Date().toISOString()}] Scheduler is not running`);
+      console.log('Scheduler is not running');
       return;
     }
 
-    console.log(`[${new Date().toISOString()}] Stopping scheduler...`);
-    this.scraperJob?.stop();
-    this.summarizerJob?.stop();
-    this.xPosterJob?.stop();
+    console.log('Stopping scheduler...');
+
+    if (this.scraperJob) {
+      this.scraperJob.stop();
+      this.scraperJob = null;
+    }
+
+    if (this.summarizerJob) {
+      this.summarizerJob.stop();
+      this.summarizerJob = null;
+    }
+
+    if (this.xPosterJob) {
+      this.xPosterJob.stop();
+      this.xPosterJob = null;
+    }
+
     this.isRunning = false;
-    console.log(`[${new Date().toISOString()}] Scheduler stopped`);
+    console.log('Scheduler stopped successfully');
   }
 
-  /**
-   * Manually run the summarizer - useful for development
-   */
   async runSummarizerManually() {
-    console.log(`[${new Date().toISOString()}] Manually running summarizer...`);
+    console.log('Running summarizer manually...');
     try {
-      await runSummarizerJob();
-      console.log(`[${new Date().toISOString()}] Manual summarizer run completed`);
+      const results = await runSummarizerJob();
+      console.log('Manual summarizer run completed successfully');
+      return results;
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Manual summarizer run failed:`, error);
+      console.error('Manual summarizer run failed:', error);
       throw error;
     }
   }
