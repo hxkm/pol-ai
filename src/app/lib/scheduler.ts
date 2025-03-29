@@ -7,7 +7,6 @@ import { loadEnvConfig } from '@next/env';
 import { loadAllThreads } from '../utils/fileLoader';
 import { selectThreads } from '../utils/threadSelector';
 import path from 'path';
-import { xPoster } from './xposter/poster';
 
 // Helper function to check thread availability
 async function checkThreadAvailability(): Promise<number> {
@@ -163,33 +162,10 @@ async function runSummarizerJob() {
   }
 }
 
-// Helper function for the X poster job
-async function runXPosterJob() {
-  console.log(`[${new Date().toISOString()}] Running scheduled X poster job`);
-  try {
-    const result = await xPoster.postNextArticle();
-    if (result.success) {
-      console.log(`[${new Date().toISOString()}] Successfully posted tweet with ID: ${result.tweetId}`);
-    } else {
-      console.error(`[${new Date().toISOString()}] Failed to post tweet: ${result.error}`);
-    }
-  } catch (error) {
-    console.error(`[${new Date().toISOString()}] X poster job failed:`, error);
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-    }
-  }
-}
-
 export class Scheduler {
   private static instance: Scheduler | null = null;
   private scraperJob: cron.ScheduledTask | null = null;
   private summarizerJob: cron.ScheduledTask | null = null;
-  private xPosterJob: cron.ScheduledTask | null = null;
   private isRunning: boolean = false;
 
   private constructor() {
@@ -240,26 +216,17 @@ export class Scheduler {
       try {
         await attemptSummarizer();
       } catch (error) {
-        console.error('Initial summarizer attempt failed:', error);
-        console.log('Scheduling retry in 5 minutes...');
+        console.error('Initial summarizer attempt failed, retrying in 5 minutes...');
         
         // Wait 5 minutes and try again
         setTimeout(async () => {
-          console.log('Attempting retry...');
           try {
             await attemptSummarizer();
-            console.log('Retry attempt succeeded');
-          } catch (error) {
-            console.error('Retry attempt failed:', error);
+          } catch (retryError) {
+            console.error('Retry attempt also failed:', retryError);
           }
         }, 5 * 60 * 1000);
       }
-    });
-
-    // X Poster: Three times daily at 01:30, 11:30, and 17:30 UTC
-    // Times are after scraper runs to ensure fresh data
-    this.xPosterJob = cron.schedule('30 1,11,17 * * *', runXPosterJob, {
-      timezone: 'UTC'
     });
 
     console.log('Scheduled jobs setup complete');
@@ -283,11 +250,6 @@ export class Scheduler {
       this.summarizerJob = null;
     }
 
-    if (this.xPosterJob) {
-      this.xPosterJob.stop();
-      this.xPosterJob = null;
-    }
-
     this.isRunning = false;
     console.log('Scheduler stopped successfully');
   }
@@ -300,20 +262,6 @@ export class Scheduler {
       return results;
     } catch (error) {
       console.error('Manual summarizer run failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Manually run the X poster - useful for development
-   */
-  async runXPosterManually() {
-    console.log(`[${new Date().toISOString()}] Manually running X poster...`);
-    try {
-      await runXPosterJob();
-      console.log(`[${new Date().toISOString()}] Manual X poster run completed`);
-    } catch (error) {
-      console.error(`[${new Date().toISOString()}] Manual X poster run failed:`, error);
       throw error;
     }
   }
