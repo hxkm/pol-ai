@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import styles from './SparklingLogo.module.css';
 
 interface Sparkle {
@@ -42,10 +43,13 @@ export default function SparklingLogo() {
           />
         ))}
       </div>
-      <img 
+      <Image 
         src="/loading.png" 
         alt="Alternative Logo" 
         className={styles.logo}
+        width={200}
+        height={200}
+        priority
       />
     </div>
   );

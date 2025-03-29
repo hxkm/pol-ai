@@ -216,14 +216,16 @@ export class Scheduler {
       try {
         await attemptSummarizer();
       } catch (error) {
-        console.error('Initial summarizer attempt failed, retrying in 5 minutes...');
+        console.error('Initial summarizer attempt failed:', error);
+        console.log('Scheduling retry in 5 minutes...');
         
         // Wait 5 minutes and try again
         setTimeout(async () => {
           try {
             await attemptSummarizer();
-          } catch (retryError) {
-            console.error('Retry attempt also failed:', retryError);
+            console.log('Retry attempt succeeded');
+          } catch (error) {
+            console.error('Retry attempt failed:', error);
           }
         }, 5 * 60 * 1000);
       }

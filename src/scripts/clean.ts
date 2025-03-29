@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import { paths } from '../app/utils/paths';
 
 async function cleanDataDirectory() {
