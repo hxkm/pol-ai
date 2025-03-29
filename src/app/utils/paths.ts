@@ -49,9 +49,6 @@ export const paths = {
   mediaDir: path.resolve(DATA_DIR, 'media'),
   mediaOpDir: path.resolve(DATA_DIR, 'media', 'OP'),
   
-  // X poster storage
-  xposterDir: path.resolve(DATA_DIR, 'xposter'),
-  
   // Helper to get thread file path by ID
   threadFile: (threadId: string) => path.resolve(DATA_DIR, 'threads', `${threadId}.json`),
   
@@ -71,7 +68,6 @@ export function ensureDirectories(): void {
       paths.threadsDir,
       paths.summariesDir,
       paths.analysisDir,
-      paths.xposterDir,
       path.resolve(paths.analysisDir, 'get'),
       path.resolve(paths.analysisDir, 'reply'),
       path.resolve(paths.analysisDir, 'link'),
