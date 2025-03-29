@@ -186,6 +186,29 @@ export class Scheduler {
     }
 
     console.log('Starting scheduler...');
+    console.log('Current UTC time:', new Date().toUTCString());
+
+    // Check if we missed today's summarizer run
+    const now = new Date();
+    const todayRun = new Date();
+    todayRun.setUTCHours(23, 30, 0, 0);
+    
+    // If it's past 23:30 UTC, we've missed today's run
+    if (now.getUTCHours() >= 23 && now.getUTCMinutes() >= 30) {
+      console.log('Past today\'s summarizer window, scheduling for tomorrow');
+    } else if (now.getUTCHours() <= 23 && now.getUTCMinutes() <= 30) {
+      // If we're before today's run and haven't run today, run it
+      console.log('Checking if we need to run today\'s summarizer...');
+      try {
+        // We could add a check here against a persistent store (like a file) to see if we already ran today
+        // For now, we'll just run it to be safe
+        console.log('Running missed summarizer job');
+        await runSummarizerJob();
+      } catch (error) {
+        console.error('Failed to run missed summarizer job:', error);
+      }
+    }
+
     this.isRunning = true;
 
     // Setup scheduled jobs
@@ -195,14 +218,16 @@ export class Scheduler {
   }
 
   private setupScheduledJobs() {
-    // Schedule scraper job - every 15 minutes
-    this.scraperJob = cron.schedule('*/15 * * * *', async () => {
+    // Schedule scraper job - at minute 0 of every even hour (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22) UTC
+    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', async () => {
       console.log('Running scheduled scraper job');
       await runScraperJob();
+    }, {
+      timezone: 'UTC'
     });
 
-    // Schedule summarizer job - every 30 minutes
-    this.summarizerJob = cron.schedule('*/30 * * * *', async () => {
+    // Schedule summarizer job - daily at 23:30 UTC
+    this.summarizerJob = cron.schedule('30 23 * * *', async () => {
       console.log('Running scheduled summarizer job');
       const attemptSummarizer = async (): Promise<void> => {
         try {
@@ -229,9 +254,16 @@ export class Scheduler {
           }
         }, 5 * 60 * 1000);
       }
+    }, {
+      timezone: 'UTC'
     });
 
-    console.log('Scheduled jobs setup complete');
+    // Log scheduled jobs
+    const currentTime = new Date();
+    console.log('Current time (UTC):', currentTime.toUTCString());
+    console.log('Scheduled jobs:');
+    console.log('- Scraper: Every 2 hours starting at 00:00 UTC');
+    console.log('- Summarizer: Daily at 23:30 UTC');
   }
 
   stop() {
