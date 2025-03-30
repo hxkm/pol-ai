@@ -20,18 +20,31 @@ const RecentXPosts = () => {
     
     const fetchTweetId = async () => {
       try {
+        console.log('Fetching latest tweet...');
         const response = await fetch('/api/recent-tweets');
         const data = await response.json();
+        
+        console.log('API Response:', data);
         
         if (!data.success) {
           throw new Error(data.error || 'Failed to fetch tweet');
         }
         
-        setTweetId(data.tweets[0] || null);
+        if (!data.tweets || data.tweets.length === 0) {
+          console.log('No tweets available');
+          setTweetId(null);
+          setError('No recent posts available');
+          return;
+        }
+        
+        const newTweetId = data.tweets[0];
+        console.log('Setting tweet ID:', newTweetId);
+        setTweetId(newTweetId);
         setError(null);
       } catch (err) {
         console.error('Error fetching tweet ID:', err);
         setError('Unable to load recent post');
+        setTweetId(null);
       } finally {
         setLoading(false);
       }

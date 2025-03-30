@@ -180,6 +180,12 @@ export class Scheduler {
   }
 
   async start() {
+    // Only run scheduler in production
+    if (process.env.RAILWAY_ENVIRONMENT !== 'production') {
+      console.log('Scheduler disabled in non-production environment');
+      return;
+    }
+
     if (this.isRunning) {
       console.log('Scheduler is already running');
       return;

@@ -47,9 +47,15 @@ export default function SparklingLogo() {
         src="/loading.png" 
         alt="Alternative Logo" 
         className={styles.logo}
-        width={200}
-        height={200}
+        fill
+        sizes="(max-width: 768px) 80vw, 400px"
+        quality={100}
         priority
+        style={{
+          objectFit: 'contain',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}
       />
     </div>
   );
