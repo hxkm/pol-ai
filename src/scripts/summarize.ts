@@ -5,6 +5,7 @@ import { Thread } from '../app/types/interfaces';
 import { Summarizer } from '../app/lib/Summarizer';
 import { selectThreads } from '../app/utils/threadSelector';
 import { paths } from '../app/utils/paths';
+import publishArticles from './publish-articles';
 
 // Load environment variables
 loadEnvConfig(process.cwd());
@@ -136,6 +137,11 @@ async function main() {
     await saveResults(results, outputPath);
 
     console.log('\n✨ Analysis complete!\n');
+
+    // Run the publish-articles script
+    console.log('\n📤 Publishing articles to public directory...');
+    await publishArticles();
+    console.log('✨ Articles published successfully!\n');
 
   } catch (error) {
     console.error('\n❌ Error running summarizer:', error);
