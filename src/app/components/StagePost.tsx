@@ -50,33 +50,56 @@ function parseComment(html: string): React.ReactNode {
     .replace(/&quot;/g, '"')
     .replace(/&#x27;/g, "'");
 
-  // Split the text into segments, preserving post references
-  const segments = text.split(/(&gt;&gt;|>>)(\d+)/g);
+  // Split into lines first to handle greentext
+  const lines = text.split('\n');
   
+  // Process each line
+  const processedLines = lines.map((line, lineIndex) => {
+    // If line starts with > but not >> (greentext)
+    if (line.startsWith('>') && !line.startsWith('>>')) {
+      return <span key={`line-${lineIndex}`} className={styles.greentext}>{line}</span>;
+    }
+    
+    // For non-greentext lines, process post references
+    const segments = line.split(/(&gt;&gt;|>>)(\d+)/g);
+    
+    return (
+      <span key={`line-${lineIndex}`}>
+        {segments.map((segment, index) => {
+          // Every third element is a post number (after the '>>' match)
+          if (index % 3 === 2) {
+            return (
+              <a
+                key={`${lineIndex}-${index}`}
+                href={`https://archive.4plebs.org/pol/post/${segment}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.postNumber}
+              >
+                &gt;&gt;{segment}
+              </a>
+            );
+          }
+          // Skip the '>>' matches
+          if (index % 3 === 1) {
+            return null;
+          }
+          // Regular text
+          return segment;
+        })}
+      </span>
+    );
+  });
+
+  // Join the lines with line breaks
   return (
     <span>
-      {segments.map((segment, index) => {
-        // Every third element is a post number (after the '>>' match)
-        if (index % 3 === 2) {
-          return (
-            <a
-              key={index}
-              href={`https://archive.4plebs.org/pol/post/${segment}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.postNumber}
-            >
-              &gt;&gt;{segment}
-            </a>
-          );
-        }
-        // Skip the '>>' matches
-        if (index % 3 === 1) {
-          return null;
-        }
-        // Regular text
-        return segment;
-      })}
+      {processedLines.map((line, index) => (
+        <React.Fragment key={`fragment-${index}`}>
+          {line}
+          {index < processedLines.length - 1 && <br />}
+        </React.Fragment>
+      ))}
     </span>
   );
 }
@@ -193,9 +216,9 @@ export default function StagePost({ position, cardType = 'gets' }: StagePostProp
       </div>
       <div className={styles.comment}>
         {data.hasImage && (
-          <span className={styles.greentext}>&gt;pic related</span>
+          <div className={styles.greentext}>&gt;pic related</div>
         )}
-        {parsedComment || <span className={styles.placeholderComment}>&gt;pic related</span>}
+        {parsedComment}
       </div>
       <div className={styles.footer}>
         {cardType === 'insights' ? (
