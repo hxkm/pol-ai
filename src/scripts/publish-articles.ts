@@ -39,7 +39,7 @@ async function publishArticles() {
     try {
       const data = await fs.readFile(articlesPath, 'utf-8')
       articlesData = JSON.parse(data)
-    } catch (_) {
+    } catch {
       console.log('No existing articles found, creating new file')
     }
 
