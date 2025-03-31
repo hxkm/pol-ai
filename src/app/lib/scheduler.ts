@@ -224,8 +224,8 @@ export class Scheduler {
   }
 
   private setupScheduledJobs() {
-    // Schedule scraper job - at minute 0 of every even hour (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22) UTC
-    this.scraperJob = cron.schedule('0 0,2,4,6,8,10,12,14,16,18,20,22 * * *', async () => {
+    // Schedule scraper job - at minute 0 of every odd hour (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23) UTC
+    this.scraperJob = cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
       console.log('Running scheduled scraper job');
       await runScraperJob();
     }, {
@@ -268,7 +268,7 @@ export class Scheduler {
     const currentTime = new Date();
     console.log('Current time (UTC):', currentTime.toUTCString());
     console.log('Scheduled jobs:');
-    console.log('- Scraper: Every 2 hours starting at 00:00 UTC');
+    console.log('- Scraper: Every 2 hours starting at 01:00 UTC');
     console.log('- Summarizer: Daily at 23:30 UTC');
   }
 
