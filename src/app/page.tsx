@@ -169,7 +169,12 @@ const CardContent: React.FC<{ card: CardItem }> = ({ card }) => {
           }}>
             2050 © &amp
           </h2>
-          {/* Buttons hidden */}
+          {process.env.NODE_ENV === 'development' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+              <ScraperButton />
+              <SummarizerButton />
+            </div>
+          )}
         </>
       );
     case 'status':
